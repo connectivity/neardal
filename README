@@ -1,0 +1,40 @@
+Neardal Library
+================
+
+Copyright (C) 2012  Intel Corporation. All rights reserved.
+
+
+
+Provides a simple C APIs to exchange datas with our NFC daemon (Neard) present on the system.
+
+
+Features
+========
+
+Supported Backends:
+	- Neard
+
+Supported Main Loop:
+	- Glib
+
+
+Compiling
+=========
+
+./autogen.sh
+
+./configure   (see ./configure --help for more information)
+
+make
+
+
+Testing
+=======
+
+Compile neardal and get Neard running. 
+under ncl directory (ncl:Neardal Command Line) run:
+
+./ncl
+
+This command line interpretor include a set of the main commands use to test neardal/Neard.
+
