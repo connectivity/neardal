@@ -29,49 +29,13 @@ extern "C" {
 /******************************************************************************
  * neardal_tools_prv_free_gerror: freeing gerror in neardal context
  *****************************************************************************/
-void neardal_tools_prv_free_gerror(neardal_t neardalObj);
+void neardal_tools_prv_free_gerror(neardal_t neardalMgr);
 
 /******************************************************************************
  * neardal_tools_prv_cmp_path: Compare dbus path.
  * return true (<>0) if path is same, 0 otherwise
  *****************************************************************************/
 int neardal_tools_prv_cmp_path(const char *neardalPath, const char *reqPath);
-
-/******************************************************************************
- * neardal_tools_prv_hashtable_get: Parse a hashtable and get value of GType
- * 'type' with a specific key
- *****************************************************************************/
-errorCode_t neardal_tools_prv_hashtable_get(GHashTable *hashTable,
-					gconstpointer key, GType gtype,
-					void *value);
-
-/******************************************************************************
- * neardal_tools_prv_create_proxy: create dbus proxy to Neard daemon
- *****************************************************************************/
-errorCode_t neardal_tools_prv_create_proxy(DBusGConnection *conn,
-				       DBusGProxy **oProxy, const char *path,
-				       const char *iface);
-
-/******************************************************************************
- * neardal_marshal_VOID__STRING_BOXED: marshaller function for signal
- * invocations
- *****************************************************************************/
-void neardal_marshal_VOID__STRING_BOXED(GClosure	*closure,
-					 GValue		*return_value,
-					 guint		n_param_values,
-					 const GValue	*param_values,
-					 gpointer	invocation_hint,
-					 gpointer	marshal_data);
-
-/******************************************************************************
- * neardal_tools_prv__g_ptr_array_copy: duplicate a 'GPtrArray' array
- *****************************************************************************/
-void neardal_tools_prv_g_ptr_array_copy(GPtrArray **target, GPtrArray *source);
-
-/******************************************************************************
- * neardal_tools_prv_g_ptr_array_free: free a 'GPtrArray' array
- *****************************************************************************/
-void neardal_tools_prv_g_ptr_array_free(GPtrArray *array);
 
 /******************************************************************************
  * neardal_tools_create_dict: Create a GHashTable for dict_entries.

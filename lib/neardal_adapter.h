@@ -21,27 +21,31 @@
 #ifndef __NEARDAL_ADAPTER_H
 #define __NEARDAL_ADAPTER_H
 
+#include "neard_adapter_proxy.h"
 #include "neardal_target.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif	/* __cplusplus */
 
-#define NEARD_ADAPTERS_IF_NAME				"org.neard.Adapter"
-#define NEARD_ADP_SIG_PROPCHANGED			"PropertyChanged"
-#define NEARD_ADP_SIG_TGT_FOUND				"TargetFound"
-#define NEARD_ADP_SIG_TGT_LOST				"TargetLost"
+#define NEARD_ADP_IF_NAME				"org.neard.Adapter"
+#define NEARD_ADP_SIG_PROPCHANGED			"property-changed"
+#define NEARD_ADP_SIG_TGT_FOUND				"target-found"
+#define NEARD_ADP_SIG_TGT_LOST				"target-lost"
 
 /* NEARDAL Adapter Properties */
 typedef struct {
-	DBusGProxy		*dbusProxy;	/* The proxy connected to Neard
+	orgNeardAdp		*proxy;		/* The proxy connected to Neard
 						Adapter interface */
 	char			*name;		/* DBus interface name
 						(as id) */
+	neardal_t		parent;
 	gboolean		polling;	/* adapter polling active ? */
 	gboolean		powered;	/* adapter powered ? */
-	char			**protocols;	/* protocols list */
-	GPtrArray		*tgtArray;	/* temporary storage */
+	gchar			**protocols;	/* protocols list */
+	gsize			lenProtocols;
+// 	gchar			**tgtArray;	/* temporary storage */
+	gsize			tgtNb;
 	GList			*tgtList;	/* Neard adapter targets list
 						available */
 } AdpProp;
@@ -56,13 +60,13 @@ errorCode_t neardal_adp_prv_get_target(AdpProp *adpProp, char *tgtName,
  * neardal_adp_add: add new NEARDAL adapter, initialize DBus Proxy
  * connection, register adapter signal
  *****************************************************************************/
-errorCode_t neardal_adp_add(neardal_t neardalObj, char *adapterName);
+errorCode_t neardal_adp_add(neardal_t neardalMgr, char *adapterName);
 
 /******************************************************************************
  * neardal_adp_remove: remove NEARDAL adapter, unref DBus Proxy
  * connection, unregister adapter signal
  *****************************************************************************/
-errorCode_t neardal_adp_remove(neardal_t neardalObj, AdpProp *adpProp);
+errorCode_t neardal_adp_remove(neardal_t neardalMgr, AdpProp *adpProp);
 
 /******************************************************************************
  * neardal_adp_publish: Creates and publish NDEF record to be written to

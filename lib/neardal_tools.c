@@ -21,12 +21,10 @@
 #include <stdio.h>
 #include <string.h>
 #include <glib.h>
-#include <dbus/dbus-glib.h>
 #include <glib-object.h>
-#include "dbus/dbus.h"
 
-#include "neard-manager-proxy.h"
-#include "neard-adapter-proxy.h"
+#include "neard_manager_proxy.h"
+#include "neard_adapter_proxy.h"
 
 #include "neardal.h"
 #include "neardal_prv.h"
@@ -74,80 +72,43 @@ typedef void (*GMarshalFunc_VOID__STRING_BOXED)(gpointer data1, gpointer arg_1,
 /******************************************************************************
  * neardal_tools_prv__g_ptr_array_copy: duplicate a 'GPtrArray' array
  *****************************************************************************/
-static void neardal_tools_g_ptr_array_add(gpointer data, gpointer array)
-{
-	char *tmp;
-	tmp = g_strdup(data);
-	g_ptr_array_add(array, tmp);
-}
-void neardal_tools_prv_g_ptr_array_copy(GPtrArray **target, GPtrArray *source)
-{
-	if (*target == NULL)
-		*target = g_ptr_array_sized_new(source->len);
-	g_ptr_array_foreach(source, neardal_tools_g_ptr_array_add, *target);
-}
+// static void neardal_tools_g_ptr_array_add(gpointer data, gpointer array)
+// {
+// 	char *tmp;
+// 	tmp = g_strdup(data);
+// 	g_ptr_array_add(array, tmp);
+// }
+// void neardal_tools_prv_array_copy(gchar ***target, gchar **source)
+// {
+// 	if (*target == NULL)
+// 		*target = g_ptr_array_sized_new(source->len);
+// 	g_ptr_array_foreach(source, neardal_tools_g_ptr_array_add, *target);
+// }
 
 /******************************************************************************
  * neardal_tools_prv_g_ptr_array_free: free a 'GPtrArray' array
  *****************************************************************************/
-static void neardal_tools_g_ptr_array_free_node(gpointer data, gpointer array)
-{
-	(void) array; /* remove warning */
-	g_free(data);
-}
-void neardal_tools_prv_g_ptr_array_free(GPtrArray *array)
-{
-	g_ptr_array_foreach(array, neardal_tools_g_ptr_array_free_node, NULL);
-	g_ptr_array_free(array, TRUE);
-}
-
-/******************************************************************************
- * neardal_tools_prv_create_proxy: create dbus proxy to Neard daemon
- *****************************************************************************/
-errorCode_t neardal_tools_prv_create_proxy(DBusGConnection *conn,
-				       DBusGProxy **oProxy, const char *path,
-				       const char *iface)
-{
-	DBusGProxy	*proxy	= NULL;
-	GError		*gerror	= NULL;
-
-	g_assert(conn != NULL);
-	g_assert(oProxy != NULL);
-	g_assert(path != NULL);
-	g_assert(iface != NULL);
-
-	NEARDAL_TRACEIN();
-	NEARDAL_TRACEF("Trying connection to (path:'%s', interface:'%s')...\n",
-		      path, iface);
-	proxy = dbus_g_proxy_new_for_name_owner(conn, NEARD_DBUS_SERVICE, path,
-						iface, &gerror);
-	if (proxy == NULL) {
-		NEARDAL_TRACE_ERR(
-		"Unable to connect to (path:'%s', interface:'%s') (err:'%s')\n",
-				 path, iface, gerror->message);
-		g_error_free(gerror);
-		return NEARDAL_ERROR_DBUS_CANNOT_CREATE_PROXY;
-	}
-	NEARDAL_TRACEF("Connection to (path:'%s', interface:'%s') OK!\n", path,
-		      iface);
-/*TODO g_signal_connect (G_OBJECT (proxy), "destroy",
- *			G_CALLBACK(destroy_signal), proxy); */
-
-	*oProxy = proxy;
-
-	return NEARDAL_SUCCESS;
-}
+// static void neardal_tools_g_ptr_array_free_node(gpointer data, gpointer array)
+// {
+// 	(void) array; /* remove warning */
+// 	g_free(data);
+// }
+// void neardal_tools_prv_g_ptr_array_free(GPtrArray *array)
+// {
+// 	g_ptr_array_foreach(array, neardal_tools_g_ptr_array_free_node, NULL);
+// 	g_ptr_array_free(array, TRUE);
+// }
 
 /******************************************************************************
  * neardal_tools_prv_free_gerror: freeing gerror in neardal context
  *****************************************************************************/
-void neardal_tools_prv_free_gerror(neardal_t neardalObj)
+void neardal_tools_prv_free_gerror(neardal_t neardalMgr)
 {
-	g_assert(neardalObj != NULL);
+	g_assert(neardalMgr != NULL);
 
-	if (neardalObj->gerror != NULL)
-		g_error_free(neardalObj->gerror);
-	neardalObj->gerror = NULL;
+	if (neardalMgr->gerror != NULL)
+		g_error_free(neardalMgr->gerror);
+	neardalMgr->gerror = NULL;
 }
 
 /******************************************************************************
@@ -183,102 +144,6 @@ int neardal_tools_prv_cmp_path(const char *neardalPath, const char *reqPath)
 			ret = FALSE;
 	}
 	return ret;
-}
-
-
-/******************************************************************************
- * neardal_tools_prv_hashtable_get: Parse a hashtable and get value of GType
- * 'type' with a specific key
- *****************************************************************************/
-errorCode_t neardal_tools_prv_hashtable_get(GHashTable *hashTable,
-					gconstpointer key, GType gtype,
-					void *value)
-{
-	gpointer	valueGp	= NULL;
-	errorCode_t	errCode	= NEARDAL_ERROR_GENERAL_ERROR;
-	gboolean	found;
-
-	NEARDAL_TRACEF("key'%s'=", key);
-	found = g_hash_table_lookup_extended(hashTable, key, NULL, &valueGp);
-	if (found == FALSE) {
-		NEARDAL_TRACE_ERR("key '%s' NOT FOUND!!!\n", key);
-		return errCode;
-	}
-
-	if (valueGp == NULL)
-		goto error;
-
-	if (G_VALUE_HOLDS(valueGp, gtype) != TRUE) {
-		NEARDAL_TRACE_ERR(
-		"Unknown GType (waiting 0x%X='%s' instead of 0x%X='%s')",
-				 gtype, g_type_name(gtype),
-				G_VALUE_TYPE(valueGp),
-				 g_type_name(G_VALUE_TYPE(valueGp)));
-		goto error;
-	}
-
-	if (value == NULL)
-		goto error;
-
-	switch (gtype) {
-	case G_TYPE_BOOLEAN:
-		*((gboolean *)value) = g_value_get_boolean(valueGp);
-		NEARDAL_TRACE("(boolean) %d", *(gboolean *)value);
-		errCode = NEARDAL_SUCCESS;
-		break;
-	case G_TYPE_STRING:
-		*((const gchar * *)value) = g_value_get_string(valueGp);
-		NEARDAL_TRACE("(string) %s", *(const gchar * *)value);
-		errCode = NEARDAL_SUCCESS;
-		break;
-	default:
-		if (gtype == G_TYPE_STRV) {
-			void *tmp;
-
-			tmp = g_value_get_boxed(valueGp);
-			*((gchar ***)value) = tmp;
-			NEARDAL_TRACE("(array of strings, first string =) %s",
-					((gchar **) tmp)[0]);
-			errCode = NEARDAL_SUCCESS;
-			break;
-		}
-		if (gtype == DBUS_TYPE_G_ARRAY_OF_OBJECT_PATH) {
-			GPtrArray	*tmp = NULL;
-			tmp = g_value_get_boxed(valueGp);
-
-			errCode = NEARDAL_ERROR_GENERAL_ERROR;
-			if (tmp == NULL)
-				break;
-
-			NEARDAL_TRACE("(array of DBusGObjectPath: ");
-			if (tmp->len > 0)
-				NEARDAL_TRACE(
-					"%d elements, first path=%s)",
-					tmp->len,
-					g_ptr_array_index(tmp, 0));
-			else
-				NEARDAL_TRACE(" (Empty!)");
-			*((GPtrArray **)value) = tmp;
-			errCode = NEARDAL_SUCCESS;
-			break;
-		}
-
-		NEARDAL_TRACE_ERR(
-		"Unknown GType (waiting 0x%X='%s' instead of 0x%X='%s')",
-					gtype, g_type_name(gtype),
-					G_VALUE_TYPE(valueGp),
-					g_type_name(G_VALUE_TYPE(valueGp)));
-		break;
-	}
-
-	NEARDAL_TRACE("\n");
-
-	return errCode;
-
-error:
-	NEARDAL_TRACE_ERR("key '%s' NOT FOUND!!!\n", key);
-	return errCode;
-
 }
 
 /******************************************************************************

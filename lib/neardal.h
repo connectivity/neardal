@@ -82,7 +82,7 @@ typedef struct {
 /*! @brief Number of supported 'types' in target */
 	int		nbTagTypes;
 /*! @brief types list (use @link neardal_free_array @endlink(& ) to free) */
-	char		**tagType;
+	char		**tagsType;
 /*! @brief target type */
 	const char	*type;
 /*! @brief Read-Only flag (is target writable?) */
@@ -180,50 +180,50 @@ typedef void (*record_cb) (const char *rcdName, void *user_data);
 neardal_t neardal_construct(errorCode_t *ec);
 
 
-/*! \fn void neardal_destroy(neardal_t neardalObj)
+/*! \fn void neardal_destroy(neardal_t neardalMgr)
 *  \brief destroy NEARDAL object instance, disconnect Neard Dbus connection,
 * unregister Neard's events
-*  \param neardalObj : NEARDAL context to destroy
+*  \param neardalMgr : NEARDAL context to destroy
 */
-void neardal_destroy(neardal_t neardalObj);
+void neardal_destroy(neardal_t neardalMgr);
 
-/*! \fn void neardal_start_poll(neardal_t neardalObj, char *adpName,
+/*! \fn void neardal_start_poll(neardal_t neardalMgr, char *adpName,
  * errorCode_t *ec)
 *  \brief Request Neard to start polling on specific NEARDAL adapter
-*  \param neardalObj : NEARDAL context
+*  \param neardalMgr : NEARDAL context
 *  \param adpName : DBus interface adapter name (as identifier)
 *  \param ec : optional, pointer to store error code
 */
-void neardal_start_poll(neardal_t neardalObj, char *adpName,
+void neardal_start_poll(neardal_t neardalMgr, char *adpName,
 			 errorCode_t *ec);
 
-/*! \fn void neardal_stop_poll(neardal_t neardalObj, char *adpName,
+/*! \fn void neardal_stop_poll(neardal_t neardalMgr, char *adpName,
  * errorCode_t *ec)
 *  \brief Request Neard to stop polling on specific NEARDAL adapter
-*  \param neardalObj : NEARDAL context
+*  \param neardalMgr : NEARDAL context
 *  \param adpName : DBus interface adapter name (as identifier)
 *  \param ec : optional, pointer to store error code
 */
-void neardal_stop_poll(neardal_t neardalObj, char *adpName, errorCode_t *ec);
+void neardal_stop_poll(neardal_t neardalMgr, char *adpName, errorCode_t *ec);
 
-/*! \fn errorCode_t neardal_get_adapters(neardal_t neardalObj, char ***array,
+/*! \fn errorCode_t neardal_get_adapters(neardal_t neardalMgr, char ***array,
  * int *len)
  * @brief get an array of NEARDAL adapters present
  *
- * @param neardalObj NEARDAL context
+ * @param neardalMgr NEARDAL context
  * @param array array of DBus interface adapter name (as identifier), use @link
  * neardal_free_array @endlink(& ) to free
  * @param len (optional), number of adapters
  * @return errorCode_t error code
  **/
-errorCode_t neardal_get_adapters(neardal_t neardalObj, char ***array,
+errorCode_t neardal_get_adapters(neardal_t neardalMgr, char ***array,
 				  int *len);
 
-/*! \fn errorCode_t neardal_get_targets(neardal_t neardalObj, char *adpName,
+/*! \fn errorCode_t neardal_get_targets(neardal_t neardalMgr, char *adpName,
  *				     char ***array, int *len)
  * @brief get an array of NEARDAL targets present
  *
- * @param neardalObj NEARDAL context
+ * @param neardalMgr NEARDAL context
  * @param adpName adapter name (identifier) on which targets list must be
  * retrieve
  * @param array array of DBus interface target name (as identifier), use @link
@@ -231,14 +231,14 @@ errorCode_t neardal_get_adapters(neardal_t neardalObj, char ***array,
  * @param len (optional), number of targets
  * @return errorCode_t error code
  **/
-errorCode_t neardal_get_targets(neardal_t neardalObj, char *adpName,
+errorCode_t neardal_get_targets(neardal_t neardalMgr, char *adpName,
 				 char ***array, int *len);
 
-/*! \fn errorCode_t neardal_get_records(neardal_t neardalObj, char *tgtName,
+/*! \fn errorCode_t neardal_get_records(neardal_t neardalMgr, char *tgtName,
  *				     char ***array, int *len)
  * @brief get an array of NEARDAL records present
  *
- * @param neardalObj NEARDAL context
+ * @param neardalMgr NEARDAL context
  * @param tgtName target name (identifier) on which records list must be
  * retrieve
  * @param array array of DBus interface record name (as identifier), use @link
@@ -246,7 +246,7 @@ errorCode_t neardal_get_targets(neardal_t neardalObj, char *adpName,
  * @param len (optional), number of records
  * @return errorCode_t error code
  **/
-errorCode_t neardal_get_records(neardal_t neardalObj, char *tgtName,
+errorCode_t neardal_get_records(neardal_t neardalMgr, char *tgtName,
 				 char ***array, int *len);
 
 /*! @fn errorCode_t neardal_free_array(char ***array)
@@ -259,142 +259,142 @@ errorCode_t neardal_get_records(neardal_t neardalObj, char *tgtName,
  **/
 errorCode_t neardal_free_array(char ***array);
 
-/*! \fn errorCode_t neardal_get_adapter_properties(neardal_t neardalObj,
+/*! \fn errorCode_t neardal_get_adapter_properties(neardal_t neardalMgr,
  * const char* adpName, neardal_adapter *adapter)
  * @brief Get properties of a specific NEARDAL adapter
  *
- * @param neardalObj NEARDAL context
+ * @param neardalMgr NEARDAL context
  * @param adpName DBus interface adapter name (as identifier)
  * @param adapter Pointer on client adapter struct to store datas
  * @return errorCode_t error code
  **/
-errorCode_t neardal_get_adapter_properties(neardal_t neardalObj,
+errorCode_t neardal_get_adapter_properties(neardal_t neardalMgr,
 					    const char *adpName,
 					    neardal_adapter *adapter);
 
-/*! \fn errorCode_t neardal_set_cb_adapter_added(neardal_t neardalObj,
+/*! \fn errorCode_t neardal_set_cb_adapter_added(neardal_t neardalMgr,
  *					     adapter_cb cb_adp_added,
  *					     void * user_data)
  * @brief setup a client callback for 'NEARDAL adapter added'. cb_adp_added = NULL
  * to remove actual callback
  *
- * @param neardalObj NEARDAL context
+ * @param neardalMgr NEARDAL context
  * @param cb_adp_added Client callback 'adapter added'
  * @param user_data Client user data
  * @return errorCode_t error code
  **/
-errorCode_t neardal_set_cb_adapter_added(neardal_t neardalObj,
+errorCode_t neardal_set_cb_adapter_added(neardal_t neardalMgr,
 					  adapter_cb cb_adp_added,
 					  void *user_data);
 
-/*! \fn errorCode_t neardal_set_cb_adapter_removed(neardal_t neardalObj,
+/*! \fn errorCode_t neardal_set_cb_adapter_removed(neardal_t neardalMgr,
  *					       adapter_cb cb_adp_removed,
  *					       void * user_data)
  * @brief setup a client callback for 'NEARDAL adapter removed'.
  * cb_adp_removed = NULL to remove actual callback
  *
- * @param neardalObj NEARDAL context
+ * @param neardalMgr NEARDAL context
  * @param cb_adp_removed Client callback 'adapter removed'
  * @param user_data Client user data
  * @return errorCode_t error code
  **/
-errorCode_t neardal_set_cb_adapter_removed(neardal_t neardalObj,
+errorCode_t neardal_set_cb_adapter_removed(neardal_t neardalMgr,
 					    adapter_cb cb_adp_removed,
 					    void *user_data);
 
 /*! \fn errorCode_t neardal_set_cb_adapter_property_changed(
- * neardal_t neardalObj, adapter_prop_cb cb_adp_property_changed,
+ * neardal_t neardalMgr, adapter_prop_cb cb_adp_property_changed,
  * void *user_data)
  * @brief setup a client callback for 'NEARDAL Adapter Property Changed'.
  * cb_adp_property_changed = NULL to remove actual callback.
  *
- * @param neardalObj NEARDAL context
+ * @param neardalMgr NEARDAL context
  * @param cb_adp_property_changed Client callback 'Adapter Property Changed'
  * @param user_data Client user data
  * @return errorCode_t error code
  **/
-errorCode_t neardal_set_cb_adapter_property_changed(neardal_t neardalObj,
+errorCode_t neardal_set_cb_adapter_property_changed(neardal_t neardalMgr,
 					adapter_prop_cb cb_adp_property_changed,
 						void *user_data);
 
-/*! \fn errorCode_t neardal_get_target_properties(neardal_t neardalObj,
+/*! \fn errorCode_t neardal_get_target_properties(neardal_t neardalMgr,
  * const char* tgtName, neardal_target *target)
  * @brief Get properties of a specific NEARDAL target
  *
- * @param neardalObj NEARDAL context
+ * @param neardalMgr NEARDAL context
  * @param tgtName target name (identifier) on which properties must be retrieve
  * @param target Pointer on client target struct to store datas
  * @return errorCode_t error code
  **/
-errorCode_t neardal_get_target_properties(neardal_t neardalObj,
+errorCode_t neardal_get_target_properties(neardal_t neardalMgr,
 					   const char *tgtName,
 					   neardal_target *target);
 
-/*! \fn errorCode_t neardal_set_cb_target_found(neardal_t neardalObj,
+/*! \fn errorCode_t neardal_set_cb_target_found(neardal_t neardalMgr,
  * target_cb cb_tgt_found, void * user_data)
  * @brief setup a client callback for 'NEARDAL target found'.
  * cb_tgt_found = NULL to remove actual callback.
  *
- * @param neardalObj NEARDAL context
+ * @param neardalMgr NEARDAL context
  * @param cb_tgt_found Client callback 'target found'
  * @param user_data Client user data
  * @return errorCode_t error code
  **/
-errorCode_t neardal_set_cb_target_found(neardal_t neardalObj,
+errorCode_t neardal_set_cb_target_found(neardal_t neardalMgr,
 					 target_cb cb_tgt_found,
 					 void *user_data);
 
-/*! \fn errorCode_t neardal_set_cb_target_lost(neardal_t neardalObj,
+/*! \fn errorCode_t neardal_set_cb_target_lost(neardal_t neardalMgr,
  * target_cb cb_tgt_lost, void * user_data)
  * @brief setup a client callback for 'NEARDAL target lost'.
  * cb_tgt_lost = NULL to remove actual callback.
  *
- * @param neardalObj NEARDAL context
+ * @param neardalMgr NEARDAL context
  * @param cb_tgt_lost Client callback 'target lost'
  * @param user_data Client user data
  * @return errorCode_t error code
  **/
-errorCode_t neardal_set_cb_target_lost(neardal_t neardalObj,
+errorCode_t neardal_set_cb_target_lost(neardal_t neardalMgr,
 					target_cb cb_tgt_lost,
 					void *user_data);
 
 
-/*! \fn errorCode_t neardal_get_record_properties(neardal_t neardalObj,
+/*! \fn errorCode_t neardal_get_record_properties(neardal_t neardalMgr,
  *					      const char *recordName,
  *					      neardal_record *record)
  * @brief Get properties of a specific NEARDAL target record
  *
- * @param neardalObj NEARDAL context
+ * @param neardalMgr NEARDAL context
  * @param recordName DBus interface record name (as identifier)
  * @param record Pointer on client record struct to store datas
  * @return errorCode_t error code
  **/
-errorCode_t neardal_get_record_properties(neardal_t neardalObj,
+errorCode_t neardal_get_record_properties(neardal_t neardalMgr,
 					   const char *recordName,
 					   neardal_record *record);
 
-/*! \fn errorCode_t neardal_publish(neardal_t neardalObj,
+/*! \fn errorCode_t neardal_publish(neardal_t neardalMgr,
  * neardal_record *record)
  * @brief Write NDEF record to an NFC tag
  *
- * @param neardalObj NEARDAL context
+ * @param neardalMgr NEARDAL context
  * @param record Pointer on client record used to create NDEF record
  * @return errorCode_t error code
  **/
-errorCode_t neardal_publish(neardal_t neardalObj, neardal_record *record);
+errorCode_t neardal_publish(neardal_t neardalMgr, neardal_record *record);
 
 
-/*! \fn errorCode_t neardal_set_cb_record_found(neardal_t neardalObj,
+/*! \fn errorCode_t neardal_set_cb_record_found(neardal_t neardalMgr,
  * record_cb cb_rcd_found, void * user_data)
  * @brief Setup a client callback for 'NEARDAL target record found'.
  * cb_rcd_found = NULL to remove actual callback
  *
- * @param neardalObj NEARDAL context
+ * @param neardalMgr NEARDAL context
  * @param cb_rcd_found Client callback 'record found'
  * @param user_data Client user data
  * @return errorCode_t error code
  **/
-errorCode_t neardal_set_cb_record_found(neardal_t neardalObj,
+errorCode_t neardal_set_cb_record_found(neardal_t neardalMgr,
 					 record_cb cb_rcd_found,
 					 void *user_data);
 

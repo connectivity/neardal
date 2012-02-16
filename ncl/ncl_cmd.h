@@ -31,7 +31,7 @@
 /* Command Line Interpretor context... */
 typedef struct {
 	/* NEARDAL Object */
-	neardal_t	neardalObj;
+	neardal_t	neardalMgr;
 
 	/* command line interpretor context */
 	GString		*clBuf;		/* Command line buffer */

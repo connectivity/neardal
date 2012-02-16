@@ -136,10 +136,15 @@ NCLError ncl_cmd_list(int argc, char *argv[])
 
 	ncl_cmd_print(stdout, "\nCommand line list\n");
 	for (index = 0; index < nbCmd; index++) {
+	if (0) { /* TODO: Remove */
 		snprintf(funcName, sizeof(funcName), "%40s",
 			 itFunc[index].cmdName);
 		ncl_cmd_print(stdout, "%s :\t%s\n", funcName,
 			      itFunc[index].helpStr);
+	} else {
+		ncl_cmd_print(stdout, "%s :\n\t%s\n\n", itFunc[index].cmdName,
+			      itFunc[index].helpStr);
+	}
 	}
 
 	return 0;
@@ -203,7 +208,7 @@ static void ncl_cmd_prv_dump_target(neardal_target target)
 	NCL_CMD_PRINT(".. Type:\t\t'%s'\n", target.type);
 
 	NCL_CMD_PRINT(".. Number of 'Tag Type':%d\n", target.nbTagTypes);
-	tagTypes = target.tagType;
+	tagTypes = target.tagsType;
 	if (target.nbTagTypes > 0) {
 		NCL_CMD_PRINT(".. Tags type[]:\t\t");
 		while ((*tagTypes) != NULL) {
@@ -211,7 +216,7 @@ static void ncl_cmd_prv_dump_target(neardal_target target)
 			tagTypes++;
 		}
 		NCL_CMD_PRINT("\n");
-		neardal_free_array(&target.tagType);
+		neardal_free_array(&target.tagsType);
 	}
 
 	records = target.records;
@@ -258,12 +263,12 @@ static void ncl_cmd_prv_dump_record(neardal_record record)
  *****************************************************************************/
 static void ncl_cmd_cb_adapter_added(const char *adpName, void *user_data)
 {
-	neardal_t	neardalObj = user_data;
+	neardal_t	neardalMgr = user_data;
 	errorCode_t	ec;
 	neardal_adapter	adapter;
 
 	NCL_CMD_PRINTF("NFC Adapter added '%s'\n", adpName);
-	ec = neardal_get_adapter_properties(neardalObj, adpName, &adapter);
+	ec = neardal_get_adapter_properties(neardalMgr, adpName, &adapter);
 	if (ec == NEARDAL_SUCCESS)
 		ncl_cmd_prv_dump_adapter(adapter);
 	else
@@ -276,9 +281,9 @@ static void ncl_cmd_cb_adapter_added(const char *adpName, void *user_data)
 
 static void ncl_cmd_cb_adapter_removed(const char *adpName, void * user_data)
 {
-	neardal_t	neardalObj = user_data;
+	neardal_t	neardalMgr = user_data;
 
-	(void) neardalObj;
+	(void) neardalMgr;
 
 	NCL_CMD_PRINTF("NFC Adapter removed '%s'\n", adpName);
 }
@@ -286,10 +291,10 @@ static void ncl_cmd_cb_adapter_removed(const char *adpName, void * user_data)
 static void ncl_cmd_cb_adapter_prop_changed(char *adpName, char *propName,
 					    void *value, void *user_data)
 {
-	neardal_t	neardalObj = user_data;
+	neardal_t	neardalMgr = user_data;
 	int		polling;
 
-	(void) neardalObj;
+	(void) neardalMgr;
 	if (!strcmp(propName, "Polling")) {
 		polling = (int)value;
 		NCL_CMD_PRINTF("Polling=%d\n", polling);
@@ -302,13 +307,13 @@ static void ncl_cmd_cb_adapter_prop_changed(char *adpName, char *propName,
 
 static void ncl_cmd_cb_target_found(const char *tgtName, void *user_data)
 {
-	neardal_t	neardalObj = user_data;
+	neardal_t	neardalMgr = user_data;
 	neardal_target	target;
 	errorCode_t	ec;
 
 	NCL_CMD_PRINTF("NFC Target found (%s)\n", tgtName);
 
-	ec = neardal_get_target_properties(neardalObj, tgtName, &target);
+	ec = neardal_get_target_properties(neardalMgr, tgtName, &target);
 	if (ec == NEARDAL_SUCCESS)
 		ncl_cmd_prv_dump_target(target);
 	else
@@ -320,26 +325,26 @@ static void ncl_cmd_cb_target_found(const char *tgtName, void *user_data)
 
 static void ncl_cmd_cb_target_lost(const char *tgtName, void *user_data)
 {
-	neardal_t	neardalObj = user_data;
+	neardal_t	neardalMgr = user_data;
 
 	NCL_CMD_PRINTF("NFC Target lost (%s)\n", tgtName);
-	(void) neardalObj;
+	(void) neardalMgr;
 
 }
 
 static void ncl_cmd_cb_record_found(const char *rcdName, void *user_data)
 {
-	neardal_t	neardalObj = user_data;
+	neardal_t	neardalMgr = user_data;
 	errorCode_t	ec;
 	neardal_record	record;
 
 	NCL_CMD_PRINTF("Target Record found (%s)\n", rcdName);
-	ec = neardal_get_record_properties(neardalObj, rcdName, &record);
+	ec = neardal_get_record_properties(neardalMgr, rcdName, &record);
 	if (ec == NEARDAL_SUCCESS) {
 		ncl_cmd_prv_dump_record(record);
 /*		NCL_CMD_PRINTF("(Re)Start Poll\n");
 		sleep(1);
-		neardal_start_poll(neardalObj, (char *) rcdName, NULL); */
+		neardal_start_poll(neardalMgr, (char *) rcdName, NULL); */
 	} else
 		NCL_CMD_PRINTF("Read record error. (error:%d='%s').\n", ec,
 			       neardal_error_get_text(ec));
@@ -356,8 +361,8 @@ static NCLError ncl_cmd_neardal_construct(int argc, char *argv[])
 	(void) argv; /* remove warning */
 
 	/* Construct NEARDAL object */
-	sNclCmdCtx.neardalObj = neardal_construct(&ec);
-	if (sNclCmdCtx.neardalObj != NULL)
+	sNclCmdCtx.neardalMgr = neardal_construct(&ec);
+	if (sNclCmdCtx.neardalMgr != NULL)
 		NCL_CMD_PRINTF("NFC object constructed");
 	else
 		NCL_CMD_PRINTF("NFC object not constructed");
@@ -366,30 +371,30 @@ static NCLError ncl_cmd_neardal_construct(int argc, char *argv[])
 			       neardal_error_get_text(ec));
 	NCL_CMD_PRINT("\n");
 
-	if (sNclCmdCtx.neardalObj == NULL)
+	if (sNclCmdCtx.neardalMgr == NULL)
 		goto exit;
 
 	nclErr = NCLERR_NOERROR;
-	neardal_set_cb_adapter_added(sNclCmdCtx.neardalObj,
+	neardal_set_cb_adapter_added(sNclCmdCtx.neardalMgr,
 				      ncl_cmd_cb_adapter_added,
-				      sNclCmdCtx.neardalObj);
-	neardal_set_cb_adapter_removed(sNclCmdCtx.neardalObj,
+				      sNclCmdCtx.neardalMgr);
+	neardal_set_cb_adapter_removed(sNclCmdCtx.neardalMgr,
 					ncl_cmd_cb_adapter_removed,
-					sNclCmdCtx.neardalObj);
-	neardal_set_cb_adapter_property_changed(sNclCmdCtx.neardalObj,
+					sNclCmdCtx.neardalMgr);
+	neardal_set_cb_adapter_property_changed(sNclCmdCtx.neardalMgr,
 					ncl_cmd_cb_adapter_prop_changed,
-						sNclCmdCtx.neardalObj);
+						sNclCmdCtx.neardalMgr);
 	NCL_CMD_PRINTF("NFC adapter callback registered\n");
-	neardal_set_cb_target_found(sNclCmdCtx.neardalObj,
+	neardal_set_cb_target_found(sNclCmdCtx.neardalMgr,
 				     ncl_cmd_cb_target_found,
-				     sNclCmdCtx.neardalObj);
-	neardal_set_cb_target_lost(sNclCmdCtx.neardalObj,
+				     sNclCmdCtx.neardalMgr);
+	neardal_set_cb_target_lost(sNclCmdCtx.neardalMgr,
 				    ncl_cmd_cb_target_lost,
-				    sNclCmdCtx.neardalObj);
+				    sNclCmdCtx.neardalMgr);
 	NCL_CMD_PRINTF("NFC target registered\n");
-	neardal_set_cb_record_found(sNclCmdCtx.neardalObj,
+	neardal_set_cb_record_found(sNclCmdCtx.neardalMgr,
 				     ncl_cmd_cb_record_found,
-				     sNclCmdCtx.neardalObj);
+				     sNclCmdCtx.neardalMgr);
 	NCL_CMD_PRINTF("NFC record callback registered\n");
 
 exit:
@@ -420,14 +425,14 @@ static NCLError ncl_cmd_neardal_get_adapters(int argc, char *argv[])
 	int		adpOff;
 
 	/* Check if NEARDAL object exist */
-	if (sNclCmdCtx.neardalObj == NULL) {
-		NCL_CMD_PRINTERR("Construct NEARDAL object...\n");
+	if (sNclCmdCtx.neardalMgr == NULL) {
+		NCL_CMD_PRINT("Construct NEARDAL object...\n");
 		nclErr = ncl_cmd_neardal_construct(argc, argv);
 	}
-	if ((nclErr != NCLERR_NOERROR) && (sNclCmdCtx.neardalObj == NULL))
+	if ((nclErr != NCLERR_NOERROR) && (sNclCmdCtx.neardalMgr == NULL))
 		return nclErr;
 
-	ec = neardal_get_adapters(sNclCmdCtx.neardalObj, &adpArray,
+	ec = neardal_get_adapters(sNclCmdCtx.neardalMgr, &adpArray,
 					&adpLen);
 	if (ec == NEARDAL_SUCCESS) {
 		adpOff = 0;
@@ -469,15 +474,15 @@ static NCLError ncl_cmd_neardal_get_adapter_properties(int argc, char *argv[])
 		return NCLERR_PARSING_PARAMETERS;
 
 	/* Check if NEARDAL object exist */
-	if (sNclCmdCtx.neardalObj == NULL) {
+	if (sNclCmdCtx.neardalMgr == NULL) {
 		NCL_CMD_PRINTERR("Construct NEARDAL object...\n");
 		nclErr = ncl_cmd_neardal_construct(argc, argv);
 	}
-	if ((nclErr != NCLERR_NOERROR) && (sNclCmdCtx.neardalObj == NULL))
+	if ((nclErr != NCLERR_NOERROR) && (sNclCmdCtx.neardalMgr == NULL))
 		return nclErr;
 
 	adapterName = argv[1];
-	ec = neardal_get_adapter_properties(sNclCmdCtx.neardalObj,
+	ec = neardal_get_adapter_properties(sNclCmdCtx.neardalMgr,
 					     adapterName, &adapter);
 
 	if (ec == NEARDAL_SUCCESS)
@@ -512,14 +517,14 @@ static NCLError ncl_cmd_neardal_get_targets(int argc, char *argv[])
 		return NCLERR_PARSING_PARAMETERS;
 
 	/* Check if NEARDAL object exist */
-	if (sNclCmdCtx.neardalObj == NULL) {
+	if (sNclCmdCtx.neardalMgr == NULL) {
 		NCL_CMD_PRINTERR("Construct NEARDAL object...\n");
 		nclErr = ncl_cmd_neardal_construct(argc, argv);
 	}
-	if ((nclErr != NCLERR_NOERROR) && (sNclCmdCtx.neardalObj == NULL))
+	if ((nclErr != NCLERR_NOERROR) && (sNclCmdCtx.neardalMgr == NULL))
 		return nclErr;
 
-	ec = neardal_get_targets(sNclCmdCtx.neardalObj, argv[1],
+	ec = neardal_get_targets(sNclCmdCtx.neardalMgr, argv[1],
 					&tgtArray, &tgtLen);
 	if (ec == NEARDAL_SUCCESS) {
 		tgtOff = 0;
@@ -561,16 +566,16 @@ static NCLError ncl_cmd_neardal_get_target_properties(int argc, char *argv[])
 		return NCLERR_PARSING_PARAMETERS;
 
 	/* Check if NEARDAL object exist */
-	if (sNclCmdCtx.neardalObj == NULL) {
+	if (sNclCmdCtx.neardalMgr == NULL) {
 		NCL_CMD_PRINTERR("Construct NEARDAL object...\n");
 		nclErr = ncl_cmd_neardal_construct(argc, argv);
 	}
-	if ((nclErr != NCLERR_NOERROR) && (sNclCmdCtx.neardalObj == NULL))
+	if ((nclErr != NCLERR_NOERROR) && (sNclCmdCtx.neardalMgr == NULL))
 		return nclErr;
 
 
 	targetName = argv[1];
-	ec = neardal_get_target_properties(sNclCmdCtx.neardalObj, targetName,
+	ec = neardal_get_target_properties(sNclCmdCtx.neardalMgr, targetName,
 					    &target);
 
 	if (ec == NEARDAL_SUCCESS)
@@ -606,14 +611,14 @@ static NCLError ncl_cmd_neardal_get_records(int argc, char *argv[])
 		return NCLERR_PARSING_PARAMETERS;
 
 	/* Check if NEARDAL object exist */
-	if (sNclCmdCtx.neardalObj == NULL) {
+	if (sNclCmdCtx.neardalMgr == NULL) {
 		NCL_CMD_PRINTERR("Construct NEARDAL object...\n");
 		nclErr = ncl_cmd_neardal_construct(argc, argv);
 	}
-	if ((nclErr != NCLERR_NOERROR) && (sNclCmdCtx.neardalObj == NULL))
+	if ((nclErr != NCLERR_NOERROR) && (sNclCmdCtx.neardalMgr == NULL))
 		return nclErr;
 
-	ec = neardal_get_records(sNclCmdCtx.neardalObj, argv[1],
+	ec = neardal_get_records(sNclCmdCtx.neardalMgr, argv[1],
 					&rcdArray, &rcdLen);
 	if (ec == NEARDAL_SUCCESS) {
 		rcdOff = 0;
@@ -654,15 +659,15 @@ static NCLError ncl_cmd_neardal_get_record_properties(int argc, char *argv[])
 		return NCLERR_PARSING_PARAMETERS;
 
 	/* Check if NEARDAL object exist */
-	if (sNclCmdCtx.neardalObj == NULL) {
+	if (sNclCmdCtx.neardalMgr == NULL) {
 		NCL_CMD_PRINTERR("Construct NEARDAL object...\n");
 		nclErr = ncl_cmd_neardal_construct(argc, argv);
 	}
-	if ((nclErr != NCLERR_NOERROR) && (sNclCmdCtx.neardalObj == NULL))
+	if ((nclErr != NCLERR_NOERROR) && (sNclCmdCtx.neardalMgr == NULL))
 		return nclErr;
 
 	recordName = argv[1];
-	ec = neardal_get_record_properties(sNclCmdCtx.neardalObj, recordName,
+	ec = neardal_get_record_properties(sNclCmdCtx.neardalMgr, recordName,
 					    &record);
 	if (ec == NEARDAL_SUCCESS)
 		ncl_cmd_prv_dump_record(record);
@@ -733,14 +738,14 @@ static GOptionEntry options[] = {
 	rcd.smartPoster = (smartPoster != 0) ? true : false;
 
 	/* Check if NEARDAL object exist */
-	if (sNclCmdCtx.neardalObj == NULL) {
+	if (sNclCmdCtx.neardalMgr == NULL) {
 		NCL_CMD_PRINTERR("Construct NEARDAL object...\n");
 		nclErr = ncl_cmd_neardal_construct(argc, argv);
 	}
-	if ((nclErr != NCLERR_NOERROR) && (sNclCmdCtx.neardalObj == NULL))
+	if ((nclErr != NCLERR_NOERROR) && (sNclCmdCtx.neardalMgr == NULL))
 		goto exit;
 
-	ec = neardal_publish(sNclCmdCtx.neardalObj, &rcd);
+	ec = neardal_publish(sNclCmdCtx.neardalMgr, &rcd);
 
 exit:
 	NCL_CMD_PRINT("\nExit with error code %d:%s\n", ec,
@@ -783,16 +788,16 @@ static NCLError ncl_cmd_neardal_start_poll(int argc, char *argv[])
 		return NCLERR_PARSING_PARAMETERS;
 
 	/* Check if NEARDAL object exist */
-	if (sNclCmdCtx.neardalObj == NULL) {
+	if (sNclCmdCtx.neardalMgr == NULL) {
 		NCL_CMD_PRINTERR("Construct NEARDAL object...\n");
 		nclErr = ncl_cmd_neardal_construct(argc, argv);
 	}
-	if ((nclErr != NCLERR_NOERROR) && (sNclCmdCtx.neardalObj == NULL))
+	if ((nclErr != NCLERR_NOERROR) && (sNclCmdCtx.neardalMgr == NULL))
 		return nclErr;
 
 	/* Start polling if adapter present */
 	adpName = argv[1];
-	neardal_start_poll(sNclCmdCtx.neardalObj, adpName, &ec);
+	neardal_start_poll(sNclCmdCtx.neardalMgr, adpName, &ec);
 	if (ec != NEARDAL_SUCCESS) {
 		NCL_CMD_PRINTF("NFC polling activation error:%d='%s'\n",
 				ec, neardal_error_get_text(ec));
@@ -822,15 +827,15 @@ static NCLError ncl_cmd_neardal_stop_poll(int argc, char *argv[])
 		return NCLERR_PARSING_PARAMETERS;
 
 	/* Check if NEARDAL object exist */
-	if (sNclCmdCtx.neardalObj == NULL) {
+	if (sNclCmdCtx.neardalMgr == NULL) {
 		NCL_CMD_PRINTERR("Construct NEARDAL object...\n");
 		nclErr = ncl_cmd_neardal_construct(argc, argv);
 	}
-	if ((nclErr != NCLERR_NOERROR) && (sNclCmdCtx.neardalObj == NULL))
+	if ((nclErr != NCLERR_NOERROR) || (sNclCmdCtx.neardalMgr == NULL))
 		return nclErr;
 
 	adpName = argv[1];
-	neardal_stop_poll(sNclCmdCtx.neardalObj, adpName, &ec);
+	neardal_stop_poll(sNclCmdCtx.neardalMgr, adpName, &ec);
 	if (ec != NEARDAL_SUCCESS) {
 		NCL_CMD_PRINTF("Stop NFC polling error:%d='%s'.\n", ec,
 			       neardal_error_get_text(ec));
@@ -956,8 +961,8 @@ static NCLError ncl_cmd_quit(int argc, char *argv[])
 	nclCtxP = ncl_get_ctx();
 
 	/* Release NEARDAL object */
-	neardal_destroy(sNclCmdCtx.neardalObj);
-	sNclCmdCtx.neardalObj = NULL;
+	neardal_destroy(sNclCmdCtx.neardalMgr);
+	sNclCmdCtx.neardalMgr = NULL;
 
 	/* Quit Main Loop */
 	if (nclCtxP)
@@ -1105,7 +1110,7 @@ void ncl_cmd_finalize(void)
 		g_string_free(sNclCmdCtx.clBuf, TRUE);
 
 	/* Release NFC object */
-	if (sNclCmdCtx.neardalObj != NULL)
-		neardal_destroy(sNclCmdCtx.neardalObj);
+	if (sNclCmdCtx.neardalMgr != NULL)
+		neardal_destroy(sNclCmdCtx.neardalMgr);
 
 }

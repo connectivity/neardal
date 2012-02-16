@@ -28,29 +28,30 @@ extern "C" {
 #endif	/* __cplusplus */
 
 #define NEARD_DBUS_SERVICE			"org.neard"
+#define NEARD_MGR_PATH				"/"
 #define NEARD_MGR_IF_NAME			"org.neard.Manager"
 #define NEARD_MGR_SECTION_ADAPTERS		"Adapters"
-#define NEARD_MGR_SIG_PROPCHANGED		"PropertyChanged"
-#define NEARD_MGR_SIG_ADP_ADDED			"AdapterAdded"
-#define NEARD_MGR_SIG_ADP_RM			"AdapterRemoved"
+#define NEARD_MGR_SIG_PROPCHANGED		"property-changed"
+#define NEARD_MGR_SIG_ADP_ADDED			"adapter-added"
+#define NEARD_MGR_SIG_ADP_RM			"adapter-removed"
 
 /* NEARDAL Manager Properties */
 typedef struct {
-	GList	*adpList;	/* List of available NEARDAL adapter */
+	GList	*adpList;	/* List of available adapter (AdpProp*) */
 } MgrProp;
 
 /******************************************************************************
  * neardal_mgr_prv_get_adapter: Get NEARDAL Adapter from name
  *****************************************************************************/
-errorCode_t neardal_mgr_prv_get_adapter(neardal_t neardalObj,
+errorCode_t neardal_mgr_prv_get_adapter(neardal_t neardalMgr,
 					     const char *adpName,
 					     AdpProp **adpProp);
 
 /******************************************************************************
  * neardal_mgr_prv_get_adapter_from_proxy: Get NEARDAL Adapter from proxy
  *****************************************************************************/
-errorCode_t neardal_mgr_prv_get_adapter_from_proxy(neardal_t neardalObj,
-							DBusGProxy *adpProxy,
+errorCode_t neardal_mgr_prv_get_adapter_from_proxy(neardal_t neardalMgr,
+							orgNeardAdp *adpProxy,
 							AdpProp **adpProp);
 
 /******************************************************************************
@@ -68,16 +69,16 @@ errorCode_t neardal_mgr_prv_get_record(TgtProp *tgtProp,
 					    RcdProp **rcdProp);
 
 /******************************************************************************
- * neardal_mgr_init: Get Neard Manager Properties = NEARDAL Adapters list.
+ * neardal_mgr_create: Get Neard Manager Properties = NEARDAL Adapters list.
  * Create a DBus proxy for the first one NEARDAL adapter if present
  * Register Neard Manager signals ('PropertyChanged')
  *****************************************************************************/
-errorCode_t neardal_mgr_init(neardal_t neardalObj);
+errorCode_t neardal_mgr_create(neardal_t neardalMgr);
 
 /******************************************************************************
- * neardal_mgr_release: unref DBus proxy, disconnect Neard Manager signals
+ * neardal_mgr_destroy: unref DBus proxy, disconnect Neard Manager signals
  *****************************************************************************/
-void neardal_mgr_release(neardal_t neardalObj);
+void neardal_mgr_destroy(neardal_t *neardalMgr);
 
 #ifdef __cplusplus
 }

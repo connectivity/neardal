@@ -21,11 +21,9 @@
 #include <stdio.h>
 #include <string.h>
 #include <glib.h>
-#include <dbus/dbus-glib.h>
 #include <glib-object.h>
-#include "dbus/dbus.h"
 
-#include "neard-record-proxy.h"
+#include "neard_record_proxy.h"
 
 #include "neardal.h"
 #include "neardal_prv.h"
@@ -36,37 +34,36 @@
  * neardal_rcd_prv_read_std_properties: Get Neard Record Properties for non
  * smartPoster tag
  *****************************************************************************/
-static errorCode_t neardal_rcd_prv_read_std_properties(GHashTable *rcdHash,
+static errorCode_t neardal_rcd_prv_read_std_properties(GVariant *value,
 						      RcdProp *rcd)
 {
-	errorCode_t	errCode;
-	char		*tmp	= NULL;
+	errorCode_t	errCode	= NEARDAL_SUCCESS;
+	GVariant	*tmpOut	= NULL;
 
-	errCode = neardal_tools_prv_hashtable_get(rcdHash, "Type",
-					      G_TYPE_STRING, &tmp);
-	if (errCode == NEARDAL_SUCCESS)
-		rcd->type = g_strdup(tmp);
-
+	tmpOut = g_variant_lookup_value(value, "Type", G_VARIANT_TYPE_STRING);
+	if (tmpOut != NULL)
+		rcd->type = g_variant_dup_string(tmpOut, NULL);
+	
 	if (!strcmp(rcd->type, "Text")) {
-		errCode = neardal_tools_prv_hashtable_get(rcdHash,
-						      "Representation",
-						      G_TYPE_STRING, &tmp);
-		if (errCode == NEARDAL_SUCCESS)
-			rcd->representation = g_strdup(tmp);
+		tmpOut = g_variant_lookup_value(value, "Representation",
+						G_VARIANT_TYPE_STRING);
+		if (tmpOut != NULL)
+			rcd->representation = g_variant_dup_string(tmpOut,
+								   NULL);
 	}
 
 	if (!strcmp(rcd->type, "URI")) {
-		errCode = neardal_tools_prv_hashtable_get(rcdHash, "URI",
-						      G_TYPE_STRING, &tmp);
-		if (errCode == NEARDAL_SUCCESS)
-			rcd->uri = g_strdup(tmp);
+		tmpOut = g_variant_lookup_value(value, "URI",
+						G_VARIANT_TYPE_STRING);
+		if (tmpOut != NULL)
+			rcd->uri = g_variant_dup_string(tmpOut, NULL);
 	}
 
 	if (!strcmp(rcd->type, "MIME Type (RFC 2046)")) {
-		errCode = neardal_tools_prv_hashtable_get(rcdHash, "MIME",
-						      G_TYPE_STRING, &tmp);
-		if (errCode == NEARDAL_SUCCESS)
-			rcd->mime = g_strdup(tmp);
+		tmpOut = g_variant_lookup_value(value, "MIME",
+						G_VARIANT_TYPE_STRING);
+		if (tmpOut != NULL)
+			rcd->mime = g_variant_dup_string(tmpOut, NULL);
 	}
 	return errCode;
 }
@@ -75,11 +72,11 @@ static errorCode_t neardal_rcd_prv_read_std_properties(GHashTable *rcdHash,
  * neardal_rcd_prv_read_sp_properties: Get Neard Record Properties
  * for smartPoster tag
  *****************************************************************************/
-static errorCode_t neardal_rcd_prv_read_sp_properties(GHashTable *rcdHash,
+static errorCode_t neardal_rcd_prv_read_sp_properties(GVariant *value,
 						       RcdProp *rcd)
 {
 	/* TODO */
-	(void) rcdHash; /* remove warning */
+	(void) value; /* remove warning */
 	(void) rcd; /* remove warning */
 
 	return NEARDAL_ERROR_GENERAL_ERROR;
@@ -91,19 +88,17 @@ static errorCode_t neardal_rcd_prv_read_sp_properties(GHashTable *rcdHash,
 static errorCode_t neardal_rcd_prv_read_properties(RcdProp *rcd)
 {
 	errorCode_t	errCode		= NEARDAL_SUCCESS;
-	GHashTable	*rcdHash	= NULL;
 	GError		*gerror		= NULL;
-	char		*tmp		= NULL;
-	gboolean	dbusCall;
-
+	GVariant	*tmp		= NULL;
+	GVariant	*tmpOut		= NULL;
 
 	NEARDAL_TRACEIN();
 	g_assert(rcd != NULL);
-	g_assert(rcd->dbusProxy != NULL);
+	g_assert(rcd->proxy != NULL);
 
-	dbusCall = org_neard_Record_get_properties(rcd->dbusProxy, &rcdHash,
-						   &gerror);
-	if (dbusCall != TRUE || gerror != NULL) {
+	org_neard_rcd__call_get_properties_sync(rcd->proxy, &tmp, NULL,
+						&gerror);
+	if (gerror != NULL) {
 		errCode = NEARDAL_ERROR_DBUS;
 		NEARDAL_TRACE_ERR(
 			"Unable to read record's properties (%d:%s)\n",
@@ -111,29 +106,29 @@ static errorCode_t neardal_rcd_prv_read_properties(RcdProp *rcd)
 		g_error_free(gerror);
 		return errCode;
 	}
+	NEARDAL_TRACEF("GVariant=%s\n", g_variant_print (tmp, TRUE));
 
-	errCode = neardal_tools_prv_hashtable_get(rcdHash, "Encoding",
-					      G_TYPE_STRING, &tmp);
-	if (errCode == NEARDAL_SUCCESS)
-		rcd->encoding = g_strdup(tmp);
-	errCode = neardal_tools_prv_hashtable_get(rcdHash, "HandOver",
-					      G_TYPE_BOOLEAN,
-					      &rcd->handOver);
-	errCode = neardal_tools_prv_hashtable_get(rcdHash, "Language",
-					      G_TYPE_STRING, &tmp);
-	if (errCode == NEARDAL_SUCCESS)
-		rcd->language = g_strdup(tmp);
-	errCode = neardal_tools_prv_hashtable_get(rcdHash, "SmartPoster",
-					      G_TYPE_BOOLEAN,
-					      &rcd->smartPoster);
+	tmpOut = g_variant_lookup_value(tmp, "Encoding", G_VARIANT_TYPE_STRING);
+	if (tmpOut != NULL)
+		rcd->encoding = g_variant_dup_string(tmpOut, NULL);
+
+	tmpOut = g_variant_lookup_value(tmp, "HandOver", G_VARIANT_TYPE_BOOLEAN);
+	if (tmpOut != NULL)
+		rcd->handOver = g_variant_get_boolean  (tmpOut);
+
+	tmpOut = g_variant_lookup_value(tmp, "Language", G_VARIANT_TYPE_STRING);
+	if (tmpOut != NULL)
+		rcd->language = g_variant_dup_string(tmpOut, NULL);
+
+	tmpOut = g_variant_lookup_value(tmp, "SmartPoster",
+					G_VARIANT_TYPE_BOOLEAN);
+	if (tmpOut != NULL)
+		rcd->smartPoster = g_variant_get_boolean  (tmpOut);
+
 	if (rcd->smartPoster == FALSE)
-		errCode = neardal_rcd_prv_read_std_properties(rcdHash,
-								  rcd);
+		errCode = neardal_rcd_prv_read_std_properties(tmp, rcd);
 	else
-		errCode = neardal_rcd_prv_read_sp_properties(rcdHash,
-								       rcd);
-
-	g_hash_table_destroy(rcdHash);
+		errCode = neardal_rcd_prv_read_sp_properties(tmp, rcd);
 
 	return errCode;
 }
@@ -143,46 +138,54 @@ static errorCode_t neardal_rcd_prv_read_properties(RcdProp *rcd)
  * Create a DBus proxy for the first one NFC record if present
  * Register Neard Manager signals ('PropertyChanged')
  *****************************************************************************/
-static errorCode_t neardal_rcd_prv_init(neardal_t neardalObj,
+static errorCode_t neardal_rcd_prv_init(neardal_t neardalMgr,
 					    RcdProp *rcd)
 {
-	errorCode_t	errCode = NEARDAL_SUCCESS;
-
 	NEARDAL_TRACEIN();
 	g_assert(rcd != NULL);
 
-	if (rcd->dbusProxy != NULL)
-		g_object_unref(rcd->dbusProxy);
-	rcd->dbusProxy = NULL;
+	if (rcd->proxy != NULL)
+		g_object_unref(rcd->proxy);
+	rcd->proxy = NULL;
 
-	errCode = neardal_tools_prv_create_proxy(neardalObj->conn,
-						  &rcd->dbusProxy,
-						  rcd->name,
-						  NEARD_RECORDS_IF_NAME);
-	if (errCode == NEARDAL_SUCCESS)
-		errCode = neardal_rcd_prv_read_properties(rcd);
-
-	return errCode;
+	rcd->proxy = org_neard_rcd__proxy_new_sync(neardalMgr->conn,
+					G_DBUS_OBJECT_MANAGER_CLIENT_FLAGS_NONE,
+							NEARD_DBUS_SERVICE,
+							rcd->name,
+							NULL, /* GCancellable */
+							&neardalMgr->gerror);
+	if (neardalMgr->gerror != NULL) {
+		NEARDAL_TRACE_ERR(
+			"Unable to create Neard Record Proxy (%d:%s)\n",
+				 neardalMgr->gerror->code,
+				neardalMgr->gerror->message);
+		neardal_tools_prv_free_gerror(neardalMgr);
+		return NEARDAL_ERROR_DBUS_CANNOT_CREATE_PROXY;
+	}
+	
+	return neardal_rcd_prv_read_properties(rcd);
 }
 
 /******************************************************************************
- * neardal_rcd_release: unref DBus proxy, disconnect Neard Record signals
+ * neardal_rcd_prv_free: unref DBus proxy, disconnect Neard Record signals
  *****************************************************************************/
-static void neardal_rcd_prv_release(RcdProp *rcd)
+static void neardal_rcd_prv_free(RcdProp **rcd)
 {
 	NEARDAL_TRACEIN();
-	if (rcd->dbusProxy != NULL)
-		g_object_unref(rcd->dbusProxy);
-	rcd->dbusProxy = NULL;
-	g_free(rcd->name);
-	g_free(rcd->language);
-	g_free(rcd->encoding);
-	g_free(rcd->mime);
-	g_free(rcd->representation);
-	g_free(rcd->type);
-	g_free(rcd->uri);
-	g_free(rcd);
+	if ((*rcd)->proxy != NULL)
+		g_object_unref((*rcd)->proxy);
+	(*rcd)->proxy = NULL;
+	g_free((*rcd)->name);
+	g_free((*rcd)->language);
+	g_free((*rcd)->encoding);
+	g_free((*rcd)->mime);
+	g_free((*rcd)->representation);
+	g_free((*rcd)->type);
+	g_free((*rcd)->uri);
+	g_free((*rcd));
+	(*rcd) = NULL;
 }
+
 /******************************************************************************
  * neardal_rcd_prv_read_std_properties: Insert key/value in a GHashTable for
  * non smartPoster tag
@@ -240,7 +243,7 @@ errorCode_t neardal_rcd_prv_format(GHashTable **hash, RcdProp *rcd)
 
 	NEARDAL_TRACEIN();
 	g_assert(rcd != NULL);
-	g_assert(rcd->dbusProxy != NULL);
+	g_assert(rcd->proxy != NULL);
 
 	if (rcd->smartPoster == FALSE)
 		errCode = neardal_rcd_prv_format_std_properties(hash, rcd);
@@ -254,22 +257,22 @@ errorCode_t neardal_rcd_prv_format(GHashTable **hash, RcdProp *rcd)
 /******************************************************************************
  * neardal_get_records: get an array of target records
  *****************************************************************************/
-errorCode_t neardal_get_records(neardal_t neardalObj, char *tgtName,
+errorCode_t neardal_get_records(neardal_t neardalMgr, char *tgtName,
 				 char ***array, int *len)
 {
 	errorCode_t	errCode		= NEARDAL_ERROR_NO_RECORD;
 	AdpProp		*adpProp	= NULL;
 	TgtProp		*tgtProp	= NULL;
-	int		rcdNb		= 0;
+	int		rcdLen		= 0;
 	int		ct		= 0;	/* counter */
 	char		**rcds		= NULL;
 	RcdProp		*rcd		= NULL;
 
 
-	if (neardalObj == NULL || tgtName == NULL || array == NULL)
+	if (neardalMgr == NULL || tgtName == NULL || array == NULL)
 		return NEARDAL_ERROR_INVALID_PARAMETER;
 
-	errCode = neardal_mgr_prv_get_adapter(neardalObj, tgtName,
+	errCode = neardal_mgr_prv_get_adapter(neardalMgr, tgtName,
 						   &adpProp);
 	if (errCode != NEARDAL_SUCCESS)
 		goto exit;
@@ -279,16 +282,16 @@ errorCode_t neardal_get_records(neardal_t neardalObj, char *tgtName,
 		goto exit;
 
 	errCode		= NEARDAL_ERROR_NO_RECORD;
-	rcdNb = g_list_length(tgtProp->rcdList);
-	if (rcdNb <= 0)
+	rcdLen = g_list_length(tgtProp->rcdList);
+	if (rcdLen <= 0)
 		goto exit;
 
 	errCode = NEARDAL_ERROR_NO_MEMORY;
-	rcds = g_try_malloc0((rcdNb + 1) * sizeof(char *));
+	rcds = g_try_malloc0((rcdLen + 1) * sizeof(char *));
 	if (rcds == NULL)
 		goto exit;
 
-	while (ct < rcdNb) {
+	while (ct < rcdLen) {
 		rcd = g_list_nth_data(tgtProp->rcdList, ct);
 		if (rcd != NULL)
 			rcds[ct++] = g_strdup(rcd->name);
@@ -297,7 +300,7 @@ errorCode_t neardal_get_records(neardal_t neardalObj, char *tgtName,
 
 exit:
 	if (len != NULL)
-		*len = rcdNb;
+		*len = rcdLen;
 	*array	= rcds;
 
 	return errCode;
@@ -307,51 +310,46 @@ exit:
  * neardal_rcd_add: add new NFC record, initialize DBus Proxy connection,
  * register record signal
  *****************************************************************************/
-errorCode_t neardal_rcd_add(neardal_t neardalObj, char *rcdName)
+errorCode_t neardal_rcd_add(neardal_t neardalMgr, void *parent,
+			    char *rcdName)
 {
 	errorCode_t	errCode		= NEARDAL_ERROR_NO_MEMORY;
-	AdpProp		*adpProp	= NULL;
 	RcdProp		*rcd	= NULL;
-	TgtProp		*tgtProp	= NULL;
-
-	g_assert(neardalObj != NULL);
+	TgtProp		*tgtProp = parent;
+	
+	g_assert(neardalMgr != NULL);
 	g_assert(rcdName != NULL);
+	g_assert(parent != NULL);
 
 	NEARDAL_TRACEF("Adding record:%s\n", rcdName);
 	rcd = g_try_malloc0(sizeof(RcdProp));
 	if (rcd == NULL)
 		goto exit;
 
-	rcd->name	= g_strdup(rcdName);
+	rcd->name = g_strdup(rcdName);
 	if (rcd->name == NULL)
 		goto exit;
 
-	errCode = neardal_rcd_prv_init(neardalObj, rcd);
-	if (errCode != NEARDAL_SUCCESS)
-		goto exit;
-
-	errCode = neardal_mgr_prv_get_adapter(neardalObj, rcdName,
-						   &adpProp);
-	if (errCode != NEARDAL_SUCCESS)
-		goto exit;
-
-	errCode = neardal_adp_prv_get_target(adpProp, rcdName, &tgtProp);
-	if (errCode != NEARDAL_SUCCESS)
-		goto exit;
-
+	rcd->parent = tgtProp;
+	
 	tgtProp->rcdList = g_list_prepend(tgtProp->rcdList, (gpointer) rcd);
+	errCode = neardal_rcd_prv_init(neardalMgr, rcd);
+	if (errCode != NEARDAL_SUCCESS)
+		goto exit;
+
 	NEARDAL_TRACEF("NEARDAL LIB recordList contains %d elements\n",
 		      g_list_length(tgtProp->rcdList));
+	
+	if (neardalMgr->cb_rcd_found != NULL)
+		(neardalMgr->cb_rcd_found)(rcdName,
+					   neardalMgr->cb_rcd_found_ud);
 	errCode = NEARDAL_SUCCESS;
 
 exit:
 	if (errCode != NEARDAL_SUCCESS) {
-		if (rcd->name != NULL) {
-			g_free(rcd->name);
-			rcd->name = NULL;
-		}
-		if (rcd != NULL)
-			g_free(rcd);
+		tgtProp->rcdList = g_list_remove(tgtProp->rcdList,
+						 (gpointer) rcd);
+		neardal_rcd_prv_free(&rcd);
 	}
 
 	return errCode;
@@ -363,10 +361,15 @@ exit:
  *****************************************************************************/
 void neardal_rcd_remove(RcdProp *rcd)
 {
+	TgtProp		*tgtProp;
+	
 	NEARDAL_TRACEIN();
 	g_assert(rcd != NULL);
 
+	tgtProp = rcd->parent;
 	NEARDAL_TRACEF("Removing record:%s\n", rcd->name);
+	tgtProp->rcdList = g_list_remove(tgtProp->rcdList,
+					 (gconstpointer) rcd);
 	/* Remove all records */
-	neardal_rcd_prv_release(rcd);
+	neardal_rcd_prv_free(&rcd);
 }

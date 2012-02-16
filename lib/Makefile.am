@@ -3,22 +3,34 @@ neardal_LT_REVISION = 1
 neardal_LT_AGE = 0
 
 #Rule to generate the binding headers
-neard-manager-proxy.h:  interface/org.neard.Manager.xml
-	dbus-binding-tool --mode=glib-client $<> $@
+neard_manager_proxy.h:  interface/org.neard.Manager.xml
+	gdbus-codegen --generate-c-code neard_manager_proxy \
+			--c-namespace orgNeardMgr \
+			--interface-prefix org.neard.Manager \
+			$<
+	
+neard_adapter_proxy.h:  interface/org.neard.Adapter.xml
+	gdbus-codegen --generate-c-code neard_adapter_proxy \
+			--c-namespace orgNeardAdp \
+			--interface-prefix org.neard.Adapter \
+			$<
 
-neard-adapter-proxy.h:  interface/org.neard.Adapter.xml
-	dbus-binding-tool --mode=glib-client $<> $@
+neard_target_proxy.h:  interface/org.neard.Target.xml
+	gdbus-codegen --generate-c-code neard_target_proxy \
+			--c-namespace orgNeardTgt \
+			--interface-prefix org.neard.Target \
+			$<
 
-neard-target-proxy.h:  interface/org.neard.Target.xml
-	dbus-binding-tool --mode=glib-client $<> $@
+neard_record_proxy.h:  interface/org.neard.Record.xml
+	gdbus-codegen --generate-c-code neard_record_proxy \
+			--c-namespace orgNeardRcd \
+			--interface-prefix org.neard.Record \
+			$<
 
-neard-record-proxy.h:  interface/org.neard.Record.xml
-	dbus-binding-tool --mode=glib-client $<> $@
-
-BUILT_SOURCES =	neard-manager-proxy.h \
-		neard-adapter-proxy.h \
-		neard-target-proxy.h \
-		neard-record-proxy.h
+BUILT_SOURCES =	neard_manager_proxy.h \
+		neard_adapter_proxy.h \
+		neard_target_proxy.h \
+		neard_record_proxy.h
 
 neardal_PRV_HDR = \
 		neardal_adapter.h \
@@ -41,17 +53,21 @@ EXTRA_DIST = interface/org.neard.Manager.xml interface/org.neard.Adapter.xml int
 lib_LTLIBRARIES =		libneardal.la
 libneardal_la_SOURCES =	neardal.c \
 				neardal_adapter.c \
+				neard_adapter_proxy.c \
 				neardal_errors.c \
 				neardal_manager.c \
+				neard_manager_proxy.c \
 				neardal_record.c \
+				neard_record_proxy.c \
 				neardal_target.c \
+				neard_target_proxy.c \
 				neardal_tools.c \
 				neardal_traces.c
 
 libneardal_la_LDFLAGS = -version-info $(neardal_LT_CURRENT):$(neardal_LT_REVISION):$(neardal_LT_AGE)
-libneardal_la_CFLAGS = $(GLIB_CFLAGS) $(DBUS_CFLAGS)
+libneardal_la_CFLAGS = $(GLIB_CFLAGS) $(GIO_UNIX_CFLAGS)
 
-libneardal_la_LIBADD = $(GLIB_LIBS) $(DBUS_LIBS)
+libneardal_la_LIBADD = $(GLIB_LIBS) $(GIO_UNIX_LIBS)
 
 neardalheadersdir = $(includedir)/neardal
 

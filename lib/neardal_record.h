@@ -21,19 +21,19 @@
 #ifndef __NEARDAL_RECORD_H
 #define __NEARDAL_RECORD_H
 
+#include "neard_record_proxy.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif	/* __cplusplus */
 
 #define NEARD_RECORDS_IF_NAME		"org.neard.Record"
-#define NEARD_TGT_SIG_PROPCHANGED	"PropertyChanged"
 
 /* NEARDAL Record Properties */
 typedef struct {
-	DBusGProxy	*dbusProxy;	/* proxy to Neard NFC Record
-					interface */
-	char		*name;		/* DBus interface name
-					(as identifier) */
+	orgNeardRcd	*proxy;	/* proxy to Neard NFC Record interface */
+	char		*name;	/* DBus interface name (as identifier) */
+	void		*parent; /* parent (target) */
 
 	char		*encoding;
 	gboolean	handOver;
@@ -50,7 +50,8 @@ typedef struct {
  * neardal_rcd_add: add new NFC record, initialize DBus Proxy connection,
  * register record signal
  *****************************************************************************/
-errorCode_t neardal_rcd_add(neardal_t neardalObj, char *rcdName);
+errorCode_t neardal_rcd_add(neardal_t neardalMgr, void *parent,
+			    char *rcdName);
 
 /******************************************************************************
  * neardal_rcd_remove: remove NFC record, unref DBus Proxy connection,

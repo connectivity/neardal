@@ -21,26 +21,32 @@
 #ifndef __NEARDAL_TARGET_H
 #define __NEARDAL_TARGET_H
 
+#include "neard_target_proxy.h"
 #include "neardal_record.h"
-#include <glib-2.0/glib/glist.h>
+// #include <glib-2.0/glib/gtypes.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif	/* __cplusplus */
 
 #define NEARD_TARGETS_IF_NAME		"org.neard.Target"
-#define NEARD_TGT_SIG_PROPCHANGED	"PropertyChanged"
+#define NEARD_TGT_SIG_PROPCHANGED	"property-changed"
 
 /* NEARDAL Target Properties */
 typedef struct {
-	DBusGProxy	*dbusProxy;	/* proxy to Neard NEARDAL Target
+	orgNeardTgt	*proxy;		/* proxy to Neard NEARDAL Target
 					interface */
 	char		*name;		/* DBus interface name
 					(as identifier) */
-	GPtrArray	*rcdArray;	/* temporary storage */
+	void		*parent;	/* parent (adapter ) */
+	
+	gchar		*type;
+	
+	gsize		rcdLen;
 	GList		*rcdList;	/* target's records paths */
-	char		**tagType;	/* array of tag types */
-	char		*type;
+	
+	gchar		**tagsType;	/* array of tag types */
+	gsize		tagsTypeLen;
 	gboolean	readOnly;	/* Read-Only flag */
 } TgtProp;
 
@@ -48,7 +54,8 @@ typedef struct {
  * neardal_tgt_add: add new NEARDAL target, initialize DBus Proxy connection,
  * register target signal
  *****************************************************************************/
-errorCode_t neardal_tgt_add(neardal_t neardalObj, char *tgtName);
+errorCode_t neardal_tgt_add(neardal_t neardalMgr, void *parent,
+			    gchar *tgtName);
 
 /******************************************************************************
  * neardal_tgt_remove: remove NEARDAL target, unref DBus Proxy connection,

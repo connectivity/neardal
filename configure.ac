@@ -1,5 +1,6 @@
 AC_INIT([libneardal], [0.1.0])
 AM_INIT_AUTOMAKE([foreign -Wall -Werror])
+
 AC_PROG_LIBTOOL
 AC_CONFIG_HEADERS([config.h])
 
@@ -47,14 +48,16 @@ if (test "${traces}" = "yes"); then
 fi
 
 ## Check dependances
-PKG_CHECK_MODULES(GLIB, glib-2.0 >= 2.22, dummy=yes,
-				AC_MSG_ERROR(GLib >= 2.22 is required))
+GLIB_REQUIRED=2.30.0
+PKG_CHECK_MODULES(GLIB, glib-2.0 >= $GLIB_REQUIRED, dummy=yes,
+				AC_MSG_ERROR(GLib >= $GLIB_REQUIRED is required))
 AC_SUBST(GLIB_CFLAGS)
 AC_SUBST(GLIB_LIBS)
 
-PKG_CHECK_MODULES(DBUS, dbus-glib-1, [have_dbus="yes"], [have_dbus="no"])
-AC_SUBST(DBUS_CFLAGS)
-AC_SUBST(DBUS_LIBS)
+PKG_CHECK_MODULES(GIO_UNIX, gio-unix-2.0 >= $GLIB_REQUIRED, dummy=yes,
+				AC_MSG_ERROR(gio-unix >= $GLIB_REQUIRED is required))
+AC_SUBST(GIO_UNIX_CFLAGS)
+AC_SUBST(GIO_UNIX_LIBS)
 
 AC_CHECK_PROGS([DOXYGEN], [doxygen])
 if test -z "$DOXYGEN";
