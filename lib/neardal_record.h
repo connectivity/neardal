@@ -34,6 +34,7 @@ typedef struct {
 	orgNeardRcd	*proxy;	/* proxy to Neard NFC Record interface */
 	char		*name;	/* DBus interface name (as identifier) */
 	void		*parent; /* parent (target) */
+	gboolean	notified; /* Already notified to client? */
 
 	char		*encoding;
 	gboolean	handOver;

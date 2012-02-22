@@ -340,9 +340,6 @@ errorCode_t neardal_rcd_add(neardal_t neardalMgr, void *parent,
 	NEARDAL_TRACEF("NEARDAL LIB recordList contains %d elements\n",
 		      g_list_length(tgtProp->rcdList));
 	
-	if (neardalMgr->cb_rcd_found != NULL)
-		(neardalMgr->cb_rcd_found)(rcdName,
-					   neardalMgr->cb_rcd_found_ud);
 	errCode = NEARDAL_SUCCESS;
 
 exit:

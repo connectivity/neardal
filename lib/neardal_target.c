@@ -208,6 +208,36 @@ static void neardal_tgt_prv_free(TgtProp **tgtProp)
 }
 
 /******************************************************************************
+ * neardal_tgt_notify_target_found: Invoke client callback for 'record found'
+ * if present, and 'target found' (if not already nofied)
+ *****************************************************************************/
+void neardal_tgt_notify_target_found(neardal_t neardalMgr, TgtProp *tgtProp)
+{
+	RcdProp *rcdProp;
+	gsize	len;
+	
+	g_assert(neardalMgr != NULL);
+	g_assert(tgtProp != NULL);
+	
+		
+	if (tgtProp->notified == FALSE && neardalMgr->cb_tgt_found != NULL) {
+		(neardalMgr->cb_tgt_found)(tgtProp->name,
+					   neardalMgr->cb_tgt_found_ud);
+		tgtProp->notified = TRUE;
+	}
+
+	len = 0;
+	if (neardalMgr->cb_rcd_found != NULL)
+		while (len < g_list_length(tgtProp->rcdList)) {
+			rcdProp = g_list_nth_data(tgtProp->rcdList, len++);
+			if (rcdProp->notified == FALSE) {
+				(neardalMgr->cb_rcd_found)(rcdProp->name,
+							neardalMgr->cb_rcd_found_ud);
+				rcdProp->notified = TRUE;
+			}
+		}
+}
+/******************************************************************************
  * neardal_get_targets: get an array of NFC targets present
  *****************************************************************************/
 errorCode_t neardal_get_targets(neardal_t neardalMgr, char *adpName,
@@ -281,10 +311,6 @@ errorCode_t neardal_tgt_add(neardal_t neardalMgr, void * parent,
 	NEARDAL_TRACEF("NEARDAL LIB targetList contains %d elements\n",
 		      g_list_length(adpProp->tgtList));
 	
-	if (neardalMgr->cb_tgt_found != NULL)
-		(neardalMgr->cb_tgt_found)(tgtProp->name,
-					   neardalMgr->cb_tgt_found_ud);
-
 	return errCode;
 
 error:

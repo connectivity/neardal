@@ -42,6 +42,7 @@ static void  neardal_adp_prv_cb_target_found(orgNeardTgt *proxy,
 	AdpProp		*adpProp	= user_data;
 	errorCode_t	err;
 	neardal_t	neardalMgr;
+	TgtProp		*tgtProp;
 
 	NEARDAL_TRACEIN();
 	(void) proxy; /* remove warning */
@@ -57,10 +58,9 @@ static void  neardal_adp_prv_cb_target_found(orgNeardTgt *proxy,
 	 * callback 'Record Found' would be called before ) */
 	err = neardal_tgt_add(neardalMgr, adpProp,
 			      (char *) arg_unnamed_arg0);
-	if (err != NEARDAL_SUCCESS) {
-		if (neardalMgr->cb_tgt_found != NULL)
-			(neardalMgr->cb_tgt_found)((char *) arg_unnamed_arg0,
-					      neardalMgr->cb_tgt_found_ud);
+	if (err == NEARDAL_SUCCESS) {
+		tgtProp = g_list_nth_data(adpProp->tgtList, 0);
+		neardal_tgt_notify_target_found(neardalMgr, tgtProp);
 	}
 	NEARDAL_TRACEF("NEARDAL LIB targetList contains %d elements\n",
 		      g_list_length(adpProp->tgtList));
@@ -148,12 +148,11 @@ static void neardal_adp_prv_cb_property_changed(orgNeardAdp *proxy,
 		tgtArray = g_variant_dup_objv (tmp, &tmpLen);
 		adpProp->tgtNb = tmpLen;
 		if (tmpLen == 0) {
-			GList *node = NULL;
 			NEARDAL_TRACEF(
 				"Target array empty! Removing all targets\n");
-			while (g_list_length(adpProp->tgtList)) {
-				node = g_list_first(adpProp->tgtList);
-				tgtProp = (TgtProp *) node->data;
+			while (tmpLen < g_list_length(adpProp->tgtList)) {
+				tgtProp = g_list_nth_data(adpProp->tgtList,
+							  tmpLen++);
 				neardal_adp_prv_cb_target_lost(tgtProp->proxy,
 							       tgtProp->name,
 							       tgtProp->parent);
@@ -451,6 +450,8 @@ errorCode_t neardal_adp_add(neardal_t neardalMgr, char *adapterName)
 	errorCode_t	errCode = NEARDAL_SUCCESS;
 	AdpProp		*adpProp = NULL;
 	GList		**adpList;
+	TgtProp		*tgtProp;
+	gsize		len;
 
 	g_assert(neardalMgr != NULL);
 	NEARDAL_TRACEF("Adding adapter:%s\n", adapterName);
@@ -474,6 +475,13 @@ errorCode_t neardal_adp_add(neardal_t neardalMgr, char *adapterName)
 			(neardalMgr->cb_adp_added)((char *) adapterName,
 					       neardalMgr->cb_adp_added_ud);
 
+	/* Notify 'Target Found' */
+	len = 0;
+	while (len < g_list_length(adpProp->tgtList)) {
+		tgtProp = g_list_nth_data(adpProp->tgtList, len++);
+		neardal_tgt_notify_target_found(neardalMgr, tgtProp);
+		len++;
+	}
 	return errCode;
 }
 

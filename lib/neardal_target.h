@@ -34,11 +34,10 @@ extern "C" {
 
 /* NEARDAL Target Properties */
 typedef struct {
-	orgNeardTgt	*proxy;		/* proxy to Neard NEARDAL Target
-					interface */
-	char		*name;		/* DBus interface name
-					(as identifier) */
-	void		*parent;	/* parent (adapter ) */
+	orgNeardTgt	*proxy;	  /* proxy to Neard NEARDAL Target interface */
+	char		*name;	  /* DBus interface name (as identifier) */
+	void		*parent;  /* parent (adapter ) */
+	gboolean	notified; /* Already notified to client? */
 	
 	gchar		*type;
 	
@@ -49,6 +48,12 @@ typedef struct {
 	gsize		tagTypeLen;
 	gboolean	readOnly;	/* Read-Only flag */
 } TgtProp;
+
+/******************************************************************************
+ * neardal_tgt_notify_target_found: Invoke client callback for 'record found'
+ * if present, and 'target found' (if not already nofied)
+ *****************************************************************************/
+void neardal_tgt_notify_target_found(neardal_t neardalMgr, TgtProp *tgtProp);
 
 /******************************************************************************
  * neardal_tgt_add: add new NEARDAL target, initialize DBus Proxy connection,
