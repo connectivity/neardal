@@ -278,7 +278,7 @@ exit:
 /******************************************************************************
  * neardal_adp_prv_get_current_target: Get current NFC target
  *****************************************************************************/
-errorCode_t neardal_adp_prv_get_target(AdpProp *adpProp, char *tgtName,
+errorCode_t neardal_adp_prv_get_target(AdpProp *adpProp, gchar *tgtName,
 				       TgtProp **tgtProp)
 {
 	errorCode_t	errCode	= NEARDAL_ERROR_NO_TARGET;
@@ -445,7 +445,7 @@ errorCode_t neardal_get_adapters(neardal_t neardalMgr, char ***array,
  * neardal_adp_add: add new NFC adapter, initialize DBus Proxy connection,
  * register adapter signal
  *****************************************************************************/
-errorCode_t neardal_adp_add(neardal_t neardalMgr, char *adapterName)
+errorCode_t neardal_adp_add(neardal_t neardalMgr, gchar *adapterName)
 {
 	errorCode_t	errCode = NEARDAL_SUCCESS;
 	AdpProp		*adpProp = NULL;

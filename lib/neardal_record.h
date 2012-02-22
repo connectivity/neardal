@@ -32,19 +32,19 @@ extern "C" {
 /* NEARDAL Record Properties */
 typedef struct {
 	orgNeardRcd	*proxy;	/* proxy to Neard NFC Record interface */
-	char		*name;	/* DBus interface name (as identifier) */
+	gchar		*name;	/* DBus interface name (as identifier) */
 	void		*parent; /* parent (target) */
 	gboolean	notified; /* Already notified to client? */
 
-	char		*encoding;
+	gchar		*encoding;
 	gboolean	handOver;
-	char		*language;
+	gchar		*language;
 	gboolean	smartPoster;
-	char		*action;
-	char		*type;
-	char		*representation;
-	char		*uri;
-	char		*mime;
+	gchar		*action;
+	gchar		*type;
+	gchar		*representation;
+	gchar		*uri;
+	gchar		*mime;
 } RcdProp;
 
 /******************************************************************************

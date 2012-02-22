@@ -156,9 +156,8 @@ static errorCode_t neardal_mgr_prv_get_all_adapters(neardal_t neardalMgr,
 /******************************************************************************
  * neardal_mgr_prv_get_adapter: Get NFC Adapter from name
  *****************************************************************************/
-errorCode_t neardal_mgr_prv_get_adapter(neardal_t neardalMgr,
-					     const char *adpName,
-					     AdpProp **adpProp)
+errorCode_t neardal_mgr_prv_get_adapter(neardal_t neardalMgr, gchar *adpName,
+					AdpProp **adpProp)
 {
 	errorCode_t	errCode	= NEARDAL_ERROR_NO_ADAPTER;
 	guint		len	= 0;
@@ -219,9 +218,8 @@ errorCode_t neardal_mgr_prv_get_adapter_from_proxy(neardal_t neardalMgr,
 /******************************************************************************
  * neardal_mgr_prv_get_target: Get specific target from adapter
  *****************************************************************************/
-errorCode_t neardal_mgr_prv_get_target(AdpProp *adpProp,
-					    const char *tgtName,
-					    TgtProp **tgtProp)
+errorCode_t neardal_mgr_prv_get_target(AdpProp *adpProp, gchar *tgtName,
+				       TgtProp **tgtProp)
 {
 	errorCode_t	errCode	= NEARDAL_ERROR_NO_TARGET;
 	guint		len;
@@ -250,9 +248,8 @@ errorCode_t neardal_mgr_prv_get_target(AdpProp *adpProp,
 /******************************************************************************
  * neardal_mgr_prv_get_record: Get specific record from target
  *****************************************************************************/
-errorCode_t neardal_mgr_prv_get_record(TgtProp *tgtProp,
-					    const char *rcdName,
-					    RcdProp **rcdProp)
+errorCode_t neardal_mgr_prv_get_record(TgtProp *tgtProp, gchar *rcdName,
+				       RcdProp **rcdProp)
 {
 	errorCode_t	errCode	= NEARDAL_ERROR_NO_RECORD;
 	guint		len;

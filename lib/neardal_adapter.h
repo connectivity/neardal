@@ -37,14 +37,13 @@ extern "C" {
 typedef struct {
 	orgNeardAdp		*proxy;		/* The proxy connected to Neard
 						Adapter interface */
-	char			*name;		/* DBus interface name
+	gchar			*name;		/* DBus interface name
 						(as id) */
 	neardal_t		parent;
 	gboolean		polling;	/* adapter polling active ? */
 	gboolean		powered;	/* adapter powered ? */
 	gchar			**protocols;	/* protocols list */
 	gsize			lenProtocols;
-// 	gchar			**tgtArray;	/* temporary storage */
 	gsize			tgtNb;
 	GList			*tgtList;	/* Neard adapter targets list
 						available */
@@ -53,14 +52,14 @@ typedef struct {
 /******************************************************************************
  * neardal_adp_prv_get_target: Get NEARDAL target from name
  *****************************************************************************/
-errorCode_t neardal_adp_prv_get_target(AdpProp *adpProp, char *tgtName,
+errorCode_t neardal_adp_prv_get_target(AdpProp *adpProp, gchar *tgtName,
 				       TgtProp **tgtProp);
 
 /******************************************************************************
  * neardal_adp_add: add new NEARDAL adapter, initialize DBus Proxy
  * connection, register adapter signal
  *****************************************************************************/
-errorCode_t neardal_adp_add(neardal_t neardalMgr, char *adapterName);
+errorCode_t neardal_adp_add(neardal_t neardalMgr, gchar *adapterName);
 
 /******************************************************************************
  * neardal_adp_remove: remove NEARDAL adapter, unref DBus Proxy

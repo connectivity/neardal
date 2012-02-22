@@ -269,20 +269,20 @@ errorCode_t neardal_publish(neardal_t neardalMgr, neardal_record *record)
 	if (neardalMgr == NULL || record == NULL)
 		goto exit;
 
-	err = neardal_mgr_prv_get_adapter(neardalMgr, record->name,
-						   &adpProp);
+	err = neardal_mgr_prv_get_adapter(neardalMgr, (gchar *) record->name,
+					  &adpProp);
 	if (err != NEARDAL_SUCCESS)
 		goto exit;
-	rcd.name		= (char *) record->name;
-	rcd.action		= (char *) record->action;
-	rcd.encoding		= (char *) record->encoding;
-	rcd.handOver		= record->handOver;
-	rcd.language		= (char *) record->language;
-	rcd.type		= (char *) record->type;
-	rcd.representation	= (char *) record->representation;
-	rcd.uri			= (char *) record->uri;
-	rcd.mime		= (char *) record->mime;
-	rcd.smartPoster		= record->smartPoster;
+	rcd.name		= (gchar *) record->name;
+	rcd.action		= (gchar *) record->action;
+	rcd.encoding		= (gchar *) record->encoding;
+	rcd.handOver		= (gboolean) record->handOver;
+	rcd.language		= (gchar *) record->language;
+	rcd.type		= (gchar *) record->type;
+	rcd.representation	= (gchar *) record->representation;
+	rcd.uri			= (gchar *) record->uri;
+	rcd.mime		= (gchar *) record->mime;
+	rcd.smartPoster		= (gboolean) record->smartPoster;
 
 	 neardal_adp_publish(adpProp, &rcd);
 exit:
@@ -305,12 +305,12 @@ errorCode_t neardal_get_adapter_properties(neardal_t neardalMgr,
 	if (neardalMgr == NULL || adpName == NULL || adapter == NULL)
 		goto exit;
 
-	err = neardal_mgr_prv_get_adapter(neardalMgr, adpName,
+	err = neardal_mgr_prv_get_adapter(neardalMgr, (gchar *) adpName,
 					  &adpProp);
 	if (err != NEARDAL_SUCCESS)
 		goto exit;
 
-	adapter->name		= adpProp->name;
+	adapter->name		= (char *) adpProp->name;
 	adapter->polling	= (short) adpProp->polling;
 	adapter->powered	= (short) adpProp->powered;
 
@@ -326,13 +326,13 @@ errorCode_t neardal_get_adapter_properties(neardal_t neardalMgr,
 			ct = 0;
 			while (ct < adapter->nbProtocols) {
 				gchar *tmp = g_strdup(adpProp->protocols[ct]);
-				adapter->protocols[ct++] = tmp;
+				adapter->protocols[ct++] = (char *) tmp;
 			}
 			err = NEARDAL_SUCCESS;
 		}
 	}
 
-	adapter->nbTargets	= adpProp->tgtNb;
+	adapter->nbTargets	= (int) adpProp->tgtNb;
 	adapter->targets	= NULL;
 	if (adapter->nbTargets <= 0)
 		goto exit;
@@ -374,19 +374,19 @@ errorCode_t neardal_get_target_properties(neardal_t neardalMgr,
 
 	target->records	= NULL;
 	target->tagType	= NULL;
-	err = neardal_mgr_prv_get_adapter(neardalMgr, tgtName,
-						   &adpProp);
+	err = neardal_mgr_prv_get_adapter(neardalMgr, (gchar *) tgtName,
+					  &adpProp);
 	if (err != NEARDAL_SUCCESS)
 		goto exit;
 
-	err = neardal_mgr_prv_get_target(adpProp, tgtName, &tgtProp);
+	err = neardal_mgr_prv_get_target(adpProp, (gchar *) tgtName, &tgtProp);
 	if (err != NEARDAL_SUCCESS)
 		goto exit;
 
-	target->name		= tgtProp->name;
-	target->type		= tgtProp->type;
-	target->readOnly	= tgtProp->readOnly;
-	target->nbRecords	= tgtProp->rcdLen;
+	target->name		= (const char *) tgtProp->name;
+	target->type		= (const char *) tgtProp->type;
+	target->readOnly	= (short) tgtProp->readOnly;
+	target->nbRecords	= (int) tgtProp->rcdLen;
 	if (target->nbRecords > 0) {
 		err = NEARDAL_ERROR_NO_MEMORY;
 		size = (target->nbRecords + 1) * sizeof(char *);
@@ -406,7 +406,7 @@ errorCode_t neardal_get_target_properties(neardal_t neardalMgr,
 	target->nbTagTypes = 0;
 	target->tagType = NULL;
 	/* Count TagTypes */
-	target->nbTagTypes = tgtProp->tagTypeLen;
+	target->nbTagTypes = (int) tgtProp->tagTypeLen;
 
 	if (target->nbTagTypes <= 0)
 		goto exit;
@@ -443,32 +443,32 @@ errorCode_t neardal_get_record_properties(neardal_t neardalMgr,
 	if (neardalMgr == NULL || recordName == NULL || record == NULL)
 		goto exit;
 
-	err = neardal_mgr_prv_get_adapter(neardalMgr, recordName,
-						   &adpProp);
+	err = neardal_mgr_prv_get_adapter(neardalMgr, (gchar *) recordName,
+					  &adpProp);
 	if (err != NEARDAL_SUCCESS)
 		goto exit;
 
-	err = neardal_mgr_prv_get_target(adpProp, recordName
-						, &tgtProp);
+	err = neardal_mgr_prv_get_target(adpProp, (gchar *) recordName,
+					 &tgtProp);
 	if (err != NEARDAL_SUCCESS)
 		goto exit;
 
-	err = neardal_mgr_prv_get_record(tgtProp, recordName
-					, &rcdProp);
+	err = neardal_mgr_prv_get_record(tgtProp, (gchar *) recordName,
+					 &rcdProp);
 	if (err != NEARDAL_SUCCESS)
 		goto exit;
 
-	record->name		= rcdProp->name;
-	record->encoding	= rcdProp->encoding;
+	record->name		= (const char *) rcdProp->name;
+	record->encoding	= (const char *) rcdProp->encoding;
 	record->handOver	= (short) rcdProp->handOver;
-	record->language	= rcdProp->language;
+	record->language	= (const char *) rcdProp->language;
 	record->smartPoster	= (short) rcdProp->smartPoster;
-	record->action		= rcdProp->action;
+	record->action		= (const char *) rcdProp->action;
 
-	record->type		= rcdProp->type;
-	record->representation	= rcdProp->representation;
-	record->uri		= rcdProp->uri;
-	record->mime		= rcdProp->mime;
+	record->type		= (const char *) rcdProp->type;
+	record->representation	= (const char *) rcdProp->representation;
+	record->uri		= (const char *) rcdProp->uri;
+	record->mime		= (const char *) rcdProp->mime;
 
 exit:
 	return err;

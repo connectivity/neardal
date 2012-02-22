@@ -35,7 +35,7 @@ extern "C" {
 /* NEARDAL Target Properties */
 typedef struct {
 	orgNeardTgt	*proxy;	  /* proxy to Neard NEARDAL Target interface */
-	char		*name;	  /* DBus interface name (as identifier) */
+	gchar		*name;	  /* DBus interface name (as identifier) */
 	void		*parent;  /* parent (adapter ) */
 	gboolean	notified; /* Already notified to client? */
 	

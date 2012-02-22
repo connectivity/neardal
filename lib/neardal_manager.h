@@ -44,7 +44,7 @@ typedef struct {
  * neardal_mgr_prv_get_adapter: Get NEARDAL Adapter from name
  *****************************************************************************/
 errorCode_t neardal_mgr_prv_get_adapter(neardal_t neardalMgr,
-					     const char *adpName,
+					     gchar *adpName,
 					     AdpProp **adpProp);
 
 /******************************************************************************
@@ -57,16 +57,14 @@ errorCode_t neardal_mgr_prv_get_adapter_from_proxy(neardal_t neardalMgr,
 /******************************************************************************
  * neardal_mgr_prv_get_target: Get specific target from adapter
  *****************************************************************************/
-errorCode_t neardal_mgr_prv_get_target(AdpProp *adpProp,
-					    const char *tgtName,
-					    TgtProp **tgtProp);
+errorCode_t neardal_mgr_prv_get_target(AdpProp *adpProp, gchar *tgtName,
+				       TgtProp **tgtProp);
 
 /******************************************************************************
  * neardal_mgr_prv_get_record: Get specific record from target
  *****************************************************************************/
-errorCode_t neardal_mgr_prv_get_record(TgtProp *tgtProp,
-					    const char *rcdName,
-					    RcdProp **rcdProp);
+errorCode_t neardal_mgr_prv_get_record(TgtProp *tgtProp, gchar *rcdName,
+				       RcdProp **rcdProp);
 
 /******************************************************************************
  * neardal_mgr_create: Get Neard Manager Properties = NEARDAL Adapters list.
