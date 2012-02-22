@@ -117,11 +117,11 @@ static errorCode_t neardal_tgt_prv_read_properties(TgtProp *tgtProp)
 
 	tmpOut = g_variant_lookup_value(tmp, "TagType", G_VARIANT_TYPE_ARRAY);
 	if (tmpOut != NULL) {
-		tgtProp->tagsType = g_variant_dup_strv (tmpOut, &len);
-		tgtProp->tagsTypeLen = len;
+		tgtProp->tagType = g_variant_dup_strv (tmpOut, &len);
+		tgtProp->tagTypeLen = len;
 		if (len == 0) {
-			g_strfreev(tgtProp->tagsType);
-			tgtProp->tagsType = NULL;
+			g_strfreev(tgtProp->tagType);
+			tgtProp->tagType = NULL;
 		}
 	}
 
@@ -202,7 +202,7 @@ static void neardal_tgt_prv_free(TgtProp **tgtProp)
 	}
 	g_free((*tgtProp)->name);
 	g_free((*tgtProp)->type);
-	g_strfreev((*tgtProp)->tagsType);
+	g_strfreev((*tgtProp)->tagType);
 	g_free((*tgtProp));
 	(*tgtProp) = NULL;
 }

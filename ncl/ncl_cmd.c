@@ -208,7 +208,7 @@ static void ncl_cmd_prv_dump_target(neardal_target target)
 	NCL_CMD_PRINT(".. Type:\t\t'%s'\n", target.type);
 
 	NCL_CMD_PRINT(".. Number of 'Tag Type':%d\n", target.nbTagTypes);
-	tagTypes = target.tagsType;
+	tagTypes = target.tagType;
 	if (target.nbTagTypes > 0) {
 		NCL_CMD_PRINT(".. Tags type[]:\t\t");
 		while ((*tagTypes) != NULL) {
@@ -216,7 +216,7 @@ static void ncl_cmd_prv_dump_target(neardal_target target)
 			tagTypes++;
 		}
 		NCL_CMD_PRINT("\n");
-		neardal_free_array(&target.tagsType);
+		neardal_free_array(&target.tagType);
 	}
 
 	records = target.records;

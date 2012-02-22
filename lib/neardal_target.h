@@ -45,8 +45,8 @@ typedef struct {
 	gsize		rcdLen;
 	GList		*rcdList;	/* target's records paths */
 	
-	gchar		**tagsType;	/* array of tag types */
-	gsize		tagsTypeLen;
+	gchar		**tagType;	/* array of tag types */
+	gsize		tagTypeLen;
 	gboolean	readOnly;	/* Read-Only flag */
 } TgtProp;
 

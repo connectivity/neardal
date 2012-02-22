@@ -373,7 +373,7 @@ errorCode_t neardal_get_target_properties(neardal_t neardalMgr,
 		goto exit;
 
 	target->records	= NULL;
-	target->tagsType	= NULL;
+	target->tagType	= NULL;
 	err = neardal_mgr_prv_get_adapter(neardalMgr, tgtName,
 						   &adpProp);
 	if (err != NEARDAL_SUCCESS)
@@ -404,22 +404,22 @@ errorCode_t neardal_get_target_properties(neardal_t neardalMgr,
 	}
 
 	target->nbTagTypes = 0;
-	target->tagsType = NULL;
+	target->tagType = NULL;
 	/* Count TagTypes */
-	target->nbTagTypes = tgtProp->tagsTypeLen;
+	target->nbTagTypes = tgtProp->tagTypeLen;
 
 	if (target->nbTagTypes <= 0)
 		goto exit;
 
 	err = NEARDAL_ERROR_NO_MEMORY;
 	size = (target->nbTagTypes + 1) * sizeof(char *);
-	target->tagsType = g_try_malloc0(size);
-	if (target->tagsType == NULL)
+	target->tagType = g_try_malloc0(size);
+	if (target->tagType == NULL)
 		goto exit;
 
 	ct = 0;
 	while (ct < target->nbTagTypes) {
-		target->tagsType[ct] = g_strdup(tgtProp->tagsType[ct]);
+		target->tagType[ct] = g_strdup(tgtProp->tagType[ct]);
 		ct++;
 	}
 	err = NEARDAL_SUCCESS;

@@ -82,7 +82,7 @@ typedef struct {
 /*! @brief Number of supported 'types' in target */
 	int		nbTagTypes;
 /*! @brief types list (use @link neardal_free_array @endlink(& ) to free) */
-	char		**tagsType;
+	char		**tagType;
 /*! @brief target type */
 	const char	*type;
 /*! @brief Read-Only flag (is target writable?) */
