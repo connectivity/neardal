@@ -68,54 +68,48 @@ static NCLError ncl_prv_split_cmdLine(gchar  *cmdLine, int *iArgc,
 				      char *iArgv[])
 {
 	NCLError	err	= NCLERR_NOERROR;
-	gssize		splitPos;
 	char		**argv	= NULL;
 	int		*argc;
-	char		*bufPos;
-	char		*prevBufPos;
-	bool		split;
+ 	char		*argEnd;
+	char		*argStart;
+ 	bool		inQuotes;
+	gssize		argSize;
 
 	/* Test input parameters */
 	if (!cmdLine || !iArgc || !iArgv)
 		return NCLERR_PARSING_PARAMETERS;
-	argv = iArgv;
-	argc = iArgc;
 
 	/* Splitting parameters list like argc/argv style */
-	splitPos = 0;
-	split = true;
+	argv = iArgv;
+	argc = iArgc;
 	*argc = 0;
-	(((char **)(argv))[(*argc)++]) = cmdLine;
-	prevBufPos = cmdLine;
-	bufPos = prevBufPos;
-	if (bufPos == NULL)
-		return NCLERR_PARSING_PARAMETERS;
-	
-	while ((*argc) < NB_MAX_PARAMETERS && *bufPos != '\0') {
-		while(*bufPos != ' ' && *bufPos != '"' && *bufPos != '\0') {
-			bufPos++;
-		}
-		if (*bufPos == '"') {
-			if (split)
-				split = false;
-			else
-				split = true;
-			bufPos++;
-		}
-		if (bufPos && split == true) {
-			splitPos += ((gssize)((long)bufPos - (long)prevBufPos));
-			cmdLine[splitPos] = '\0';
-			bufPos++;
-			splitPos++;
-			if (((gssize)((long)bufPos - (long)prevBufPos)) > 0)
-				(((char **)(argv))[(*argc)++]) = bufPos;
-			prevBufPos = bufPos;
-		} else
-			bufPos++;
-	}
+	inQuotes = false;
 
+	argStart = argEnd = cmdLine;
+	while ((*argc) < NB_MAX_PARAMETERS && *argEnd != '\0') {
+		while(*argEnd != ' ' && *argEnd != '"' && *argEnd != '\0') {
+			argEnd++;
+		}
+		if (*argEnd == '"') {
+			if (inQuotes == false)
+				argStart = argEnd + 1;
+			inQuotes = !inQuotes;
+		}
+
+		if (inQuotes == false) {
+			*argEnd = '\0';
+			argSize = argEnd - argStart;
+			if (argSize > 0)
+				((char **)(argv))[(*argc)++] = argStart;
+			argEnd++;
+			argStart = argEnd;
+		} else
+			argEnd++;
+	}
+ 
 	return err;
 }
+
 
 static ncl_cmd_func ncl_prv_find_func(char *cmd)
 {
@@ -128,7 +122,7 @@ static ncl_cmd_func ncl_prv_find_func(char *cmd)
 		return NULL;
 
 	for (index = 0; index < nbClCmd; index++)
-		if (!strncmp(it[index].cmdName, cmd, strlen(cmd)))
+		if (!strncmp(it[index].cmdName, cmd, strlen(it[index].cmdName)))
 			return it[index].func;
 
 	return NULL;
