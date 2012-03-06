@@ -247,13 +247,12 @@ static void ncl_cmd_prv_dump_record(neardal_record record)
 	NCL_CMD_PRINT(".. HandOver:\t\t%s\n"	,
 		      record.handOver ? "TRUE" : "FALSE");
 	NCL_CMD_PRINT(".. Language:\t\t%s\n"	, record.language);
-	NCL_CMD_PRINT(".. SmartPoster:\t\t%s\n"	,
-		      record.smartPoster ? "TRUE" : "FALSE");
 	NCL_CMD_PRINT(".. Action:\t\t%s\n"	, record.action);
 
 	NCL_CMD_PRINT(".. Type:\t\t%s\n"	, record.type);
 	NCL_CMD_PRINT(".. Representation:\t%s\n", record.representation);
 	NCL_CMD_PRINT(".. URI:\t\t\t%s\n"	, record.uri);
+	NCL_CMD_PRINT(".. URI size:\t\t%d\n"	, record.uriObjSize);
 	NCL_CMD_PRINT(".. MIME:\t\t%s\n"	, record.mime);
 }
 
@@ -733,9 +732,20 @@ static GOptionEntry options[] = {
 	/* Parse options */
 	memset(&rcd, 0, sizeof(neardal_record));
 	nclErr = ncl_cmd_prv_parseOptions(&argc, &argv, options);
+	if (nclErr == NCLERR_NOERROR_HELP_DISP) {
+		ncl_cmd_print(stdout, "Sample (Type 'Text'):");
+		ncl_cmd_print(stdout, "e.g. < publish --type Text --lang en-US \
+--encoding UTF-8 --rep \"Simple text\" --adp /org/neard/nfc0 >\n");
+		ncl_cmd_print(stdout, "Sample (Type 'URI'):");
+		ncl_cmd_print(stdout, "e.g. < publish --type URI \
+--uri=http://www.nfc-forum.com  --adp /org/neard/nfc0 >\n");
+		ncl_cmd_print(stdout, "Sample (Type 'SmartPoster'):");
+		ncl_cmd_print(stdout, "e.g. < publish --type=SmartPoster \
+--uri=http://www.nfc-forum.com > --adp /org/neard/nfc0 >\n");
+	}
+	
 	if (nclErr != NCLERR_NOERROR)
 		goto exit;
-	rcd.smartPoster = (smartPoster != 0) ? true : false;
 
 	/* Check if NEARDAL object exist */
 	if (sNclCmdCtx.neardalMgr == NULL) {

@@ -29,6 +29,7 @@
 #include "neardal_prv.h"
 #include <glib-2.0/glib/gerror.h>
 #include <glib-2.0/glib/glist.h>
+#include <glib-2.0/glib/gvariant.h>
 
 
 /******************************************************************************
@@ -231,7 +232,7 @@ static errorCode_t neardal_adp_prv_read_properties(AdpProp *adpProp)
 		goto exit;
 	}
 
-	NEARDAL_TRACEF("GVariant=%s\n", g_variant_print (tmp, TRUE));
+	NEARDAL_TRACE_LOG("Reading:\n%s\n", g_variant_print(tmp, TRUE));
 	tmpOut = g_variant_lookup_value(tmp, "Targets", G_VARIANT_TYPE_ARRAY);
 	if (tmpOut != NULL) {
 		tgtArray = g_variant_dup_objv (tmpOut, &len);
@@ -520,31 +521,37 @@ errorCode_t neardal_adp_remove(neardal_t neardalMgr, AdpProp *adpProp)
  *****************************************************************************/
 errorCode_t neardal_adp_publish(AdpProp *adpProp, RcdProp *rcd)
 {
-	GHashTable	*hash = NULL;
+	GVariantBuilder	*builder= NULL;
+	GVariant	*in;
 	errorCode_t	err;
-	GError		*gerror = NULL;
+	GError		*gerror	= NULL;
 	
 	g_assert(adpProp != NULL);
 
-	hash = neardal_tools_create_dict();
-	if (hash == NULL)
+	builder = g_variant_builder_new (G_VARIANT_TYPE_ARRAY);
+	if (builder == NULL)
 		return NEARDAL_ERROR_NO_MEMORY;
 
-	err = neardal_rcd_prv_format(&hash, rcd);
+	g_variant_builder_init(builder,  G_VARIANT_TYPE_ARRAY);
+	err = neardal_rcd_prv_format(builder, rcd);
 	if (err != NEARDAL_SUCCESS)
 		goto exit;
 
-// TODO	org_neard_Adapter_publish(adpProp->proxy, hash, &gerror);
+	in = g_variant_builder_end (builder);
+	NEARDAL_TRACE_LOG("Sending:\n%s\n", g_variant_print(in, TRUE));
+	org_neard_adp__call_publish_sync(adpProp->proxy, in, NULL, &gerror);
 
 exit:
-	if (hash != NULL)
-		g_hash_table_destroy(hash);
 	if (gerror != NULL) {
 		NEARDAL_TRACE_ERR("Unable to publish tag record (%d:%s)\n",
 				 gerror->code, gerror->message);
 		g_error_free(gerror);
 		err = NEARDAL_ERROR_DBUS;
 	}
+	if (in != NULL)
+		g_variant_unref(in);
+	if (builder != NULL)
+		g_variant_builder_unref(builder);
 	
 	return err;
 }

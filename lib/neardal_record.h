@@ -22,6 +22,7 @@
 #define __NEARDAL_RECORD_H
 
 #include "neard_record_proxy.h"
+#include <../lib/i386-linux-gnu/glib-2.0/include/glibconfig.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -39,11 +40,11 @@ typedef struct {
 	gchar		*encoding;
 	gboolean	handOver;
 	gchar		*language;
-	gboolean	smartPoster;
 	gchar		*action;
 	gchar		*type;
 	gchar		*representation;
 	gchar		*uri;
+	gsize		uriObjSize;
 	gchar		*mime;
 } RcdProp;
 
@@ -63,7 +64,7 @@ void neardal_rcd_remove(RcdProp *rcdProp);
 /******************************************************************************
  * neardal_rcd_prv_format: Insert key/value in a GHashTable
  *****************************************************************************/
-errorCode_t neardal_rcd_prv_format(GHashTable ** hash, RcdProp *rcdProp);
+errorCode_t neardal_rcd_prv_format(GVariantBuilder *builder, RcdProp *rcdProp);
 
 #ifdef __cplusplus
 }

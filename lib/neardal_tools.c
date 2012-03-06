@@ -28,76 +28,8 @@
 
 #include "neardal.h"
 #include "neardal_prv.h"
+#include <glib-2.0/glib/gvariant.h>
 
-
-#define g_marshal_value_peek_string(v)   (char *) g_value_get_string(v)
-#define g_marshal_value_peek_boxed(v)    g_value_get_boxed(v)
-
-void
-neardal_marshal_VOID__STRING_BOXED(GClosure *closure, GValue *return_value,
-				    guint		n_param_values,
-				    const GValue	*param_values,
-				    gpointer		invocation_hint,
-				    gpointer		marshal_data)
-{
-typedef void (*GMarshalFunc_VOID__STRING_BOXED)(gpointer data1, gpointer arg_1,
-						gpointer arg_2, gpointer data2);
-
-	register GMarshalFunc_VOID__STRING_BOXED callback;
-	register gpointer			data1, data2;
-	register GCClosure			*cc	= (GCClosure *)closure;
-	GValue					*value	= NULL;
-
-	g_return_if_fail(n_param_values == 3);
-	(void) return_value; /* remove warning */
-	(void) invocation_hint; /* remove warning */
-
-	if (G_CCLOSURE_SWAP_DATA(closure)) {
-		data1 = closure->data;
-		data2 = g_value_peek_pointer(param_values + 0);
-	} else {
-		data1 = g_value_peek_pointer(param_values + 0);
-		data2 = closure->data;
-	}
-	callback = (GMarshalFunc_VOID__STRING_BOXED) (marshal_data ?
-	marshal_data : cc->callback);
-
-	if (G_IS_VALUE(g_marshal_value_peek_boxed(param_values + 2)))
-		value = g_marshal_value_peek_boxed(param_values + 2);
-
-	callback(data1, g_marshal_value_peek_string(param_values + 1), value,
-		 data2);
-}
-
-/******************************************************************************
- * neardal_tools_prv__g_ptr_array_copy: duplicate a 'GPtrArray' array
- *****************************************************************************/
-// static void neardal_tools_g_ptr_array_add(gpointer data, gpointer array)
-// {
-// 	char *tmp;
-// 	tmp = g_strdup(data);
-// 	g_ptr_array_add(array, tmp);
-// }
-// void neardal_tools_prv_array_copy(gchar ***target, gchar **source)
-// {
-// 	if (*target == NULL)
-// 		*target = g_ptr_array_sized_new(source->len);
-// 	g_ptr_array_foreach(source, neardal_tools_g_ptr_array_add, *target);
-// }
-
-/******************************************************************************
- * neardal_tools_prv_g_ptr_array_free: free a 'GPtrArray' array
- *****************************************************************************/
-// static void neardal_tools_g_ptr_array_free_node(gpointer data, gpointer array)
-// {
-// 	(void) array; /* remove warning */
-// 	g_free(data);
-// }
-// void neardal_tools_prv_g_ptr_array_free(GPtrArray *array)
-// {
-// 	g_ptr_array_foreach(array, neardal_tools_g_ptr_array_free_node, NULL);
-// 	g_ptr_array_free(array, TRUE);
-// }
 
 /******************************************************************************
  * neardal_tools_prv_free_gerror: freeing gerror in neardal context
@@ -157,25 +89,22 @@ GHashTable *neardal_tools_create_dict(void)
 /******************************************************************************
  * neardal_tools_add_dict_entry: add an entry in a dictionnary
  *****************************************************************************/
-errorCode_t neardal_tools_add_dict_entry(GHashTable *hash, gchar *key,
-					  gchar *value)
-{	
-	errorCode_t	err = NEARDAL_ERROR_NO_MEMORY;
-	GValue		*gvalue;
+errorCode_t neardal_tools_add_dict_entry(GVariantBuilder *builder, gchar *key,
+					  void *value, int gVariantType)
+{
+	GVariant *tmp;
+	g_assert(builder != NULL);
 
-	g_assert(hash != NULL);
-
-	gvalue = g_try_malloc0(sizeof(GValue));
-	if (gvalue == NULL)
-		goto error;
+	switch(gVariantType) {
+	case G_TYPE_STRING:
+		tmp = g_variant_new_string(value);
+		break;
+	case G_TYPE_UINT:
+		tmp = g_variant_new_uint32((guint32) value);
+		break;
+	}
+	g_variant_builder_add(builder, "{sv}", key, tmp);
 	
-	g_value_init (gvalue, G_TYPE_STRING);
-	g_value_set_string (gvalue, value);
-	g_hash_table_insert (hash, (char *) key, gvalue);
-
-	err = NEARDAL_SUCCESS;
-
-error:
-	return err;
+	return NEARDAL_SUCCESS;
 }
 

@@ -281,8 +281,8 @@ errorCode_t neardal_publish(neardal_t neardalMgr, neardal_record *record)
 	rcd.type		= (gchar *) record->type;
 	rcd.representation	= (gchar *) record->representation;
 	rcd.uri			= (gchar *) record->uri;
+	rcd.uriObjSize		= record->uriObjSize;
 	rcd.mime		= (gchar *) record->mime;
-	rcd.smartPoster		= (gboolean) record->smartPoster;
 
 	 neardal_adp_publish(adpProp, &rcd);
 exit:
@@ -462,12 +462,12 @@ errorCode_t neardal_get_record_properties(neardal_t neardalMgr,
 	record->encoding	= (const char *) rcdProp->encoding;
 	record->handOver	= (short) rcdProp->handOver;
 	record->language	= (const char *) rcdProp->language;
-	record->smartPoster	= (short) rcdProp->smartPoster;
 	record->action		= (const char *) rcdProp->action;
 
 	record->type		= (const char *) rcdProp->type;
 	record->representation	= (const char *) rcdProp->representation;
 	record->uri		= (const char *) rcdProp->uri;
+	record->uriObjSize	= (uint) rcdProp->uriObjSize;
 	record->mime		= (const char *) rcdProp->mime;
 
 exit:

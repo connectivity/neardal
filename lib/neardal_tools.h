@@ -45,8 +45,8 @@ GHashTable *neardal_tools_create_dict(void);
 /******************************************************************************
  * neardal_tools_add_dict_entry: add an entry in a dictionnary
  *****************************************************************************/
-errorCode_t neardal_tools_add_dict_entry(GHashTable *hash, gchar *key,
-					  gchar *value);
+errorCode_t neardal_tools_add_dict_entry(GVariantBuilder *builder, gchar *key,
+					  void *value, int gVariantType);
 
 #ifdef __cplusplus
 }

@@ -132,8 +132,8 @@ static errorCode_t neardal_mgr_prv_get_all_adapters(neardal_t neardalMgr,
 	if (org_neard_mgr__call_get_properties_sync(neardalMgr->proxy, &tmp,
 						    NULL,
 					     &neardalMgr->gerror)) {
+		NEARDAL_TRACE_LOG("Reading:\n%s\n", g_variant_print(tmp, TRUE));
 		NEARDAL_TRACEF("Parsing neard adapters...\n");
-		NEARDAL_TRACEF("GVariant=%s\n", g_variant_print (tmp, TRUE));
 		
 		tmpOut = g_variant_lookup_value(tmp, "Adapters",
 						G_VARIANT_TYPE_ARRAY);

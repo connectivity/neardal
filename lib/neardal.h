@@ -102,8 +102,6 @@ technologies */
 	short		handOver;
 /*! @brief internation language used */
 	const char	*language;
-/*! @brief is tag smartposter? */
-	short		smartPoster;
 /*! @brief 'Action' Save, Edit, Download... */
 	const char	*action;
 /*! @brief tag type: 'Text', 'Uri', 'MIME Type' */
@@ -112,6 +110,8 @@ technologies */
 	const char	*representation;
 /*! @brief Uri datas */
 	const char	*uri;
+//*! @brief Uri datas */
+	unsigned int	uriObjSize;
 /*! @brief MIME Type datas */
 	const char	*mime;
 } neardal_record;

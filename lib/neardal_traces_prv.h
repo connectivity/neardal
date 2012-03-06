@@ -48,6 +48,8 @@ extern "C" {
 	#define NEARDAL_TRACEIN()		(void)0
 #endif /* NEARDAL_DEBUG */
 /* always defined */
+#define NEARDAL_TRACE_LOG(msg, ...)		neardal_trace(stdout, \
+				"%s() : " msg, __func__, ##__VA_ARGS__)
 #define NEARDAL_TRACE_ERR(msg, ...)		neardal_trace(stderr, \
 				"%s(ERR) : " msg, __func__, ##__VA_ARGS__)
 
