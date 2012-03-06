@@ -97,8 +97,7 @@ static errorCode_t neardal_rcd_prv_read_properties(RcdProp *rcd)
  * Create a DBus proxy for the first one NFC record if present
  * Register Neard Manager signals ('PropertyChanged')
  *****************************************************************************/
-static errorCode_t neardal_rcd_prv_init(neardal_t neardalMgr,
-					    RcdProp *rcd)
+static errorCode_t neardal_rcd_prv_init(RcdProp *rcd)
 {
 	NEARDAL_TRACEIN();
 	g_assert(rcd != NULL);
@@ -107,18 +106,18 @@ static errorCode_t neardal_rcd_prv_init(neardal_t neardalMgr,
 		g_object_unref(rcd->proxy);
 	rcd->proxy = NULL;
 
-	rcd->proxy = org_neard_rcd__proxy_new_sync(neardalMgr->conn,
+	rcd->proxy = org_neard_rcd__proxy_new_sync(neardalMgr.conn,
 					G_DBUS_OBJECT_MANAGER_CLIENT_FLAGS_NONE,
 							NEARD_DBUS_SERVICE,
 							rcd->name,
 							NULL, /* GCancellable */
-							&neardalMgr->gerror);
-	if (neardalMgr->gerror != NULL) {
+							&neardalMgr.gerror);
+	if (neardalMgr.gerror != NULL) {
 		NEARDAL_TRACE_ERR(
 			"Unable to create Neard Record Proxy (%d:%s)\n",
-				 neardalMgr->gerror->code,
-				neardalMgr->gerror->message);
-		neardal_tools_prv_free_gerror(neardalMgr);
+				 neardalMgr.gerror->code,
+				neardalMgr.gerror->message);
+		neardal_tools_prv_free_gerror(&neardalMgr);
 		return NEARDAL_ERROR_DBUS_CANNOT_CREATE_PROXY;
 	}
 	
@@ -196,10 +195,9 @@ errorCode_t neardal_rcd_prv_format(GVariantBuilder *builder, RcdProp *rcd)
 /******************************************************************************
  * neardal_get_records: get an array of target records
  *****************************************************************************/
-errorCode_t neardal_get_records(neardal_t neardalMgr, char *tgtName,
-				 char ***array, int *len)
+errorCode_t neardal_get_records(char *tgtName, char ***array, int *len)
 {
-	errorCode_t	errCode		= NEARDAL_ERROR_NO_RECORD;
+	errorCode_t	err		= NEARDAL_SUCCESS;
 	AdpProp		*adpProp	= NULL;
 	TgtProp		*tgtProp	= NULL;
 	int		rcdLen		= 0;
@@ -208,24 +206,26 @@ errorCode_t neardal_get_records(neardal_t neardalMgr, char *tgtName,
 	RcdProp		*rcd		= NULL;
 
 
-	if (neardalMgr == NULL || tgtName == NULL || array == NULL)
+	if (neardalMgr.proxy == NULL)
+		neardal_prv_construct(&err);
+
+	if (err != NEARDAL_SUCCESS || tgtName == NULL || array == NULL)
 		return NEARDAL_ERROR_INVALID_PARAMETER;
 
-	errCode = neardal_mgr_prv_get_adapter(neardalMgr, tgtName,
-						   &adpProp);
-	if (errCode != NEARDAL_SUCCESS)
+	err = neardal_mgr_prv_get_adapter(tgtName, &adpProp);
+	if (err != NEARDAL_SUCCESS)
 		goto exit;
 
-	errCode = neardal_adp_prv_get_target(adpProp, tgtName, &tgtProp);
-	if (errCode != NEARDAL_SUCCESS)
+	err = neardal_adp_prv_get_target(adpProp, tgtName, &tgtProp);
+	if (err != NEARDAL_SUCCESS)
 		goto exit;
 
-	errCode		= NEARDAL_ERROR_NO_RECORD;
+	err		= NEARDAL_ERROR_NO_RECORD;
 	rcdLen = g_list_length(tgtProp->rcdList);
 	if (rcdLen <= 0)
 		goto exit;
 
-	errCode = NEARDAL_ERROR_NO_MEMORY;
+	err = NEARDAL_ERROR_NO_MEMORY;
 	rcds = g_try_malloc0((rcdLen + 1) * sizeof(char *));
 	if (rcds == NULL)
 		goto exit;
@@ -235,28 +235,26 @@ errorCode_t neardal_get_records(neardal_t neardalMgr, char *tgtName,
 		if (rcd != NULL)
 			rcds[ct++] = g_strdup(rcd->name);
 	}
-	errCode = NEARDAL_SUCCESS;
+	err = NEARDAL_SUCCESS;
 
 exit:
 	if (len != NULL)
 		*len = rcdLen;
 	*array	= rcds;
 
-	return errCode;
+	return err;
 }
 
 /******************************************************************************
  * neardal_rcd_add: add new NFC record, initialize DBus Proxy connection,
  * register record signal
  *****************************************************************************/
-errorCode_t neardal_rcd_add(neardal_t neardalMgr, void *parent,
-			    char *rcdName)
+errorCode_t neardal_rcd_add(char *rcdName, void *parent)
 {
 	errorCode_t	errCode		= NEARDAL_ERROR_NO_MEMORY;
 	RcdProp		*rcd	= NULL;
 	TgtProp		*tgtProp = parent;
 	
-	g_assert(neardalMgr != NULL);
 	g_assert(rcdName != NULL);
 	g_assert(parent != NULL);
 
@@ -272,7 +270,7 @@ errorCode_t neardal_rcd_add(neardal_t neardalMgr, void *parent,
 	rcd->parent = tgtProp;
 	
 	tgtProp->rcdList = g_list_prepend(tgtProp->rcdList, (gpointer) rcd);
-	errCode = neardal_rcd_prv_init(neardalMgr, rcd);
+	errCode = neardal_rcd_prv_init(rcd);
 	if (errCode != NEARDAL_SUCCESS)
 		goto exit;
 

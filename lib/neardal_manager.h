@@ -43,15 +43,12 @@ typedef struct {
 /******************************************************************************
  * neardal_mgr_prv_get_adapter: Get NEARDAL Adapter from name
  *****************************************************************************/
-errorCode_t neardal_mgr_prv_get_adapter(neardal_t neardalMgr,
-					     gchar *adpName,
-					     AdpProp **adpProp);
+errorCode_t neardal_mgr_prv_get_adapter(gchar *adpName, AdpProp **adpProp);
 
 /******************************************************************************
  * neardal_mgr_prv_get_adapter_from_proxy: Get NEARDAL Adapter from proxy
  *****************************************************************************/
-errorCode_t neardal_mgr_prv_get_adapter_from_proxy(neardal_t neardalMgr,
-							orgNeardAdp *adpProxy,
+errorCode_t neardal_mgr_prv_get_adapter_from_proxy(orgNeardAdp *adpProxy,
 							AdpProp **adpProp);
 
 /******************************************************************************
@@ -71,12 +68,12 @@ errorCode_t neardal_mgr_prv_get_record(TgtProp *tgtProp, gchar *rcdName,
  * Create a DBus proxy for the first one NEARDAL adapter if present
  * Register Neard Manager signals ('PropertyChanged')
  *****************************************************************************/
-errorCode_t neardal_mgr_create(neardal_t neardalMgr);
+errorCode_t neardal_mgr_create(void);
 
 /******************************************************************************
  * neardal_mgr_destroy: unref DBus proxy, disconnect Neard Manager signals
  *****************************************************************************/
-void neardal_mgr_destroy(neardal_t *neardalMgr);
+void neardal_mgr_destroy(void);
 
 #ifdef __cplusplus
 }
