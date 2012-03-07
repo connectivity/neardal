@@ -205,7 +205,7 @@ errorCode_t neardal_free_array(char ***array)
 /******************************************************************************
  * neardal_start_poll: Request Neard to start polling
  *****************************************************************************/
-void neardal_start_poll(char *adpName, errorCode_t *ec)
+errorCode_t neardal_start_poll(char *adpName)
 {
 	errorCode_t	err		= NEARDAL_SUCCESS;
 	AdpProp		*adpProp	= NULL;
@@ -213,7 +213,7 @@ void neardal_start_poll(char *adpName, errorCode_t *ec)
 	if (neardalMgr.proxy == NULL)
 		neardal_prv_construct(&err);
 	if (err != NEARDAL_SUCCESS)
-		return;
+		return err;
 	
 	err = neardal_mgr_prv_get_adapter(adpName, &adpProp);
 
@@ -241,14 +241,13 @@ void neardal_start_poll(char *adpName, errorCode_t *ec)
 		err = NEARDAL_ERROR_POLLING_ALREADY_ACTIVE;
 
 exit:
-	if (ec != NULL)
-		*ec = err;
+	return err;
 }
 
 /******************************************************************************
  * neardal_stop_poll: Request Neard to stop polling
  *****************************************************************************/
-void neardal_stop_poll(char *adpName, errorCode_t *ec)
+errorCode_t neardal_stop_poll(char *adpName)
 {
 	errorCode_t	err = NEARDAL_SUCCESS;
 	AdpProp		*adpProp	= NULL;
@@ -281,8 +280,7 @@ void neardal_stop_poll(char *adpName, errorCode_t *ec)
 	}
 
 exit:
-	if (ec != NULL)
-		*ec = err;
+	return err;
 }
 
 /******************************************************************************

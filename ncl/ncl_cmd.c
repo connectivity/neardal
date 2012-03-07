@@ -722,7 +722,7 @@ static NCLError ncl_cmd_neardal_start_poll(int argc, char *argv[])
 
 	/* Start polling if adapter present */
 	adpName = argv[1];
-	neardal_start_poll(adpName, &ec);
+	ec = neardal_start_poll(adpName);
 	if (ec != NEARDAL_SUCCESS) {
 		NCL_CMD_PRINTF("NFC polling activation error:%d='%s'\n",
 				ec, neardal_error_get_text(ec));
@@ -755,7 +755,7 @@ static NCLError ncl_cmd_neardal_stop_poll(int argc, char *argv[])
 		ncl_cmd_install_callback();
 
 	adpName = argv[1];
-	neardal_stop_poll(adpName, &ec);
+	ec = neardal_stop_poll(adpName);
 	if (ec != NEARDAL_SUCCESS) {
 		NCL_CMD_PRINTF("Stop NFC polling error:%d='%s'.\n", ec,
 			       neardal_error_get_text(ec));

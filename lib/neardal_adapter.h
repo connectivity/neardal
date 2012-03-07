@@ -39,7 +39,7 @@ typedef struct {
 						Adapter interface */
 	gchar			*name;		/* DBus interface name
 						(as id) */
-	neardal_t		parent;
+	void			*parent;
 	gboolean		polling;	/* adapter polling active ? */
 	gboolean		powered;	/* adapter powered ? */
 	gchar			**protocols;	/* protocols list */

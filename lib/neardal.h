@@ -177,19 +177,19 @@ typedef void (*record_cb) (const char *rcdName, void *user_data);
 */
 void neardal_destroy();
 
-/*! \fn void neardal_start_poll(char *adpName, errorCode_t *ec)
+/*! \fn errorCode_t neardal_start_poll(char *adpName)
 *  \brief Request Neard to start polling on specific NEARDAL adapter
 *  \param adpName : DBus interface adapter name (as identifier)
-*  \param ec : optional, pointer to store error code
+*  @return errorCode_t error code
 */
-void neardal_start_poll(char *adpName, errorCode_t *ec);
+errorCode_t neardal_start_poll(char *adpName);
 
-/*! \fn void neardal_stop_poll(char *adpName, errorCode_t *ec)
+/*! \fn errorCode_t neardal_stop_poll(char *adpName)
 *  \brief Request Neard to stop polling on specific NEARDAL adapter
 *  \param adpName : DBus interface adapter name (as identifier)
-*  \param ec : optional, pointer to store error code
+*  @return errorCode_t error code
 */
-void neardal_stop_poll(char *adpName, errorCode_t *ec);
+errorCode_t neardal_stop_poll(char *adpName);
 
 /*! \fn errorCode_t neardal_get_adapters(char ***array, int *len)
  * @brief get an array of NEARDAL adapters present
