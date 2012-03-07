@@ -423,7 +423,9 @@ errorCode_t neardal_get_adapters(char ***array, int *len)
 			}
 			err = NEARDAL_SUCCESS;
 		}
-	}
+	} else
+		err = NEARDAL_ERROR_NO_ADAPTER;
+	
 	if (len != NULL)
 		*len = adpNb;
 	*array	= adps;
