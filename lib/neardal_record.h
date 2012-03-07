@@ -38,7 +38,6 @@ typedef struct {
 	gboolean	notified; /* Already notified to client? */
 
 	gchar		*encoding;
-	gboolean	handOver;
 	gchar		*language;
 	gchar		*action;
 	gchar		*type;

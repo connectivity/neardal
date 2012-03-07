@@ -95,7 +95,7 @@ errorCode_t neardal_tools_add_dict_entry(GVariantBuilder *builder, gchar *key,
 	GVariant *tmp;
 	g_assert(builder != NULL);
 
-	switch(gVariantType) {
+	switch (gVariantType) {
 	case G_TYPE_STRING:
 		tmp = g_variant_new_string(value);
 		break;
@@ -104,7 +104,7 @@ errorCode_t neardal_tools_add_dict_entry(GVariantBuilder *builder, gchar *key,
 		break;
 	}
 	g_variant_builder_add(builder, "{sv}", key, tmp);
-	
+
 	return NEARDAL_SUCCESS;
 }
 

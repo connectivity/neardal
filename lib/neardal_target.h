@@ -23,7 +23,6 @@
 
 #include "neard_target_proxy.h"
 #include "neardal_record.h"
-// #include <glib-2.0/glib/gtypes.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -38,12 +37,12 @@ typedef struct {
 	gchar		*name;	  /* DBus interface name (as identifier) */
 	void		*parent;  /* parent (adapter ) */
 	gboolean	notified; /* Already notified to client? */
-	
+
 	gchar		*type;
-	
+
 	gsize		rcdLen;
 	GList		*rcdList;	/* target's records paths */
-	
+
 	gchar		**tagType;	/* array of tag types */
 	gsize		tagTypeLen;
 	gboolean	readOnly;	/* Read-Only flag */

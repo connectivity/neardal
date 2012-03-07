@@ -36,10 +36,10 @@
  * neardal_mgr_prv_cb_property_changed: Callback called when a NFC Manager
  * Property is changed
  *****************************************************************************/
-static void neardal_mgr_prv_cb_property_changed( orgNeardMgr *proxy,
-						 const gchar *arg_unnamed_arg0,
-						 GVariant *arg_unnamed_arg1,
-						 void        *user_data)
+static void neardal_mgr_prv_cb_property_changed(orgNeardMgr *proxy,
+						const gchar *arg_unnamed_arg0,
+						GVariant *arg_unnamed_arg1,
+						void        *user_data)
 {
 	NEARDAL_TRACEIN();
 
@@ -105,7 +105,7 @@ static void neardal_mgr_prv_cb_adapter_removed(orgNeardMgr *proxy,
 					 neardalMgr.cb_adp_removed_ud);
 
 	neardal_adp_remove(((AdpProp *)node->data));
-	
+
 	NEARDAL_TRACEF("NEARDAL LIB adapterList contains %d elements\n",
 		      g_list_length(neardalMgr.prop.adpList));
 }
@@ -128,11 +128,11 @@ static errorCode_t neardal_mgr_prv_get_all_adapters(gchar ***adpArray,
 					     &neardalMgr.gerror)) {
 		NEARDAL_TRACE_LOG("Reading:\n%s\n", g_variant_print(tmp, TRUE));
 		NEARDAL_TRACEF("Parsing neard adapters...\n");
-		
+
 		tmpOut = g_variant_lookup_value(tmp, "Adapters",
 						G_VARIANT_TYPE_ARRAY);
 		if (tmpOut != NULL) {
-			*adpArray = g_variant_dup_objv (tmpOut, len);
+			*adpArray = g_variant_dup_objv(tmpOut, len);
 			errCode = NEARDAL_SUCCESS;
 		} else
 			errCode = NEARDAL_ERROR_NO_ADAPTER;
@@ -291,7 +291,7 @@ errorCode_t neardal_mgr_create(void)
 		g_object_unref(neardalMgr.proxy);
 		neardalMgr.proxy = NULL;
 	}
-	
+
 	neardalMgr.proxy = org_neard_mgr__proxy_new_sync(neardalMgr.conn,
 					G_DBUS_OBJECT_MANAGER_CLIENT_FLAGS_NONE,
 							NEARD_DBUS_SERVICE,
@@ -323,21 +323,21 @@ errorCode_t neardal_mgr_create(void)
 	NEARDAL_TRACEF("Register Neard-Manager Signal 'PropertyChanged'\n");
 	g_signal_connect(neardalMgr.proxy,
 			 NEARD_MGR_SIG_PROPCHANGED,
-			 G_CALLBACK (neardal_mgr_prv_cb_property_changed),
+			 G_CALLBACK(neardal_mgr_prv_cb_property_changed),
 			 NULL);
 
 	/* Register for manager signals 'AdapterAdded(ObjectPath)' */
 	NEARDAL_TRACEF("Register Neard-Manager Signal 'AdapterAdded'\n");
 	g_signal_connect(neardalMgr.proxy,
 			 NEARD_MGR_SIG_ADP_ADDED,
-			 G_CALLBACK (neardal_mgr_prv_cb_adapter_added),
+			 G_CALLBACK(neardal_mgr_prv_cb_adapter_added),
 			 NULL);
 
 	/* Register for manager signals 'AdapterRemoved(ObjectPath)' */
 	NEARDAL_TRACEF("Register Neard-Manager Signal 'AdapterRemoved'\n");
 	g_signal_connect(neardalMgr.proxy,
 			 NEARD_MGR_SIG_ADP_RM,
-			 G_CALLBACK (neardal_mgr_prv_cb_adapter_removed),
+			 G_CALLBACK(neardal_mgr_prv_cb_adapter_removed),
 			 NULL);
 
 	return errCode;

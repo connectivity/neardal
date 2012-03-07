@@ -56,7 +56,7 @@ static errorCode_t neardal_rcd_prv_read_properties(RcdProp *rcd)
 		return errCode;
 	}
 	NEARDAL_TRACE_LOG("Reading:\n%s\n", g_variant_print(tmp, TRUE));
-	
+
 	tmpOut = g_variant_lookup_value(tmp, "Type", G_VARIANT_TYPE_STRING);
 	if (tmpOut != NULL)
 		rcd->type = g_variant_dup_string(tmpOut, NULL);
@@ -66,14 +66,10 @@ static errorCode_t neardal_rcd_prv_read_properties(RcdProp *rcd)
 	if (tmpOut != NULL)
 		rcd->representation = g_variant_dup_string(tmpOut,
 								NULL);
-		
+
 	tmpOut = g_variant_lookup_value(tmp, "Encoding", G_VARIANT_TYPE_STRING);
 	if (tmpOut != NULL)
 		rcd->encoding = g_variant_dup_string(tmpOut, NULL);
-
-	tmpOut = g_variant_lookup_value(tmp, "HandOver", G_VARIANT_TYPE_BOOLEAN);
-	if (tmpOut != NULL)
-		rcd->handOver = g_variant_get_boolean  (tmpOut);
 
 	tmpOut = g_variant_lookup_value(tmp, "Language", G_VARIANT_TYPE_STRING);
 	if (tmpOut != NULL)
@@ -120,7 +116,7 @@ static errorCode_t neardal_rcd_prv_init(RcdProp *rcd)
 		neardal_tools_prv_free_gerror(&neardalMgr);
 		return NEARDAL_ERROR_DBUS_CANNOT_CREATE_PROXY;
 	}
-	
+
 	return neardal_rcd_prv_read_properties(rcd);
 }
 
@@ -176,7 +172,7 @@ errorCode_t neardal_rcd_prv_format(GVariantBuilder *builder, RcdProp *rcd)
 		neardal_tools_add_dict_entry(builder, "URI", rcd->uri,
 					    (int) G_TYPE_STRING);
 		neardal_tools_add_dict_entry(builder, "Size",
-					    (void*) rcd->uriObjSize,
+					    (void *) rcd->uriObjSize,
 					    (int) G_TYPE_UINT);
 
 	}
@@ -187,7 +183,7 @@ errorCode_t neardal_rcd_prv_format(GVariantBuilder *builder, RcdProp *rcd)
 	if (rcd->action != NULL)
 		neardal_tools_add_dict_entry(builder, "Action", rcd->action,
 					    (int) G_TYPE_STRING);
-		
+
 	return errCode;
 }
 
@@ -254,7 +250,7 @@ errorCode_t neardal_rcd_add(char *rcdName, void *parent)
 	errorCode_t	errCode		= NEARDAL_ERROR_NO_MEMORY;
 	RcdProp		*rcd	= NULL;
 	TgtProp		*tgtProp = parent;
-	
+
 	g_assert(rcdName != NULL);
 	g_assert(parent != NULL);
 
@@ -268,7 +264,7 @@ errorCode_t neardal_rcd_add(char *rcdName, void *parent)
 		goto exit;
 
 	rcd->parent = tgtProp;
-	
+
 	tgtProp->rcdList = g_list_prepend(tgtProp->rcdList, (gpointer) rcd);
 	errCode = neardal_rcd_prv_init(rcd);
 	if (errCode != NEARDAL_SUCCESS)
@@ -276,7 +272,7 @@ errorCode_t neardal_rcd_add(char *rcdName, void *parent)
 
 	NEARDAL_TRACEF("NEARDAL LIB recordList contains %d elements\n",
 		      g_list_length(tgtProp->rcdList));
-	
+
 	errCode = NEARDAL_SUCCESS;
 
 exit:
@@ -296,7 +292,7 @@ exit:
 void neardal_rcd_remove(RcdProp *rcd)
 {
 	TgtProp		*tgtProp;
-	
+
 	NEARDAL_TRACEIN();
 	g_assert(rcd != NULL);
 

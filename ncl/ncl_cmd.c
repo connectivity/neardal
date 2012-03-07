@@ -128,7 +128,6 @@ static NCLCmdInterpretor itFunc[];
 NCLError ncl_cmd_list(int argc, char *argv[])
 {
 	int index;
-	char funcName[50];
 	int  nbCmd = ncl_cmd_get_nbCmd();
 
 	(void) argc; /* remove warning */
@@ -136,15 +135,8 @@ NCLError ncl_cmd_list(int argc, char *argv[])
 
 	ncl_cmd_print(stdout, "\nCommand line list\n");
 	for (index = 0; index < nbCmd; index++) {
-	if (0) { /* TODO: Remove */
-		snprintf(funcName, sizeof(funcName), "%40s",
-			 itFunc[index].cmdName);
-		ncl_cmd_print(stdout, "%s :\t%s\n", funcName,
-			      itFunc[index].helpStr);
-	} else {
 		ncl_cmd_print(stdout, "%s :\n\t%s\n\n", itFunc[index].cmdName,
 			      itFunc[index].helpStr);
-	}
 	}
 
 	return 0;
@@ -244,11 +236,8 @@ static void ncl_cmd_prv_dump_record(neardal_record record)
 	NCL_CMD_PRINT("Record\n");
 	NCL_CMD_PRINT(".. Name:\t\t%s\n"	, record.name);
 	NCL_CMD_PRINT(".. Encoding:\t\t%s\n"	, record.encoding);
-	NCL_CMD_PRINT(".. HandOver:\t\t%s\n"	,
-		      record.handOver ? "TRUE" : "FALSE");
 	NCL_CMD_PRINT(".. Language:\t\t%s\n"	, record.language);
 	NCL_CMD_PRINT(".. Action:\t\t%s\n"	, record.action);
-
 	NCL_CMD_PRINT(".. Type:\t\t%s\n"	, record.type);
 	NCL_CMD_PRINT(".. Representation:\t%s\n", record.representation);
 	NCL_CMD_PRINT(".. URI:\t\t\t%s\n"	, record.uri);
@@ -265,7 +254,7 @@ static void ncl_cmd_cb_adapter_added(const char *adpName, void *user_data)
 	neardal_adapter	adapter;
 
 	(void) user_data; /* Remove warning */
-	
+
 	NCL_CMD_PRINTF("NFC Adapter added '%s'\n", adpName);
 	ec = neardal_get_adapter_properties(adpName, &adapter);
 	if (ec == NEARDAL_SUCCESS)
@@ -281,7 +270,7 @@ static void ncl_cmd_cb_adapter_added(const char *adpName, void *user_data)
 static void ncl_cmd_cb_adapter_removed(const char *adpName, void * user_data)
 {
 	(void) user_data; /* remove warning */
-	
+
 	NCL_CMD_PRINTF("NFC Adapter removed '%s'\n", adpName);
 }
 
@@ -291,7 +280,7 @@ static void ncl_cmd_cb_adapter_prop_changed(char *adpName, char *propName,
 	int		polling;
 
 	(void) user_data; /* remove warning */
-	
+
 	if (!strcmp(propName, "Polling")) {
 		polling = (int)value;
 		NCL_CMD_PRINTF("Polling=%d\n", polling);
@@ -333,7 +322,7 @@ static void ncl_cmd_cb_record_found(const char *rcdName, void *user_data)
 	neardal_record	record;
 
 	(void) user_data; /* remove warning */
-	
+
 	NCL_CMD_PRINTF("Target Record found (%s)\n", rcdName);
 	ec = neardal_get_record_properties(rcdName, &record);
 	if (ec == NEARDAL_SUCCESS) {
@@ -380,7 +369,7 @@ static NCLError ncl_cmd_neardal_get_adapters(int argc, char *argv[])
 
 	(void) argc; /* Remove warning */
 	(void) argv; /* Remove warning */
-	
+
 	/* Install Neardal Callback*/
 	if (sNclCmdCtx.cb_initialized == false)
 		ncl_cmd_install_callback();
@@ -667,7 +656,7 @@ static GOptionEntry options[] = {
 		ncl_cmd_print(stdout, "e.g. < publish --type=SmartPoster \
 --uri=http://www.nfc-forum.com > --adp /org/neard/nfc0 >\n");
 	}
-	
+
 	if (nclErr != NCLERR_NOERROR)
 		goto exit;
 
@@ -882,7 +871,7 @@ static NCLError ncl_cmd_quit(int argc, char *argv[])
 
 	/* Release NEARDAL object */
 	neardal_destroy();
-	
+
 	/* Quit Main Loop */
 	if (nclCtxP)
 		g_main_loop_quit(nclCtxP->main_loop);

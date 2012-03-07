@@ -60,9 +60,8 @@ void neardal_prv_construct(errorCode_t *ec)
 				err, neardal_error_get_text(err));
 
 			/* No Neard daemon, destroying neardal object... */
-			if (err == NEARDAL_ERROR_DBUS_CANNOT_CREATE_PROXY) {
+			if (err == NEARDAL_ERROR_DBUS_CANNOT_CREATE_PROXY)
 				neardal_tools_prv_free_gerror(&neardalMgr);
-			}
 		}
 	} else {
 		NEARDAL_TRACE_ERR("Unable to connect to dbus: %s\n",
@@ -100,8 +99,8 @@ void neardal_destroy(void)
 errorCode_t neardal_set_cb_adapter_added(adapter_cb cb_adp_added,
 					 void *user_data)
 {
-	neardalMgr.cb_adp_added 	= cb_adp_added;
-	neardalMgr.cb_adp_added_ud 	= user_data;
+	neardalMgr.cb_adp_added		= cb_adp_added;
+	neardalMgr.cb_adp_added_ud	= user_data;
 
 	return NEARDAL_SUCCESS;
 }
@@ -130,7 +129,7 @@ errorCode_t neardal_set_cb_adapter_property_changed(
 					adapter_prop_cb cb_adp_property_changed,
 					void *user_data)
 {
-	neardalMgr.cb_adp_prop_changed 		= cb_adp_property_changed;
+	neardalMgr.cb_adp_prop_changed		= cb_adp_property_changed;
 	neardalMgr.cb_adp_prop_changed_ud	= user_data;
 
 	return NEARDAL_SUCCESS;
@@ -214,7 +213,7 @@ errorCode_t neardal_start_poll(char *adpName)
 		neardal_prv_construct(&err);
 	if (err != NEARDAL_SUCCESS)
 		return err;
-	
+
 	err = neardal_mgr_prv_get_adapter(adpName, &adpProp);
 
 	err = NEARDAL_ERROR_NO_ADAPTER;
@@ -225,8 +224,8 @@ errorCode_t neardal_start_poll(char *adpName)
 		goto exit;
 
 	if (!adpProp->polling) {
-		org_neard_adp__call_start_poll_sync(adpProp->proxy, NULL, 
-						&neardalMgr.gerror);
+		org_neard_adp__call_start_poll_sync(adpProp->proxy, NULL,
+						    &neardalMgr.gerror);
 
 		err = NEARDAL_SUCCESS;
 		if (neardalMgr.gerror != NULL) {
@@ -305,7 +304,6 @@ errorCode_t neardal_publish(neardal_record *record)
 	rcd.name		= (gchar *) record->name;
 	rcd.action		= (gchar *) record->action;
 	rcd.encoding		= (gchar *) record->encoding;
-	rcd.handOver		= (gboolean) record->handOver;
 	rcd.language		= (gchar *) record->language;
 	rcd.type		= (gchar *) record->type;
 	rcd.representation	= (gchar *) record->representation;
@@ -462,7 +460,7 @@ exit:
  /******************************************************************************
  * neardal_get_record_properties: Get values of a specific target record
   *****************************************************************************/
-errorCode_t neardal_get_record_properties( const char *recordName,
+errorCode_t neardal_get_record_properties(const char *recordName,
 					  neardal_record *record)
 {
 	errorCode_t	err		= NEARDAL_SUCCESS;
@@ -495,7 +493,6 @@ errorCode_t neardal_get_record_properties( const char *recordName,
 
 	record->name		= (const char *) rcdProp->name;
 	record->encoding	= (const char *) rcdProp->encoding;
-	record->handOver	= (short) rcdProp->handOver;
 	record->language	= (const char *) rcdProp->language;
 	record->action		= (const char *) rcdProp->action;
 

@@ -92,7 +92,7 @@ static errorCode_t neardal_tgt_prv_read_properties(TgtProp *tgtProp)
 	NEARDAL_TRACE_LOG("Reading:\n%s\n", g_variant_print(tmp, TRUE));
 	tmpOut = g_variant_lookup_value(tmp, "Records", G_VARIANT_TYPE_ARRAY);
 	if (tmpOut != NULL) {
-		rcdArray = g_variant_dup_objv (tmpOut, &len);
+		rcdArray = g_variant_dup_objv(tmpOut, &len);
 		tgtProp->rcdLen = len;
 		if (len == 0) {
 			g_strfreev(rcdArray);
@@ -111,7 +111,7 @@ static errorCode_t neardal_tgt_prv_read_properties(TgtProp *tgtProp)
 
 	tmpOut = g_variant_lookup_value(tmp, "TagType", G_VARIANT_TYPE_ARRAY);
 	if (tmpOut != NULL) {
-		tgtProp->tagType = g_variant_dup_strv (tmpOut, &len);
+		tgtProp->tagType = g_variant_dup_strv(tmpOut, &len);
 		tgtProp->tagTypeLen = len;
 		if (len == 0) {
 			g_strfreev(tgtProp->tagType);
@@ -123,9 +123,10 @@ static errorCode_t neardal_tgt_prv_read_properties(TgtProp *tgtProp)
 	if (tmpOut != NULL)
 		tgtProp->type = g_variant_dup_string(tmpOut, NULL);
 
-	tmpOut = g_variant_lookup_value(tmp, "ReadOnly", G_VARIANT_TYPE_BOOLEAN);
+	tmpOut = g_variant_lookup_value(tmp, "ReadOnly",
+					G_VARIANT_TYPE_BOOLEAN);
 	if (tmpOut != NULL)
-		tgtProp->readOnly = g_variant_get_boolean  (tmpOut);
+		tgtProp->readOnly = g_variant_get_boolean(tmpOut);
 
 exit:
 	return errCode;
@@ -174,7 +175,7 @@ static errorCode_t neardal_tgt_prv_init(TgtProp *tgtProp)
 
 	NEARDAL_TRACEF("Register Neard-Target Signal 'PropertyChanged'\n");
 	g_signal_connect(tgtProp->proxy, NEARD_TGT_SIG_PROPCHANGED,
-			G_CALLBACK (neardal_tgt_prv_cb_property_changed),
+			G_CALLBACK(neardal_tgt_prv_cb_property_changed),
 			  tgtProp);
 
 	return errCode;
@@ -208,10 +209,9 @@ void neardal_tgt_notify_target_found(TgtProp *tgtProp)
 {
 	RcdProp *rcdProp;
 	gsize	len;
-	
+
 	g_assert(tgtProp != NULL);
-	
-		
+
 	if (tgtProp->notified == FALSE && neardalMgr.cb_tgt_found != NULL) {
 		(neardalMgr.cb_tgt_found)(tgtProp->name,
 					   neardalMgr.cb_tgt_found_ud);
@@ -224,7 +224,7 @@ void neardal_tgt_notify_target_found(TgtProp *tgtProp)
 			rcdProp = g_list_nth_data(tgtProp->rcdList, len++);
 			if (rcdProp->notified == FALSE) {
 				(neardalMgr.cb_rcd_found)(rcdProp->name,
-							neardalMgr.cb_rcd_found_ud);
+						neardalMgr.cb_rcd_found_ud);
 				rcdProp->notified = TRUE;
 			}
 		}
@@ -301,7 +301,7 @@ errorCode_t neardal_tgt_add(gchar *tgtName, void * parent)
 
 	NEARDAL_TRACEF("NEARDAL LIB targetList contains %d elements\n",
 		      g_list_length(adpProp->tgtList));
-	
+
 	return errCode;
 
 error:
@@ -335,6 +335,6 @@ void neardal_tgt_remove(TgtProp *tgtProp)
 	adpProp = tgtProp->parent;
 	adpProp->tgtList = g_list_remove(adpProp->tgtList,
 					 (gconstpointer) tgtProp);
-	
+
 	neardal_tgt_prv_free(&tgtProp);
 }
