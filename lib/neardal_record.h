@@ -22,7 +22,6 @@
 #define __NEARDAL_RECORD_H
 
 #include "neard_record_proxy.h"
-#include <../lib/i386-linux-gnu/glib-2.0/include/glibconfig.h>
 
 #ifdef __cplusplus
 extern "C" {
