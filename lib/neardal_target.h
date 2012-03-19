@@ -23,7 +23,6 @@
 
 #include "neard_target_proxy.h"
 #include "neardal_record.h"
-// #include <glib-2.0/glib/gtypes.h>
 
 #ifdef __cplusplus
 extern "C" {
