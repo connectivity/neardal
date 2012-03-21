@@ -70,9 +70,9 @@ static NCLError ncl_prv_split_cmdLine(gchar  *cmdLine, int *iArgc,
 	NCLError	err	= NCLERR_NOERROR;
 	char		**argv	= NULL;
 	int		*argc;
- 	char		*argEnd;
+	char		*argEnd;
 	char		*argStart;
- 	bool		inQuotes;
+	bool		inQuotes;
 	gssize		argSize;
 
 	/* Test input parameters */
@@ -87,9 +87,8 @@ static NCLError ncl_prv_split_cmdLine(gchar  *cmdLine, int *iArgc,
 
 	argStart = argEnd = cmdLine;
 	while ((*argc) < NB_MAX_PARAMETERS && *argEnd != '\0') {
-		while(*argEnd != ' ' && *argEnd != '"' && *argEnd != '\0') {
+		while (*argEnd != ' ' && *argEnd != '"' && *argEnd != '\0')
 			argEnd++;
-		}
 		if (*argEnd == '"') {
 			if (inQuotes == false)
 				argStart = argEnd + 1;
@@ -106,7 +105,7 @@ static NCLError ncl_prv_split_cmdLine(gchar  *cmdLine, int *iArgc,
 		} else
 			argEnd++;
 	}
- 
+
 	return err;
 }
 

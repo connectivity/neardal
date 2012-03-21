@@ -30,8 +30,8 @@
 
 /* Command Line Interpretor context... */
 typedef struct {
-	/* NEARDAL Object */
-	neardal_t	neardalMgr;
+	/* NEARDAL Callback already initialized? */
+	gboolean	cb_initialized;
 
 	/* command line interpretor context */
 	GString		*clBuf;		/* Command line buffer */

@@ -39,7 +39,7 @@ typedef struct {
 						Adapter interface */
 	gchar			*name;		/* DBus interface name
 						(as id) */
-	neardal_t		parent;
+	void			*parent;
 	gboolean		polling;	/* adapter polling active ? */
 	gboolean		powered;	/* adapter powered ? */
 	gchar			**protocols;	/* protocols list */
@@ -59,13 +59,13 @@ errorCode_t neardal_adp_prv_get_target(AdpProp *adpProp, gchar *tgtName,
  * neardal_adp_add: add new NEARDAL adapter, initialize DBus Proxy
  * connection, register adapter signal
  *****************************************************************************/
-errorCode_t neardal_adp_add(neardal_t neardalMgr, gchar *adapterName);
+errorCode_t neardal_adp_add(gchar *adapterName);
 
 /******************************************************************************
  * neardal_adp_remove: remove NEARDAL adapter, unref DBus Proxy
  * connection, unregister adapter signal
  *****************************************************************************/
-errorCode_t neardal_adp_remove(neardal_t neardalMgr, AdpProp *adpProp);
+errorCode_t neardal_adp_remove(AdpProp *adpProp);
 
 /******************************************************************************
  * neardal_adp_publish: Creates and publish NDEF record to be written to

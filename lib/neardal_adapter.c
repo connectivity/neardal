@@ -42,26 +42,21 @@ static void  neardal_adp_prv_cb_target_found(orgNeardTgt *proxy,
 {
 	AdpProp		*adpProp	= user_data;
 	errorCode_t	err;
-	neardal_t	neardalMgr;
 	TgtProp		*tgtProp;
 
 	NEARDAL_TRACEIN();
 	(void) proxy; /* remove warning */
-	
+
 	g_assert(arg_unnamed_arg0 != NULL);
 	g_assert(adpProp != NULL);
-	neardalMgr = adpProp->parent;
-	g_assert(neardalMgr != NULL);
-	
 
 	NEARDAL_TRACEF("Adding target '%s'\n", arg_unnamed_arg0);
 	/* Invoking Callback 'Target Found' before adding it (otherwise
 	 * callback 'Record Found' would be called before ) */
-	err = neardal_tgt_add(neardalMgr, adpProp,
-			      (char *) arg_unnamed_arg0);
+	err = neardal_tgt_add((char *) arg_unnamed_arg0, adpProp);
 	if (err == NEARDAL_SUCCESS) {
 		tgtProp = g_list_nth_data(adpProp->tgtList, 0);
-		neardal_tgt_notify_target_found(neardalMgr, tgtProp);
+		neardal_tgt_notify_target_found(tgtProp);
 	}
 	NEARDAL_TRACEF("NEARDAL LIB targetList contains %d elements\n",
 		      g_list_length(adpProp->tgtList));
@@ -76,17 +71,14 @@ static void neardal_adp_prv_cb_target_lost(orgNeardTgt *proxy,
 					   void *user_data)
 {
 	AdpProp		*adpProp	= user_data;
-	neardal_t	neardalMgr	= adpProp->parent;
 	TgtProp		*tgtProp	= NULL;
 	errorCode_t	errCode;
 
 	NEARDAL_TRACEIN();
-	g_assert(neardalMgr != NULL);
 	g_assert(arg_unnamed_arg0 != NULL);
 	(void) proxy; /* remove warning */
 
-	neardal_mgr_prv_get_adapter(neardalMgr, (char *) arg_unnamed_arg0,
-				    &adpProp);
+	neardal_mgr_prv_get_adapter((char *) arg_unnamed_arg0, &adpProp);
 
 	NEARDAL_TRACEF("Removing target '%s'\n", arg_unnamed_arg0);
 	/* Invoking Callback 'Target Found' before adding it (otherwise
@@ -94,9 +86,9 @@ static void neardal_adp_prv_cb_target_lost(orgNeardTgt *proxy,
 	errCode = neardal_mgr_prv_get_target(adpProp, (char *) arg_unnamed_arg0,
 						  &tgtProp);
 	if (errCode == NEARDAL_SUCCESS) {
-		if (neardalMgr->cb_tgt_lost != NULL)
-			(neardalMgr->cb_tgt_lost)((char *) arg_unnamed_arg0,
-					      neardalMgr->cb_tgt_lost_ud);
+		if (neardalMgr.cb_tgt_lost != NULL)
+			(neardalMgr.cb_tgt_lost)((char *) arg_unnamed_arg0,
+					      neardalMgr.cb_tgt_lost_ud);
 		neardal_tgt_remove(tgtProp);
 		NEARDAL_TRACEF("NEARDAL LIB targetList contains %d elements\n",
 			      g_list_length(adpProp->tgtList));
@@ -112,7 +104,6 @@ static void neardal_adp_prv_cb_property_changed(orgNeardAdp *proxy,
 						GVariant *arg_unnamed_arg1,
 						void        *user_data)
 {
-	neardal_t	neardalMgr	= user_data;
 	AdpProp		*adpProp	= NULL;
 	errorCode_t	errCode		= NEARDAL_ERROR_NO_TARGET;
 	char		*tgtName	= NULL;
@@ -122,31 +113,32 @@ static void neardal_adp_prv_cb_property_changed(orgNeardAdp *proxy,
 	gchar		**tgtArray	= NULL;
 
 	(void) proxy; /* remove warning */
+	(void) user_data; /* remove warning */
 	NEARDAL_TRACEIN();
 	g_assert(arg_unnamed_arg0 != NULL);
 
-	neardal_mgr_prv_get_adapter_from_proxy(neardalMgr, proxy, &adpProp);
+	neardal_mgr_prv_get_adapter_from_proxy(proxy, &adpProp);
 	if (adpProp == NULL) {
 		errCode = NEARDAL_ERROR_GENERAL_ERROR;
 		goto exit;
 	}
-	
+
 	tmp = g_variant_get_variant(arg_unnamed_arg1);
 	if (tmp == NULL) {
 		errCode = NEARDAL_ERROR_GENERAL_ERROR;
 		goto exit;
 	}
-	
+
 	if (!strcmp(arg_unnamed_arg0, "Polling")) {
-		adpProp->polling = g_variant_get_boolean  (tmp);		
+		adpProp->polling = g_variant_get_boolean(tmp);
 		clientValue = GUINT_TO_POINTER(adpProp->polling);
-		NEARDAL_TRACEF("neardalMgr->polling=%d\n", adpProp->polling);
+		NEARDAL_TRACEF("neardalMgr.polling=%d\n", adpProp->polling);
 	}
 
 	if (!strcmp(arg_unnamed_arg0, "Targets")) {
 		guint tmpLen;
 
-		tgtArray = g_variant_dup_objv (tmp, &tmpLen);
+		tgtArray = g_variant_dup_objv(tmp, &tmpLen);
 		adpProp->tgtNb = tmpLen;
 		if (tmpLen == 0) {
 			NEARDAL_TRACEF(
@@ -159,20 +151,19 @@ static void neardal_adp_prv_cb_property_changed(orgNeardAdp *proxy,
 							       tgtProp->parent);
 			}
 			g_strfreev(tgtArray);
-			
+
 			errCode = NEARDAL_SUCCESS;
 			goto exit;
 		}
-		
+
 		/* Extract the targets arrays List from the GValue */
 		errCode = NEARDAL_ERROR_NO_ADAPTER;
 		tmpLen = 0;
 		while (tmpLen < adpProp->tgtNb) {
 			/* Getting last target (targets list not updated with
 			 * targets lost */
-			
- 			tgtName = g_strdup(tgtArray[tmpLen++]);
-			
+			tgtName = g_strdup(tgtArray[tmpLen++]);
+
 			/* TODO : for Neard Workaround, emulate 'TargetFound'
 			 * signals */
 			errCode = neardal_mgr_prv_get_target(adpProp,
@@ -188,11 +179,11 @@ static void neardal_adp_prv_cb_property_changed(orgNeardAdp *proxy,
 		g_strfreev(tgtArray);
 	}
 
-	if (neardalMgr->cb_adp_prop_changed != NULL)
-		(neardalMgr->cb_adp_prop_changed)(adpProp->name,
+	if (neardalMgr.cb_adp_prop_changed != NULL)
+		(neardalMgr.cb_adp_prop_changed)(adpProp->name,
 						  (char *) arg_unnamed_arg0,
 						  clientValue,
-					neardalMgr->cb_adp_prop_changed_ud);
+					neardalMgr.cb_adp_prop_changed_ud);
 	return;
 
 exit:
@@ -213,13 +204,10 @@ static errorCode_t neardal_adp_prv_read_properties(AdpProp *adpProp)
 	GVariant	*tmpOut			= NULL;
 	gchar		**tgtArray		= NULL;
 	gsize		len;
-	neardal_t	neardalMgr		= NULL;
 
 	NEARDAL_TRACEIN();
 	g_assert(adpProp != NULL);
 	g_assert(adpProp->proxy != NULL);
-	neardalMgr = adpProp->parent;
-	g_assert(neardalMgr != NULL);
 
 	org_neard_adp__call_get_properties_sync(adpProp->proxy, &tmp,
 						NULL, &gerror);
@@ -235,7 +223,7 @@ static errorCode_t neardal_adp_prv_read_properties(AdpProp *adpProp)
 	NEARDAL_TRACE_LOG("Reading:\n%s\n", g_variant_print(tmp, TRUE));
 	tmpOut = g_variant_lookup_value(tmp, "Targets", G_VARIANT_TYPE_ARRAY);
 	if (tmpOut != NULL) {
-		tgtArray = g_variant_dup_objv (tmpOut, &len);
+		tgtArray = g_variant_dup_objv(tmpOut, &len);
 		adpProp->tgtNb = len;
 		if (len == 0) {
 			g_strfreev(tgtArray);
@@ -247,31 +235,30 @@ static errorCode_t neardal_adp_prv_read_properties(AdpProp *adpProp)
 			while (len < adpProp->tgtNb &&
 				errCode == NEARDAL_SUCCESS) {
 				tgtName = tgtArray[len++];
-				errCode = neardal_tgt_add(neardalMgr, adpProp,
-							tgtName);
+				errCode = neardal_tgt_add(tgtName, adpProp);
 			}
 		}
 	}
 
 	tmpOut = g_variant_lookup_value(tmp, "Polling", G_VARIANT_TYPE_BOOLEAN);
 	if (tmpOut != NULL)
-		adpProp->polling = g_variant_get_boolean  (tmpOut);
+		adpProp->polling = g_variant_get_boolean(tmpOut);
 
 	tmpOut = g_variant_lookup_value(tmp, "Powered", G_VARIANT_TYPE_BOOLEAN);
 	if (tmpOut != NULL)
-		adpProp->powered = g_variant_get_boolean  (tmpOut);
+		adpProp->powered = g_variant_get_boolean(tmpOut);
 
 	tmpOut = g_variant_lookup_value(tmp, "Protocols",
 					G_VARIANT_TYPE_ARRAY);
 	if (tmpOut != NULL) {
-		adpProp->protocols = g_variant_dup_strv (tmpOut, &len);
+		adpProp->protocols = g_variant_dup_strv(tmpOut, &len);
 		adpProp->lenProtocols = len;
 		if (adpProp->lenProtocols == 0) {
 			g_strfreev(adpProp->protocols);
 			adpProp->protocols = NULL;
 		}
 	}
-	
+
 exit:
 	return errCode;
 }
@@ -309,8 +296,7 @@ errorCode_t neardal_adp_prv_get_target(AdpProp *adpProp, gchar *tgtName,
  * Create a DBus proxy for the first one NFC adapter if present
  * Register Neard Manager signals ('PropertyChanged')
  *****************************************************************************/
-static errorCode_t neardal_adp_prv_init(neardal_t neardalMgr,
-					     AdpProp *adpProp)
+static errorCode_t neardal_adp_prv_init(AdpProp *adpProp)
 {
 	errorCode_t	errCode = NEARDAL_SUCCESS;
 
@@ -335,19 +321,19 @@ static errorCode_t neardal_adp_prv_init(neardal_t neardalMgr,
 	if (adpProp->name == NULL)
 		return errCode;
 
-	adpProp->proxy = org_neard_adp__proxy_new_sync(neardalMgr->conn,
+	adpProp->proxy = org_neard_adp__proxy_new_sync(neardalMgr.conn,
 					G_DBUS_OBJECT_MANAGER_CLIENT_FLAGS_NONE,
 							NEARD_DBUS_SERVICE,
 							adpProp->name,
 							NULL, /* GCancellable */
-							&neardalMgr->gerror);
+							&neardalMgr.gerror);
 
-	if (neardalMgr->gerror != NULL) {
+	if (neardalMgr.gerror != NULL) {
 		NEARDAL_TRACE_ERR(
 			"Unable to create Neard Adapter Proxy (%d:%s)\n",
-				 neardalMgr->gerror->code,
-				neardalMgr->gerror->message);
-		neardal_tools_prv_free_gerror(neardalMgr);
+				 neardalMgr.gerror->code,
+				neardalMgr.gerror->message);
+		neardal_tools_prv_free_gerror(&neardalMgr);
 		return NEARDAL_ERROR_DBUS_CANNOT_CREATE_PROXY;
 	}
 
@@ -356,20 +342,20 @@ static errorCode_t neardal_adp_prv_init(neardal_t neardalMgr,
 	NEARDAL_TRACEF("Register Neard-Adapter Signal ");
 	NEARDAL_TRACE("'PropertyChanged'\n");
 	g_signal_connect(adpProp->proxy, NEARD_ADP_SIG_PROPCHANGED,
-			G_CALLBACK (neardal_adp_prv_cb_property_changed),
-			  neardalMgr);
+			G_CALLBACK(neardal_adp_prv_cb_property_changed),
+			  NULL);
 
 	/* Register 'TargetFound', 'TargetLost' */
 	NEARDAL_TRACEF("Register Neard-Adapter Signal ");
 	NEARDAL_TRACE("'TargetFound'\n");
 	g_signal_connect(adpProp->proxy, NEARD_ADP_SIG_TGT_FOUND,
-			G_CALLBACK (neardal_adp_prv_cb_target_found),
+			G_CALLBACK(neardal_adp_prv_cb_target_found),
 			  adpProp);
 
 	NEARDAL_TRACEF("Register Neard-Adapter Signal ");
 	NEARDAL_TRACE("'TargetLost'\n");
 	g_signal_connect(adpProp->proxy, NEARD_ADP_SIG_TGT_LOST,
-			G_CALLBACK (neardal_adp_prv_cb_target_lost),
+			G_CALLBACK(neardal_adp_prv_cb_target_lost),
 			  adpProp);
 
 	return errCode;
@@ -395,8 +381,6 @@ static void neardal_adp_prv_free(AdpProp **adpProp)
 		(*adpProp)->proxy = NULL;
 	}
 	g_free((*adpProp)->name);
-// TODO remove	if ((*adpProp)->tgtArray != NULL)
-// 		g_strfreev((*adpProp)->tgtArray);
 	if ((*adpProp)->protocols != NULL)
 		g_strfreev((*adpProp)->protocols);
 	g_free((*adpProp));
@@ -406,47 +390,51 @@ static void neardal_adp_prv_free(AdpProp **adpProp)
 /******************************************************************************
  * neardal_get_adapters: get an array of NFC adapters (adpName) present
  *****************************************************************************/
-errorCode_t neardal_get_adapters(neardal_t neardalMgr, char ***array,
-				  int *len)
+errorCode_t neardal_get_adapters(char ***array, int *len)
 {
-	errorCode_t	errCode		= NEARDAL_ERROR_NO_ADAPTER;
+	errorCode_t	err		= NEARDAL_SUCCESS;
 	int		adpNb		= 0;
 	int		ct		= 0;	/* counter */
 	char		**adps		= NULL;
 	AdpProp		*adapter	= NULL;
 	gsize		size;
 
-	if (neardalMgr == NULL || array == NULL)
+	if (neardalMgr.proxy == NULL)
+		neardal_prv_construct(&err);
+
+	if (err != NEARDAL_SUCCESS || array == NULL)
 		return NEARDAL_ERROR_INVALID_PARAMETER;
 
-	adpNb = g_list_length(neardalMgr->prop.adpList);
+	adpNb = g_list_length(neardalMgr.prop.adpList);
 	if (adpNb > 0) {
-		errCode = NEARDAL_ERROR_NO_MEMORY;
+		err = NEARDAL_ERROR_NO_MEMORY;
 		size = (adpNb + 1) * sizeof(char *);
 		adps = g_try_malloc0(size);
 		if (adps != NULL) {
 			GList	*list;
 			while (ct < adpNb) {
-				list = neardalMgr->prop.adpList;
+				list = neardalMgr.prop.adpList;
 				adapter = g_list_nth_data(list, ct);
 				if (adapter != NULL)
 					adps[ct++] = g_strdup(adapter->name);
 			}
-			errCode = NEARDAL_SUCCESS;
+			err = NEARDAL_SUCCESS;
 		}
-	}
+	} else
+		err = NEARDAL_ERROR_NO_ADAPTER;
+
 	if (len != NULL)
 		*len = adpNb;
 	*array	= adps;
 
-	return errCode;
+	return err;
 }
 
 /******************************************************************************
  * neardal_adp_add: add new NFC adapter, initialize DBus Proxy connection,
  * register adapter signal
  *****************************************************************************/
-errorCode_t neardal_adp_add(neardal_t neardalMgr, gchar *adapterName)
+errorCode_t neardal_adp_add(gchar *adapterName)
 {
 	errorCode_t	errCode = NEARDAL_SUCCESS;
 	AdpProp		*adpProp = NULL;
@@ -454,7 +442,6 @@ errorCode_t neardal_adp_add(neardal_t neardalMgr, gchar *adapterName)
 	TgtProp		*tgtProp;
 	gsize		len;
 
-	g_assert(neardalMgr != NULL);
 	NEARDAL_TRACEF("Adding adapter:%s\n", adapterName);
 
 	adpProp = g_try_malloc0(sizeof(AdpProp));
@@ -462,25 +449,25 @@ errorCode_t neardal_adp_add(neardal_t neardalMgr, gchar *adapterName)
 		return NEARDAL_ERROR_NO_MEMORY;
 
 	adpProp->name = g_strdup(adapterName);
-	adpProp->parent = neardalMgr;
-	
-	adpList = &neardalMgr->prop.adpList;
+	adpProp->parent = &neardalMgr;
+
+	adpList = &neardalMgr.prop.adpList;
 	*adpList = g_list_prepend(*adpList, (gpointer) adpProp);
-	errCode = neardal_adp_prv_init(neardalMgr, adpProp);
+	errCode = neardal_adp_prv_init(adpProp);
 
 	NEARDAL_TRACEF("NEARDAL LIB adapterList contains %d elements\n",
 		      g_list_length(*adpList));
 
 	/* Invoke client cb 'adapter added' */
-	if (neardalMgr->cb_adp_added != NULL)
-			(neardalMgr->cb_adp_added)((char *) adapterName,
-					       neardalMgr->cb_adp_added_ud);
+	if (neardalMgr.cb_adp_added != NULL)
+			(neardalMgr.cb_adp_added)((char *) adapterName,
+					       neardalMgr.cb_adp_added_ud);
 
 	/* Notify 'Target Found' */
 	len = 0;
 	while (len < g_list_length(adpProp->tgtList)) {
 		tgtProp = g_list_nth_data(adpProp->tgtList, len++);
-		neardal_tgt_notify_target_found(neardalMgr, tgtProp);
+		neardal_tgt_notify_target_found(tgtProp);
 		len++;
 	}
 	return errCode;
@@ -490,13 +477,12 @@ errorCode_t neardal_adp_add(neardal_t neardalMgr, gchar *adapterName)
  * neardal_adp_remove: remove one NFC adapter, unref DBus Proxy connection,
  * unregister adapter signal
  *****************************************************************************/
-errorCode_t neardal_adp_remove(neardal_t neardalMgr, AdpProp *adpProp)
+errorCode_t neardal_adp_remove(AdpProp *adpProp)
 {
 	TgtProp		*tgtProp;
 	GList		*node = NULL;
 	GList		**adpList;
 
-	g_assert(neardalMgr != NULL);
 	g_assert(adpProp != NULL);
 
 	NEARDAL_TRACEF("Removing adapter:%s\n", adpProp->name);
@@ -508,7 +494,7 @@ errorCode_t neardal_adp_remove(neardal_t neardalMgr, AdpProp *adpProp)
 		neardal_tgt_remove(tgtProp);
 	}
 
-	adpList = &neardalMgr->prop.adpList;
+	adpList = &neardalMgr.prop.adpList;
 	(*adpList) = g_list_remove((*adpList), (gconstpointer) adpProp);
 	neardal_adp_prv_free(&adpProp);
 
@@ -521,14 +507,14 @@ errorCode_t neardal_adp_remove(neardal_t neardalMgr, AdpProp *adpProp)
  *****************************************************************************/
 errorCode_t neardal_adp_publish(AdpProp *adpProp, RcdProp *rcd)
 {
-	GVariantBuilder	*builder= NULL;
+	GVariantBuilder	*builder = NULL;
 	GVariant	*in;
 	errorCode_t	err;
 	GError		*gerror	= NULL;
-	
+
 	g_assert(adpProp != NULL);
 
-	builder = g_variant_builder_new (G_VARIANT_TYPE_ARRAY);
+	builder = g_variant_builder_new(G_VARIANT_TYPE_ARRAY);
 	if (builder == NULL)
 		return NEARDAL_ERROR_NO_MEMORY;
 
@@ -537,7 +523,7 @@ errorCode_t neardal_adp_publish(AdpProp *adpProp, RcdProp *rcd)
 	if (err != NEARDAL_SUCCESS)
 		goto exit;
 
-	in = g_variant_builder_end (builder);
+	in = g_variant_builder_end(builder);
 	NEARDAL_TRACE_LOG("Sending:\n%s\n", g_variant_print(in, TRUE));
 	org_neard_adp__call_publish_sync(adpProp->proxy, in, NULL, &gerror);
 
@@ -552,6 +538,6 @@ exit:
 		g_variant_unref(in);
 	if (builder != NULL)
 		g_variant_builder_unref(builder);
-	
+
 	return err;
 }

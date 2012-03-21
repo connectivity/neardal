@@ -9,12 +9,16 @@ Makefile
 Makefile.in
 lib/Makefile
 lib/Makefile.in
-lib/libnfc.la
-lib/neard-adapter-proxy.h
-lib/neard-manager-proxy.h
-lib/neard-record-proxy.h
-lib/neard-target-proxy.h
-libnfc.pc
+lib/libneardal.la
+lib/neard_adapter_proxy.h
+lib/neard_manager_proxy.h
+lib/neard_record_proxy.h
+lib/neard_target_proxy.h
+lib/neard_adapter_proxy.c
+lib/neard_manager_proxy.c
+lib/neard_record_proxy.c
+lib/neard_target_proxy.c
+neardal.pc
 libtool
 ltmain.sh
 ncl/.deps/
@@ -23,12 +27,14 @@ ncl/Makefile
 ncl/Makefile.in
 ncl/ncl
 stamp-h1
+doxygen.cfg
 
 # Use wildcards as well
 *~
 config.*
 *.lo
 *.o
+*kdev4*
 
 # Specific directories and files in a directory.
 autom4te.cache/*

@@ -75,6 +75,16 @@ typedef struct neardalCtx {
 	GError		*gerror;	/* Lastest GError if available */
 } neardalCtx;
 
+extern neardalCtx neardalMgr;
+
+/*! \fn neardal_t neardal_prv_construct(errorCode_t *ec)
+*  \brief create NEARDAL object instance, Neard Dbus connection,
+* register Neard's events
+*  \param ec : optional, pointer to store error code
+*  \return the NEARDAL context
+*/
+void neardal_prv_construct(errorCode_t *ec);
+
 #ifdef __cplusplus
 }
 #endif	/* __cplusplus */

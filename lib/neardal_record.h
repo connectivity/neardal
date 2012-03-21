@@ -37,7 +37,6 @@ typedef struct {
 	gboolean	notified; /* Already notified to client? */
 
 	gchar		*encoding;
-	gboolean	handOver;
 	gchar		*language;
 	gchar		*action;
 	gchar		*type;
@@ -51,8 +50,7 @@ typedef struct {
  * neardal_rcd_add: add new NFC record, initialize DBus Proxy connection,
  * register record signal
  *****************************************************************************/
-errorCode_t neardal_rcd_add(neardal_t neardalMgr, void *parent,
-			    char *rcdName);
+errorCode_t neardal_rcd_add(char *rcdName, void *parent);
 
 /******************************************************************************
  * neardal_rcd_remove: remove NFC record, unref DBus Proxy connection,

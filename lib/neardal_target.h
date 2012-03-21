@@ -37,12 +37,12 @@ typedef struct {
 	gchar		*name;	  /* DBus interface name (as identifier) */
 	void		*parent;  /* parent (adapter ) */
 	gboolean	notified; /* Already notified to client? */
-	
+
 	gchar		*type;
-	
+
 	gsize		rcdLen;
 	GList		*rcdList;	/* target's records paths */
-	
+
 	gchar		**tagType;	/* array of tag types */
 	gsize		tagTypeLen;
 	gboolean	readOnly;	/* Read-Only flag */
@@ -52,14 +52,13 @@ typedef struct {
  * neardal_tgt_notify_target_found: Invoke client callback for 'record found'
  * if present, and 'target found' (if not already nofied)
  *****************************************************************************/
-void neardal_tgt_notify_target_found(neardal_t neardalMgr, TgtProp *tgtProp);
+void neardal_tgt_notify_target_found(TgtProp *tgtProp);
 
 /******************************************************************************
  * neardal_tgt_add: add new NEARDAL target, initialize DBus Proxy connection,
  * register target signal
  *****************************************************************************/
-errorCode_t neardal_tgt_add(neardal_t neardalMgr, void *parent,
-			    gchar *tgtName);
+errorCode_t neardal_tgt_add(gchar *tgtName, void * parent);
 
 /******************************************************************************
  * neardal_tgt_remove: remove NEARDAL target, unref DBus Proxy connection,

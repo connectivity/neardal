@@ -32,24 +32,77 @@
 #include <glib-2.0/glib/glist.h>
 #include <glib-2.0/glib/gerror.h>
 
+neardalCtx neardalMgr = {NULL, NULL, {NULL}, NULL, NULL, NULL, NULL, NULL, NULL,
+NULL, NULL, NULL, NULL, NULL, NULL, 0, NULL};
+
+/******************************************************************************
+ * neardal_prv_construct: create NEARDAL object instance, Neard Dbus connection,
+ * register Neard's events
+ *****************************************************************************/
+void neardal_prv_construct(errorCode_t *ec)
+{
+	errorCode_t	err = NEARDAL_SUCCESS;
+
+	if (neardalMgr.proxy != NULL)
+		return;
+
+	NEARDAL_TRACEIN();
+	/* Create DBUS connection */
+	g_type_init();
+	neardalMgr.conn = g_bus_get_sync(G_BUS_TYPE_SYSTEM, NULL,
+					   &neardalMgr.gerror);
+	if (neardalMgr.conn != NULL) {
+		/* We have a DBUS connection, create proxy on Neard Manager */
+		err =  neardal_mgr_create();
+		if (err != NEARDAL_SUCCESS) {
+			NEARDAL_TRACEF(
+				"neardal_mgr_create() exit (err %d: %s)\n",
+				err, neardal_error_get_text(err));
+
+			/* No Neard daemon, destroying neardal object... */
+			if (err == NEARDAL_ERROR_DBUS_CANNOT_CREATE_PROXY)
+				neardal_tools_prv_free_gerror(&neardalMgr);
+		}
+	} else {
+		NEARDAL_TRACE_ERR("Unable to connect to dbus: %s\n",
+				 neardalMgr.gerror->message);
+		neardal_tools_prv_free_gerror(&neardalMgr);
+		err = NEARDAL_ERROR_DBUS;
+	}
+
+	if (ec != NULL)
+		*ec = err;
+
+	NEARDAL_TRACEF("Exit\n");
+	return;
+}
+
+
+/******************************************************************************
+ * neardal_destroy: destroy NEARDAL object instance, Disconnect Neard Dbus
+ * connection, unregister Neard's events
+ *****************************************************************************/
+void neardal_destroy(void)
+{
+	NEARDAL_TRACEIN();
+	if (neardalMgr.proxy != NULL) {
+		neardal_tools_prv_free_gerror(&neardalMgr);
+		neardal_mgr_destroy();
+	}
+}
+
 /******************************************************************************
  * neardal_set_cb_adapter_added: setup a client callback for
  * 'NEARDAL adapter added'.
  * cb_adp_added = NULL to remove actual callback.
  *****************************************************************************/
-errorCode_t neardal_set_cb_adapter_added(neardal_t neardalMgr,
-					 adapter_cb cb_adp_added,
+errorCode_t neardal_set_cb_adapter_added(adapter_cb cb_adp_added,
 					 void *user_data)
 {
-	errorCode_t err = NEARDAL_ERROR_INVALID_PARAMETER;
+	neardalMgr.cb_adp_added		= cb_adp_added;
+	neardalMgr.cb_adp_added_ud	= user_data;
 
-	if (neardalMgr != NULL) {
-		neardalMgr->cb_adp_added = cb_adp_added;
-		neardalMgr->cb_adp_added_ud = user_data;
-		err = NEARDAL_SUCCESS;
-	}
-
-	return err;
+	return NEARDAL_SUCCESS;
 }
 
 /******************************************************************************
@@ -57,19 +110,14 @@ errorCode_t neardal_set_cb_adapter_added(neardal_t neardalMgr,
  * 'NEARDAL adapter added'.
  * cb_adp_removed = NULL to remove actual callback.
  *****************************************************************************/
-errorCode_t neardal_set_cb_adapter_removed(neardal_t neardalMgr,
-					   adapter_cb cb_adp_removed,
+errorCode_t neardal_set_cb_adapter_removed(adapter_cb cb_adp_removed,
 					   void *user_data)
 {
-	errorCode_t err = NEARDAL_ERROR_INVALID_PARAMETER;
 
-	if (neardalMgr != NULL) {
-		neardalMgr->cb_adp_removed	= cb_adp_removed;
-		neardalMgr->cb_adp_removed_ud	= user_data;
-		err				= NEARDAL_SUCCESS;
-	}
+	neardalMgr.cb_adp_removed	= cb_adp_removed;
+	neardalMgr.cb_adp_removed_ud	= user_data;
 
-	return err;
+	return NEARDAL_SUCCESS;
 }
 
 /******************************************************************************
@@ -77,19 +125,14 @@ errorCode_t neardal_set_cb_adapter_removed(neardal_t neardalMgr,
  * 'NEARDAL Adapter Property Change'.
  * cb_mgr_adp_property_changed = NULL to remove actual callback.
  *****************************************************************************/
-errorCode_t neardal_set_cb_adapter_property_changed(neardal_t neardalMgr,
+errorCode_t neardal_set_cb_adapter_property_changed(
 					adapter_prop_cb cb_adp_property_changed,
 					void *user_data)
 {
-	errorCode_t err = NEARDAL_ERROR_INVALID_PARAMETER;
+	neardalMgr.cb_adp_prop_changed		= cb_adp_property_changed;
+	neardalMgr.cb_adp_prop_changed_ud	= user_data;
 
-	if (neardalMgr != NULL) {
-		neardalMgr->cb_adp_prop_changed = cb_adp_property_changed;
-		neardalMgr->cb_adp_prop_changed_ud	= user_data;
-		err					= NEARDAL_SUCCESS;
-	}
-
-	return err;
+	return NEARDAL_SUCCESS;
 }
 
 /******************************************************************************
@@ -97,19 +140,13 @@ errorCode_t neardal_set_cb_adapter_property_changed(neardal_t neardalMgr,
  * 'NEARDAL adapter added'.
  * cb_adp_added = NULL to remove actual callback.
  *****************************************************************************/
-errorCode_t neardal_set_cb_target_found(neardal_t neardalMgr,
-					target_cb cb_tgt_found,
+errorCode_t neardal_set_cb_target_found(target_cb cb_tgt_found,
 					void *user_data)
 {
-	errorCode_t err = NEARDAL_ERROR_INVALID_PARAMETER;
+	neardalMgr.cb_tgt_found		= cb_tgt_found;
+	neardalMgr.cb_tgt_found_ud	= user_data;
 
-	if (neardalMgr != NULL) {
-		neardalMgr->cb_tgt_found	= cb_tgt_found;
-		neardalMgr->cb_tgt_found_ud	= user_data;
-		err				= NEARDAL_SUCCESS;
-	}
-
-	return err;
+	return NEARDAL_SUCCESS;
 }
 
 /******************************************************************************
@@ -117,18 +154,13 @@ errorCode_t neardal_set_cb_target_found(neardal_t neardalMgr,
  * 'NEARDAL adapter added'.
  * cb_adp_removed = NULL to remove actual callback.
  *****************************************************************************/
-errorCode_t neardal_set_cb_target_lost(neardal_t neardalMgr,
-				       target_cb cb_tgt_lost, void *user_data)
+errorCode_t neardal_set_cb_target_lost(target_cb cb_tgt_lost,
+				       void *user_data)
 {
-	errorCode_t err = NEARDAL_ERROR_INVALID_PARAMETER;
+	neardalMgr.cb_tgt_lost		= cb_tgt_lost;
+	neardalMgr.cb_tgt_lost_ud	= user_data;
 
-	if (neardalMgr != NULL) {
-		neardalMgr->cb_tgt_lost		= cb_tgt_lost;
-		neardalMgr->cb_tgt_lost_ud	= user_data;
-		err				= NEARDAL_SUCCESS;
-	}
-
-	return err;
+	return NEARDAL_SUCCESS;
 }
 
 
@@ -137,19 +169,13 @@ errorCode_t neardal_set_cb_target_lost(neardal_t neardalMgr,
  * 'NEARDAL target record found'.
  * cb_rcd_found = NULL to remove actual callback.
  *****************************************************************************/
-errorCode_t neardal_set_cb_record_found(neardal_t neardalMgr,
-					record_cb cb_rcd_found,
+errorCode_t neardal_set_cb_record_found(record_cb cb_rcd_found,
 					void *user_data)
 {
-	errorCode_t err = NEARDAL_ERROR_INVALID_PARAMETER;
+	neardalMgr.cb_rcd_found		= cb_rcd_found;
+	neardalMgr.cb_rcd_found_ud	= user_data;
 
-	if (neardalMgr != NULL) {
-		neardalMgr->cb_rcd_found	= cb_rcd_found;
-		neardalMgr->cb_rcd_found_ud	= user_data;
-		err				= NEARDAL_SUCCESS;
-	}
-
-	return err;
+	return NEARDAL_SUCCESS;
 }
 
 /******************************************************************************
@@ -178,16 +204,17 @@ errorCode_t neardal_free_array(char ***array)
 /******************************************************************************
  * neardal_start_poll: Request Neard to start polling
  *****************************************************************************/
-void neardal_start_poll(neardal_t neardalMgr, char *adpName, errorCode_t *ec)
+errorCode_t neardal_start_poll(char *adpName)
 {
-	errorCode_t	err		= NEARDAL_ERROR_INVALID_PARAMETER;
+	errorCode_t	err		= NEARDAL_SUCCESS;
 	AdpProp		*adpProp	= NULL;
 
-	if (neardalMgr == NULL)
-		goto exit;
+	if (neardalMgr.proxy == NULL)
+		neardal_prv_construct(&err);
+	if (err != NEARDAL_SUCCESS)
+		return err;
 
-	err = neardal_mgr_prv_get_adapter(neardalMgr, adpName,
-					  &adpProp);
+	err = neardal_mgr_prv_get_adapter(adpName, &adpProp);
 
 	err = NEARDAL_ERROR_NO_ADAPTER;
 	if (adpProp == NULL)
@@ -197,39 +224,38 @@ void neardal_start_poll(neardal_t neardalMgr, char *adpName, errorCode_t *ec)
 		goto exit;
 
 	if (!adpProp->polling) {
-		org_neard_adp__call_start_poll_sync(adpProp->proxy, NULL, 
-						&neardalMgr->gerror);
+		org_neard_adp__call_start_poll_sync(adpProp->proxy, NULL,
+						    &neardalMgr.gerror);
 
 		err = NEARDAL_SUCCESS;
-		if (neardalMgr->gerror != NULL) {
+		if (neardalMgr.gerror != NULL) {
 			NEARDAL_TRACE_ERR(
 				"Error with neard dbus method (err:%d:'%s')\n"
-					, neardalMgr->gerror->code
-					, neardalMgr->gerror->message);
+					, neardalMgr.gerror->code
+					, neardalMgr.gerror->message);
 			err = NEARDAL_ERROR_DBUS_INVOKE_METHOD_ERROR;
-			neardal_tools_prv_free_gerror(neardalMgr);
+			neardal_tools_prv_free_gerror(&neardalMgr);
 		}
 	} else
 		err = NEARDAL_ERROR_POLLING_ALREADY_ACTIVE;
 
 exit:
-	if (ec != NULL)
-		*ec = err;
+	return err;
 }
 
 /******************************************************************************
  * neardal_stop_poll: Request Neard to stop polling
  *****************************************************************************/
-void neardal_stop_poll(neardal_t neardalMgr, char *adpName, errorCode_t *ec)
+errorCode_t neardal_stop_poll(char *adpName)
 {
-	errorCode_t	err = NEARDAL_ERROR_INVALID_PARAMETER;
+	errorCode_t	err = NEARDAL_SUCCESS;
 	AdpProp		*adpProp	= NULL;
 
-	if (neardalMgr == NULL)
-		goto exit;
+	if (neardalMgr.proxy == NULL)
+		neardal_prv_construct(&err);
 
-	err = neardal_mgr_prv_get_adapter(neardalMgr, adpName,
-						   &adpProp);
+	if (err == NEARDAL_SUCCESS)
+		err = neardal_mgr_prv_get_adapter(adpName, &adpProp);
 
 	if (adpProp == NULL)
 		goto exit;
@@ -239,44 +265,45 @@ void neardal_stop_poll(neardal_t neardalMgr, char *adpName, errorCode_t *ec)
 
 	if (adpProp->polling) {
 		org_neard_adp__call_stop_poll_sync(adpProp->proxy, NULL,
-						   &neardalMgr->gerror);
+						   &neardalMgr.gerror);
 
 		err = NEARDAL_SUCCESS;
-		if (neardalMgr->gerror != NULL) {
+		if (neardalMgr.gerror != NULL) {
 			NEARDAL_TRACE_ERR(
 				"Error with neard dbus method (err:%d:'%s')\n"
-					, neardalMgr->gerror->code
-					, neardalMgr->gerror->message);
+					, neardalMgr.gerror->code
+					, neardalMgr.gerror->message);
 			err = NEARDAL_ERROR_DBUS_INVOKE_METHOD_ERROR;
-			neardal_tools_prv_free_gerror(neardalMgr);
+			neardal_tools_prv_free_gerror(&neardalMgr);
 		}
 	}
 
 exit:
-	if (ec != NULL)
-		*ec = err;
+	return err;
 }
 
 /******************************************************************************
  * neardal_publish: Write NDEF record to an NFC tag
  *****************************************************************************/
-errorCode_t neardal_publish(neardal_t neardalMgr, neardal_record *record)
+errorCode_t neardal_publish(neardal_record *record)
 {
-	errorCode_t	err	= NEARDAL_ERROR_INVALID_PARAMETER;
+	errorCode_t	err	= NEARDAL_SUCCESS;
 	AdpProp		*adpProp;
 	RcdProp		rcd;
 
-	if (neardalMgr == NULL || record == NULL)
+
+	if (neardalMgr.proxy == NULL)
+		neardal_prv_construct(&err);
+
+	if (err != NEARDAL_SUCCESS || record == NULL)
 		goto exit;
 
-	err = neardal_mgr_prv_get_adapter(neardalMgr, (gchar *) record->name,
-					  &adpProp);
+	err = neardal_mgr_prv_get_adapter((gchar *) record->name, &adpProp);
 	if (err != NEARDAL_SUCCESS)
 		goto exit;
 	rcd.name		= (gchar *) record->name;
 	rcd.action		= (gchar *) record->action;
 	rcd.encoding		= (gchar *) record->encoding;
-	rcd.handOver		= (gboolean) record->handOver;
 	rcd.language		= (gchar *) record->language;
 	rcd.type		= (gchar *) record->type;
 	rcd.representation	= (gchar *) record->representation;
@@ -292,21 +319,22 @@ exit:
 /******************************************************************************
  * neardal_get_adapter_properties: Get properties of a specific NEARDAL adapter
  *****************************************************************************/
-errorCode_t neardal_get_adapter_properties(neardal_t neardalMgr,
-					   const char *adpName,
+errorCode_t neardal_get_adapter_properties(const char *adpName,
 					   neardal_adapter *adapter)
 {
-	errorCode_t	err		= NEARDAL_ERROR_INVALID_PARAMETER;
+	errorCode_t	err		= NEARDAL_SUCCESS;
 	AdpProp		*adpProp	= NULL;
 	TgtProp		*target		= NULL;
 	int		ct		= 0;	/* counter */
 	gsize		size;
 
-	if (neardalMgr == NULL || adpName == NULL || adapter == NULL)
+	if (neardalMgr.proxy == NULL)
+		neardal_prv_construct(&err);
+
+	if (err != NEARDAL_SUCCESS || adpName == NULL || adapter == NULL)
 		goto exit;
 
-	err = neardal_mgr_prv_get_adapter(neardalMgr, (gchar *) adpName,
-					  &adpProp);
+	err = neardal_mgr_prv_get_adapter((gchar *) adpName, &adpProp);
 	if (err != NEARDAL_SUCCESS)
 		goto exit;
 
@@ -358,24 +386,25 @@ exit:
 /******************************************************************************
  * neardal_get_adapter_properties: Get properties of a specific NEARDAL adapter
  *****************************************************************************/
-errorCode_t neardal_get_target_properties(neardal_t neardalMgr,
-					  const char *tgtName,
+errorCode_t neardal_get_target_properties(const char *tgtName,
 					  neardal_target *target)
 {
-	errorCode_t	err		= NEARDAL_ERROR_INVALID_PARAMETER;
+	errorCode_t	err		= NEARDAL_SUCCESS;
 	AdpProp		*adpProp	= NULL;
 	TgtProp		*tgtProp	= NULL;
 	int		ct		= 0;	/* counter */
 	RcdProp		*record		= NULL;
 	gsize		size;
 
-	if (neardalMgr == NULL || tgtName == NULL || target == NULL)
+	if (neardalMgr.proxy == NULL)
+		neardal_prv_construct(&err);
+
+	if (err != NEARDAL_SUCCESS || tgtName == NULL || target == NULL)
 		goto exit;
 
 	target->records	= NULL;
 	target->tagType	= NULL;
-	err = neardal_mgr_prv_get_adapter(neardalMgr, (gchar *) tgtName,
-					  &adpProp);
+	err = neardal_mgr_prv_get_adapter((gchar *) tgtName, &adpProp);
 	if (err != NEARDAL_SUCCESS)
 		goto exit;
 
@@ -431,20 +460,24 @@ exit:
  /******************************************************************************
  * neardal_get_record_properties: Get values of a specific target record
   *****************************************************************************/
-errorCode_t neardal_get_record_properties(neardal_t neardalMgr,
-					  const char *recordName,
+errorCode_t neardal_get_record_properties(const char *recordName,
 					  neardal_record *record)
 {
-	errorCode_t	err		= NEARDAL_ERROR_INVALID_PARAMETER;
+	errorCode_t	err		= NEARDAL_SUCCESS;
 	AdpProp		*adpProp	= NULL;
 	TgtProp		*tgtProp	= NULL;
 	RcdProp		*rcdProp	= NULL;
 
-	if (neardalMgr == NULL || recordName == NULL || record == NULL)
+	if (recordName == NULL || record == NULL)
 		goto exit;
 
-	err = neardal_mgr_prv_get_adapter(neardalMgr, (gchar *) recordName,
-					  &adpProp);
+	if (neardalMgr.proxy == NULL)
+		neardal_prv_construct(&err);
+
+	if (err != NEARDAL_SUCCESS)
+		goto exit;
+
+	err = neardal_mgr_prv_get_adapter((gchar *) recordName, &adpProp);
 	if (err != NEARDAL_SUCCESS)
 		goto exit;
 
@@ -460,7 +493,6 @@ errorCode_t neardal_get_record_properties(neardal_t neardalMgr,
 
 	record->name		= (const char *) rcdProp->name;
 	record->encoding	= (const char *) rcdProp->encoding;
-	record->handOver	= (short) rcdProp->handOver;
 	record->language	= (const char *) rcdProp->language;
 	record->action		= (const char *) rcdProp->action;
 
@@ -472,70 +504,4 @@ errorCode_t neardal_get_record_properties(neardal_t neardalMgr,
 
 exit:
 	return err;
-}
-
-
-/******************************************************************************
- * neardal_construct: create NEARDAL object instance, Neard Dbus connection,
- * register Neard's events
- *****************************************************************************/
-neardal_t neardal_construct(errorCode_t *ec)
-{
-	neardal_t	neardalMgr	= NULL;
-	errorCode_t	err	= NEARDAL_ERROR_NO_MEMORY;
-
-	NEARDAL_TRACEIN();
-	/* Allocate NEARDAL context */
-	neardalMgr = g_try_malloc0(sizeof(neardalCtx));
-	if (neardalMgr == NULL)
-		goto exit;
-
-	/* Create DBUS connection */
-	g_type_init();
-	neardalMgr->conn = g_bus_get_sync(G_BUS_TYPE_SYSTEM, NULL,
-					   &neardalMgr->gerror);
-	if (neardalMgr->conn != NULL) {
-		/* We have a DBUS connection, create proxy on Neard Manager */
-		err =  neardal_mgr_create(neardalMgr);
-		if (err != NEARDAL_SUCCESS) {
-			NEARDAL_TRACEF(
-				"neardal_mgr_create() exit (err %d: %s)\n",
-				err, neardal_error_get_text(err));
-
-			/* No Neard daemon, destroying neardal object... */
-			if (err == NEARDAL_ERROR_DBUS_CANNOT_CREATE_PROXY) {
-				neardal_tools_prv_free_gerror(neardalMgr);
-				g_free(neardalMgr);
-				neardalMgr = NULL;
-			}
-		}
-	} else {
-		NEARDAL_TRACE_ERR("Unable to connect to dbus: %s\n",
-				 neardalMgr->gerror->message);
-		neardal_tools_prv_free_gerror(neardalMgr);
-		err = NEARDAL_ERROR_DBUS;
-		g_free(neardalMgr);
-		neardalMgr = NULL;
-	}
-
-exit:
-	if (ec != NULL)
-		*ec = err;
-
-	NEARDAL_TRACEF("Exit\n");
-	return neardalMgr;
-}
-
-
-/******************************************************************************
- * neardal_destroy: destroy NEARDAL object instance, Disconnect Neard Dbus
- * connection, unregister Neard's events
- *****************************************************************************/
-void neardal_destroy(neardal_t neardalMgr)
-{
-	NEARDAL_TRACEIN();
-	if (neardalMgr != NULL) {
-		neardal_tools_prv_free_gerror(neardalMgr);
-		neardal_mgr_destroy(&neardalMgr);
-	}
 }
