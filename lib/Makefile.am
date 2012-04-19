@@ -38,6 +38,7 @@ neardal_PRV_HDR = \
 		neardal_prv.h \
 		neardal_record.h \
 		neardal_target.h \
+		neardal_traces_prv.h \
 		neardal_tools.h
 
 # We don't want to install this header
