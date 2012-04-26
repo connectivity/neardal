@@ -22,7 +22,7 @@
 #define __NEARDAL_ADAPTER_H
 
 #include "neard_adapter_proxy.h"
-#include "neardal_target.h"
+#include "neardal_tag.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -30,8 +30,8 @@ extern "C" {
 
 #define NEARD_ADP_IF_NAME				"org.neard.Adapter"
 #define NEARD_ADP_SIG_PROPCHANGED			"property-changed"
-#define NEARD_ADP_SIG_TGT_FOUND				"target-found"
-#define NEARD_ADP_SIG_TGT_LOST				"target-lost"
+#define NEARD_ADP_SIG_TGT_FOUND				"tag-found"
+#define NEARD_ADP_SIG_TGT_LOST				"tag-lost"
 
 /* NEARDAL Adapter Properties */
 typedef struct {
@@ -44,16 +44,16 @@ typedef struct {
 	gboolean		powered;	/* adapter powered ? */
 	gchar			**protocols;	/* protocols list */
 	gsize			lenProtocols;
-	gsize			tgtNb;
-	GList			*tgtList;	/* Neard adapter targets list
+	gsize			tagNb;
+	GList			*tagList;	/* Neard adapter tags list
 						available */
 } AdpProp;
 
 /******************************************************************************
- * neardal_adp_prv_get_target: Get NEARDAL target from name
+ * neardal_adp_prv_get_tag: Get NEARDAL tag from name
  *****************************************************************************/
-errorCode_t neardal_adp_prv_get_target(AdpProp *adpProp, gchar *tgtName,
-				       TgtProp **tgtProp);
+errorCode_t neardal_adp_prv_get_tag(AdpProp *adpProp, gchar *tagName,
+				       TagProp **tagProp);
 
 /******************************************************************************
  * neardal_adp_add: add new NEARDAL adapter, initialize DBus Proxy

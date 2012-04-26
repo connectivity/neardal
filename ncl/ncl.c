@@ -30,7 +30,6 @@
 
 #include "ncl.h"
 #include "ncl_cmd.h"
-#include <glib-2.0/glib/gstrfuncs.h>
 
 #define PROMPT_PREFIX		"NCL> "
 #define NB_MAX_PARAMETERS	20	/* Max number of parameters in a

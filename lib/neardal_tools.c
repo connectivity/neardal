@@ -28,7 +28,6 @@
 
 #include "neardal.h"
 #include "neardal_prv.h"
-#include <glib-2.0/glib/gvariant.h>
 
 
 /******************************************************************************

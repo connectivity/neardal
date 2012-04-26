@@ -27,8 +27,6 @@
 
 #include "neardal.h"
 #include "neardal_prv.h"
-#include <glib-2.0/glib/gerror.h>
-#include <glib-2.0/glib/glist.h>
 
 
 /******************************************************************************
@@ -189,13 +187,13 @@ errorCode_t neardal_rcd_prv_format(GVariantBuilder *builder, RcdProp *rcd)
 
 
 /******************************************************************************
- * neardal_get_records: get an array of target records
+ * neardal_get_records: get an array of tag records
  *****************************************************************************/
-errorCode_t neardal_get_records(char *tgtName, char ***array, int *len)
+errorCode_t neardal_get_records(char *tagName, char ***array, int *len)
 {
 	errorCode_t	err		= NEARDAL_SUCCESS;
 	AdpProp		*adpProp	= NULL;
-	TgtProp		*tgtProp	= NULL;
+	TagProp		*tagProp	= NULL;
 	int		rcdLen		= 0;
 	int		ct		= 0;	/* counter */
 	char		**rcds		= NULL;
@@ -205,19 +203,19 @@ errorCode_t neardal_get_records(char *tgtName, char ***array, int *len)
 	if (neardalMgr.proxy == NULL)
 		neardal_prv_construct(&err);
 
-	if (err != NEARDAL_SUCCESS || tgtName == NULL || array == NULL)
+	if (err != NEARDAL_SUCCESS || tagName == NULL || array == NULL)
 		return NEARDAL_ERROR_INVALID_PARAMETER;
 
-	err = neardal_mgr_prv_get_adapter(tgtName, &adpProp);
+	err = neardal_mgr_prv_get_adapter(tagName, &adpProp);
 	if (err != NEARDAL_SUCCESS)
 		goto exit;
 
-	err = neardal_adp_prv_get_target(adpProp, tgtName, &tgtProp);
+	err = neardal_adp_prv_get_tag(adpProp, tagName, &tagProp);
 	if (err != NEARDAL_SUCCESS)
 		goto exit;
 
 	err		= NEARDAL_ERROR_NO_RECORD;
-	rcdLen = g_list_length(tgtProp->rcdList);
+	rcdLen = g_list_length(tagProp->rcdList);
 	if (rcdLen <= 0)
 		goto exit;
 
@@ -227,7 +225,7 @@ errorCode_t neardal_get_records(char *tgtName, char ***array, int *len)
 		goto exit;
 
 	while (ct < rcdLen) {
-		rcd = g_list_nth_data(tgtProp->rcdList, ct);
+		rcd = g_list_nth_data(tagProp->rcdList, ct);
 		if (rcd != NULL)
 			rcds[ct++] = g_strdup(rcd->name);
 	}
@@ -249,7 +247,7 @@ errorCode_t neardal_rcd_add(char *rcdName, void *parent)
 {
 	errorCode_t	errCode		= NEARDAL_ERROR_NO_MEMORY;
 	RcdProp		*rcd	= NULL;
-	TgtProp		*tgtProp = parent;
+	TagProp		*tagProp = parent;
 
 	g_assert(rcdName != NULL);
 	g_assert(parent != NULL);
@@ -263,21 +261,21 @@ errorCode_t neardal_rcd_add(char *rcdName, void *parent)
 	if (rcd->name == NULL)
 		goto exit;
 
-	rcd->parent = tgtProp;
+	rcd->parent = tagProp;
 
-	tgtProp->rcdList = g_list_prepend(tgtProp->rcdList, (gpointer) rcd);
+	tagProp->rcdList = g_list_prepend(tagProp->rcdList, (gpointer) rcd);
 	errCode = neardal_rcd_prv_init(rcd);
 	if (errCode != NEARDAL_SUCCESS)
 		goto exit;
 
 	NEARDAL_TRACEF("NEARDAL LIB recordList contains %d elements\n",
-		      g_list_length(tgtProp->rcdList));
+		      g_list_length(tagProp->rcdList));
 
 	errCode = NEARDAL_SUCCESS;
 
 exit:
 	if (errCode != NEARDAL_SUCCESS) {
-		tgtProp->rcdList = g_list_remove(tgtProp->rcdList,
+		tagProp->rcdList = g_list_remove(tagProp->rcdList,
 						 (gpointer) rcd);
 		neardal_rcd_prv_free(&rcd);
 	}
@@ -291,14 +289,14 @@ exit:
  *****************************************************************************/
 void neardal_rcd_remove(RcdProp *rcd)
 {
-	TgtProp		*tgtProp;
+	TagProp		*tagProp;
 
 	NEARDAL_TRACEIN();
 	g_assert(rcd != NULL);
 
-	tgtProp = rcd->parent;
+	tagProp = rcd->parent;
 	NEARDAL_TRACEF("Removing record:%s\n", rcd->name);
-	tgtProp->rcdList = g_list_remove(tgtProp->rcdList,
+	tagProp->rcdList = g_list_remove(tagProp->rcdList,
 					 (gconstpointer) rcd);
 	/* Remove all records */
 	neardal_rcd_prv_free(&rcd);

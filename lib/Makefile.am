@@ -15,10 +15,10 @@ neard_adapter_proxy.h:  interface/org.neard.Adapter.xml
 			--interface-prefix org.neard.Adapter \
 			$<
 
-neard_target_proxy.h:  interface/org.neard.Target.xml
-	gdbus-codegen --generate-c-code neard_target_proxy \
-			--c-namespace orgNeardTgt \
-			--interface-prefix org.neard.Target \
+neard_tag_proxy.h:  	interface/org.neard.Tag.xml
+	gdbus-codegen --generate-c-code neard_tag_proxy \
+			--c-namespace orgNeardTag \
+			--interface-prefix org.neard.Tag \
 			$<
 
 neard_record_proxy.h:  interface/org.neard.Record.xml
@@ -29,7 +29,7 @@ neard_record_proxy.h:  interface/org.neard.Record.xml
 
 BUILT_SOURCES =	neard_manager_proxy.h \
 		neard_adapter_proxy.h \
-		neard_target_proxy.h \
+		neard_tag_proxy.h \
 		neard_record_proxy.h
 
 neardal_PRV_HDR = \
@@ -37,7 +37,7 @@ neardal_PRV_HDR = \
 		neardal_manager.h \
 		neardal_prv.h \
 		neardal_record.h \
-		neardal_target.h \
+		neardal_tag.h \
 		neardal_traces_prv.h \
 		neardal_tools.h
 
@@ -60,8 +60,8 @@ libneardal_la_SOURCES =	neardal.c \
 				neard_manager_proxy.c \
 				neardal_record.c \
 				neard_record_proxy.c \
-				neardal_target.c \
-				neard_target_proxy.c \
+				neardal_tag.c \
+				neard_tag_proxy.c \
 				neardal_tools.c \
 				neardal_traces.c
 

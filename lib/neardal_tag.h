@@ -21,19 +21,19 @@
 #ifndef __NEARDAL_TARGET_H
 #define __NEARDAL_TARGET_H
 
-#include "neard_target_proxy.h"
+#include "neard_tag_proxy.h"
 #include "neardal_record.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif	/* __cplusplus */
 
-#define NEARD_TARGETS_IF_NAME		"org.neard.Target"
+#define NEARD_TARGETS_IF_NAME		"org.neard.Tag"
 #define NEARD_TGT_SIG_PROPCHANGED	"property-changed"
 
-/* NEARDAL Target Properties */
+/* NEARDAL Tag Properties */
 typedef struct {
-	orgNeardTgt	*proxy;	  /* proxy to Neard NEARDAL Target interface */
+	orgNeardTag	*proxy;	  /* proxy to Neard NEARDAL Tag interface */
 	gchar		*name;	  /* DBus interface name (as identifier) */
 	void		*parent;  /* parent (adapter ) */
 	gboolean	notified; /* Already notified to client? */
@@ -41,30 +41,30 @@ typedef struct {
 	gchar		*type;
 
 	gsize		rcdLen;
-	GList		*rcdList;	/* target's records paths */
+	GList		*rcdList;	/* tag's records paths */
 
 	gchar		**tagType;	/* array of tag types */
 	gsize		tagTypeLen;
 	gboolean	readOnly;	/* Read-Only flag */
-} TgtProp;
+} TagProp;
 
 /******************************************************************************
- * neardal_tgt_notify_target_found: Invoke client callback for 'record found'
- * if present, and 'target found' (if not already nofied)
+ * neardal_tag_notify_tag_found: Invoke client callback for 'record found'
+ * if present, and 'tag found' (if not already nofied)
  *****************************************************************************/
-void neardal_tgt_notify_target_found(TgtProp *tgtProp);
+void neardal_tag_notify_tag_found(TagProp *tagProp);
 
 /******************************************************************************
- * neardal_tgt_add: add new NEARDAL target, initialize DBus Proxy connection,
- * register target signal
+ * neardal_tag_add: add new NEARDAL tag, initialize DBus Proxy connection,
+ * register tag signal
  *****************************************************************************/
-errorCode_t neardal_tgt_add(gchar *tgtName, void * parent);
+errorCode_t neardal_tag_add(gchar *tagName, void * parent);
 
 /******************************************************************************
- * neardal_tgt_remove: remove NEARDAL target, unref DBus Proxy connection,
- * unregister target signal
+ * neardal_tag_remove: remove NEARDAL tag, unref DBus Proxy connection,
+ * unregister tag signal
  *****************************************************************************/
-void neardal_tgt_remove(TgtProp *tgtProp);
+void neardal_tag_remove(TagProp *tagProp);
 
 
 #ifdef __cplusplus

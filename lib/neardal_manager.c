@@ -28,9 +28,6 @@
 
 #include "neardal.h"
 #include "neardal_prv.h"
-#include <glib-2.0/glib/glist.h>
-#include <glib-2.0/glib/garray.h>
-#include <glib-2.0/glib/galloca.h>
 
 /******************************************************************************
  * neardal_mgr_prv_cb_property_changed: Callback called when a NFC Manager
@@ -206,26 +203,26 @@ errorCode_t neardal_mgr_prv_get_adapter_from_proxy(orgNeardAdp *adpProxy,
 }
 
 /******************************************************************************
- * neardal_mgr_prv_get_target: Get specific target from adapter
+ * neardal_mgr_prv_get_tag: Get specific tag from adapter
  *****************************************************************************/
-errorCode_t neardal_mgr_prv_get_target(AdpProp *adpProp, gchar *tgtName,
-				       TgtProp **tgtProp)
+errorCode_t neardal_mgr_prv_get_tag(AdpProp *adpProp, gchar *tagName,
+				       TagProp **tagProp)
 {
 	errorCode_t	errCode	= NEARDAL_ERROR_NO_TARGET;
 	guint		len;
-	TgtProp		*tgt	= NULL;
+	TagProp		*tag	= NULL;
 	GList		*tmpList;
 
 	g_assert(adpProp != NULL);
-	g_assert(tgtName != NULL);
-	g_assert(tgtProp != NULL);
+	g_assert(tagName != NULL);
+	g_assert(tagProp != NULL);
 
 	len = 0;
-	tmpList = adpProp->tgtList;
+	tmpList = adpProp->tagList;
 	while (len < g_list_length(tmpList)) {
-		tgt = g_list_nth_data(tmpList, len);
-		if (neardal_tools_prv_cmp_path(tgt->name, tgtName)) {
-			*tgtProp = tgt;
+		tag = g_list_nth_data(tmpList, len);
+		if (neardal_tools_prv_cmp_path(tag->name, tagName)) {
+			*tagProp = tag;
 			errCode = NEARDAL_SUCCESS;
 			break;
 		}
@@ -236,22 +233,22 @@ errorCode_t neardal_mgr_prv_get_target(AdpProp *adpProp, gchar *tgtName,
 }
 
 /******************************************************************************
- * neardal_mgr_prv_get_record: Get specific record from target
+ * neardal_mgr_prv_get_record: Get specific record from tag
  *****************************************************************************/
-errorCode_t neardal_mgr_prv_get_record(TgtProp *tgtProp, gchar *rcdName,
+errorCode_t neardal_mgr_prv_get_record(TagProp *tagProp, gchar *rcdName,
 				       RcdProp **rcdProp)
 {
 	errorCode_t	errCode	= NEARDAL_ERROR_NO_RECORD;
 	guint		len;
 	RcdProp	*rcd	= NULL;
 
-	g_assert(tgtProp != NULL);
+	g_assert(tagProp != NULL);
 	g_assert(rcdName != NULL);
 	g_assert(rcdProp != NULL);
 
 	len = 0;
-	while (len < g_list_length(tgtProp->rcdList)) {
-		rcd = g_list_nth_data(tgtProp->rcdList, len);
+	while (len < g_list_length(tagProp->rcdList)) {
+		rcd = g_list_nth_data(tagProp->rcdList, len);
 		if (neardal_tools_prv_cmp_path(rcd->name, rcdName)) {
 			*rcdProp = rcd;
 			errCode = NEARDAL_SUCCESS;

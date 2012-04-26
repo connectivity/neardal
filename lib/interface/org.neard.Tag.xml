@@ -1,18 +1,21 @@
 <!DOCTYPE node PUBLIC "-//freedesktop//DTD D-BUS Object Introspection 1.0//EN"
 "http://www.freedesktop.org/standards/dbus/1.0/introspect.dtd">
 <node>
-	<interface name="org.neard.Target">
+	<interface name="org.neard.Tag">
 		<method name="GetProperties">
-            <arg type="a{sv}" direction="out"/>
+			<arg type="a{sv}" direction="out"/>
 		</method>
 		<method name="SetProperty">
 			<arg type="s" direction="in"/>
 			<arg type="v" direction="in"/>
+		</method>
+		<method name="Write">
+			<arg type="a{sv}" direction="in"/>
 		</method>
 		<signal name="PropertyChanged">
 			<arg type="s"/>
 			<arg type="v"/>
 		</signal>
 	</interface>
+	<node name="record0"/>
 </node>
-

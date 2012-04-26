@@ -18,7 +18,7 @@
  *
  */
 
-#include <glib/gtypes.h>
+#include <glib.h>
 #include <neardal_errors.h>
 
 char *neardal_error_get_text(errorCode_t ec)
@@ -49,10 +49,10 @@ char *neardal_error_get_text(errorCode_t ec)
 		return "No NFC adapter found...";
 
 	case NEARDAL_ERROR_NO_TARGET:
-		return "No NFC target found...";
+		return "No NFC tag found...";
 
 	case NEARDAL_ERROR_NO_RECORD:
-		return "No target record found...";
+		return "No tag record found...";
 
 	case NEARDAL_ERROR_POLLING_ALREADY_ACTIVE:
 		return "Polling already active";

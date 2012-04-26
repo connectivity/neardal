@@ -54,22 +54,22 @@ typedef struct neardalCtx {
 							client callback
 						'adapter property changed' */
 
-	target_cb	cb_tgt_found;		/* Client callback for
-							'target found' */
-	void		*cb_tgt_found_ud;	/* User data for
+	tag_cb	cb_tag_found;		/* Client callback for
+							'tag found' */
+	void		*cb_tag_found_ud;	/* User data for
 							client callback
-							'target found' */
-	target_cb	cb_tgt_lost;		/* Client callback for
-							'target lost' */
-	void		*cb_tgt_lost_ud;	/* User data for
+							'tag found' */
+	tag_cb	cb_tag_lost;		/* Client callback for
+							'tag lost' */
+	void		*cb_tag_lost_ud;	/* User data for
 							client callback
-							'target lost' */
+							'tag lost' */
 
 	record_cb	cb_rcd_found;		/* Client callback for
-						'	'target record found'*/
+						'	'tag record found'*/
 	void		*cb_rcd_found_ud;	/* User data for
 							client callback
-							'target record found'*/
+							'tag record found'*/
 
 	errorCode_t	ec;		/* Lastest NEARDAL error */
 	GError		*gerror;	/* Lastest GError if available */

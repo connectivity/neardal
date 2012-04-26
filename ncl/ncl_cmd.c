@@ -30,7 +30,6 @@
 #include "ncl.h"
 #include "ncl_cmd.h"
 #include <lib/neardal.h>
-#include <glib-2.0/glib/goption.h>
 
 
 static NCLCmdContext  sNclCmdCtx;
@@ -149,7 +148,7 @@ NCLError ncl_cmd_list(int argc, char *argv[])
 static void ncl_cmd_prv_dump_adapter(neardal_adapter adapter)
 {
 	char **protocols;
-	char **targets;
+	char **tags;
 
 	NCL_CMD_PRINT("Adapter\n");
 	NCL_CMD_PRINT(".. Name:\t\t'%s'\n", adapter.name);
@@ -159,17 +158,17 @@ static void ncl_cmd_prv_dump_adapter(neardal_adapter adapter)
 	NCL_CMD_PRINT(".. Powered:\t\t'%s'\n",
 		      adapter.powered ? "TRUE" : "FALSE");
 
-	targets = adapter.targets;
-	NCL_CMD_PRINT(".. Number of targets:\t%d\n", adapter.nbTargets);
-	NCL_CMD_PRINT(".. Targets[]:\t\t");
-	if (adapter.nbTargets > 0) {
-		while ((*targets) != NULL) {
-			NCL_CMD_PRINT("'%s', ", *targets);
-			targets++;
+	tags = adapter.tags;
+	NCL_CMD_PRINT(".. Number of tags:\t%d\n", adapter.nbTags);
+	NCL_CMD_PRINT(".. Tags[]:\t\t");
+	if (adapter.nbTags > 0) {
+		while ((*tags) != NULL) {
+			NCL_CMD_PRINT("'%s', ", *tags);
+			tags++;
 		}
-		neardal_free_array(&adapter.targets);
+		neardal_free_array(&adapter.tags);
 	} else
-		NCL_CMD_PRINT("No targets!");
+		NCL_CMD_PRINT("No tags!");
 	NCL_CMD_PRINT("\n");
 
 	protocols = adapter.protocols;
@@ -187,45 +186,45 @@ static void ncl_cmd_prv_dump_adapter(neardal_adapter adapter)
 }
 
 /******************************************************************************
- * Dump properties of a target
+ * Dump properties of a tag
  *****************************************************************************/
-static void ncl_cmd_prv_dump_target(neardal_target target)
+static void ncl_cmd_prv_dump_tag(neardal_tag tag)
 {
 	char **records;
 	char **tagTypes;
 
-	NCL_CMD_PRINT("Target:\n");
-	NCL_CMD_PRINT(".. Name:\t\t'%s'\n", target.name);
+	NCL_CMD_PRINT("Tag:\n");
+	NCL_CMD_PRINT(".. Name:\t\t'%s'\n", tag.name);
 
-	NCL_CMD_PRINT(".. Type:\t\t'%s'\n", target.type);
+	NCL_CMD_PRINT(".. Type:\t\t'%s'\n", tag.type);
 
-	NCL_CMD_PRINT(".. Number of 'Tag Type':%d\n", target.nbTagTypes);
-	tagTypes = target.tagType;
-	if (target.nbTagTypes > 0) {
+	NCL_CMD_PRINT(".. Number of 'Tag Type':%d\n", tag.nbTagTypes);
+	tagTypes = tag.tagType;
+	if (tag.nbTagTypes > 0) {
 		NCL_CMD_PRINT(".. Tags type[]:\t\t");
 		while ((*tagTypes) != NULL) {
 			NCL_CMD_PRINT("'%s', ", *tagTypes);
 			tagTypes++;
 		}
 		NCL_CMD_PRINT("\n");
-		neardal_free_array(&target.tagType);
+		neardal_free_array(&tag.tagType);
 	}
 
-	records = target.records;
-	NCL_CMD_PRINT(".. Number of records:\t%d\n", target.nbRecords);
+	records = tag.records;
+	NCL_CMD_PRINT(".. Number of records:\t%d\n", tag.nbRecords);
 	NCL_CMD_PRINT(".. Records[]:\t\t");
 	if (records != NULL) {
 		while ((*records) != NULL) {
 			NCL_CMD_PRINT("'%s', ", *records);
 			records++;
 		}
-		neardal_free_array(&target.records);
+		neardal_free_array(&tag.records);
 	} else
 		NCL_CMD_PRINT("No records!");
 
 	NCL_CMD_PRINT("\n");
 	NCL_CMD_PRINT(".. ReadOnly:\t\t%s\n"	,
-		      target.readOnly ? "TRUE" : "FALSE");
+		      tag.readOnly ? "TRUE" : "FALSE");
 }
 
 /******************************************************************************
@@ -291,29 +290,29 @@ static void ncl_cmd_cb_adapter_prop_changed(char *adpName, char *propName,
 	NCL_CMD_PRINT("\n");
 }
 
-static void ncl_cmd_cb_target_found(const char *tgtName, void *user_data)
+static void ncl_cmd_cb_tag_found(const char *tagName, void *user_data)
 {
-	neardal_target	target;
+	neardal_tag	tag;
 	errorCode_t	ec;
 
 	(void) user_data; /* remove warning */
 
-	NCL_CMD_PRINTF("NFC Target found (%s)\n", tgtName);
+	NCL_CMD_PRINTF("NFC Tag found (%s)\n", tagName);
 
-	ec = neardal_get_target_properties(tgtName, &target);
+	ec = neardal_get_tag_properties(tagName, &tag);
 	if (ec == NEARDAL_SUCCESS)
-		ncl_cmd_prv_dump_target(target);
+		ncl_cmd_prv_dump_tag(tag);
 	else
 		NCL_CMD_PRINTF(
-		"Unable to read target properties. (error:%d='%s'). exit...\n",
+		"Unable to read tag properties. (error:%d='%s'). exit...\n",
 			       ec, neardal_error_get_text(ec));
 	return;
 }
 
-static void ncl_cmd_cb_target_lost(const char *tgtName, void *user_data)
+static void ncl_cmd_cb_tag_lost(const char *tagName, void *user_data)
 {
 	(void) user_data; /* remove warning */
-	NCL_CMD_PRINTF("NFC Target lost (%s)\n", tgtName);
+	NCL_CMD_PRINTF("NFC Tag lost (%s)\n", tagName);
 }
 
 static void ncl_cmd_cb_record_found(const char *rcdName, void *user_data)
@@ -323,7 +322,7 @@ static void ncl_cmd_cb_record_found(const char *rcdName, void *user_data)
 
 	(void) user_data; /* remove warning */
 
-	NCL_CMD_PRINTF("Target Record found (%s)\n", rcdName);
+	NCL_CMD_PRINTF("Tag Record found (%s)\n", rcdName);
 	ec = neardal_get_record_properties(rcdName, &record);
 	if (ec == NEARDAL_SUCCESS) {
 		ncl_cmd_prv_dump_record(record);
@@ -347,9 +346,9 @@ static void ncl_cmd_install_callback(void)
 	neardal_set_cb_adapter_property_changed(ncl_cmd_cb_adapter_prop_changed,
 						NULL);
 	NCL_CMD_PRINTF("NFC adapter callback registered\n");
-	neardal_set_cb_target_found(ncl_cmd_cb_target_found, NULL);
-	neardal_set_cb_target_lost(ncl_cmd_cb_target_lost, NULL);
-	NCL_CMD_PRINTF("NFC target registered\n");
+	neardal_set_cb_tag_found(ncl_cmd_cb_tag_found, NULL);
+	neardal_set_cb_tag_lost(ncl_cmd_cb_tag_lost, NULL);
+	NCL_CMD_PRINTF("NFC tag registered\n");
 	neardal_set_cb_record_found(ncl_cmd_cb_record_found, NULL);
 	NCL_CMD_PRINTF("NFC record callback registered\n");
 	sNclCmdCtx.cb_initialized = true;
@@ -437,16 +436,16 @@ static NCLError ncl_cmd_neardal_get_adapter_properties(int argc, char *argv[])
  *****************************************************************************/
 
 /******************************************************************************
- * neardal_get_targets : BEGIN
- * Get targets List
+ * neardal_get_tags : BEGIN
+ * Get tags List
  *****************************************************************************/
-static NCLError ncl_cmd_neardal_get_targets(int argc, char *argv[])
+static NCLError ncl_cmd_neardal_get_tags(int argc, char *argv[])
 {
 	errorCode_t	ec;
 	NCLError	nclErr;
-	char		**tgtArray = NULL;
-	int		tgtLen;
-	int		tgtOff;
+	char		**tagArray = NULL;
+	int		tagLen;
+	int		tagOff;
 
 	if (argc <= 1)
 		return NCLERR_PARSING_PARAMETERS;
@@ -455,17 +454,17 @@ static NCLError ncl_cmd_neardal_get_targets(int argc, char *argv[])
 	if (sNclCmdCtx.cb_initialized == false)
 		ncl_cmd_install_callback();
 
-	ec = neardal_get_targets(argv[1], &tgtArray, &tgtLen);
+	ec = neardal_get_tags(argv[1], &tagArray, &tagLen);
 	if (ec == NEARDAL_SUCCESS) {
-		tgtOff = 0;
-			/* For each target */
-		while (tgtArray[tgtOff] != NULL)
-			NCL_CMD_PRINT(".. Target '%s'\n",
-					tgtArray[tgtOff++]);
+		tagOff = 0;
+			/* For each tag */
+		while (tagArray[tagOff] != NULL)
+			NCL_CMD_PRINT(".. Tag '%s'\n",
+					tagArray[tagOff++]);
 
-		neardal_free_array(&tgtArray);
+		neardal_free_array(&tagArray);
 	} else
-		NCL_CMD_PRINTF("No target\n");
+		NCL_CMD_PRINTF("No tag\n");
 
 	NCL_CMD_PRINT("\nExit with error code %d:%s\n", ec,
 		      neardal_error_get_text(ec));
@@ -478,18 +477,18 @@ static NCLError ncl_cmd_neardal_get_targets(int argc, char *argv[])
 	return nclErr;
 }
 /******************************************************************************
- * neardal_get_targets : END
+ * neardal_get_tags : END
  *****************************************************************************/
 
 /******************************************************************************
- * ncl_cmd_neardal_get_target_properties : BEGIN
- * Read target properties
+ * ncl_cmd_neardal_get_tag_properties : BEGIN
+ * Read tag properties
  *****************************************************************************/
-static NCLError ncl_cmd_neardal_get_target_properties(int argc, char *argv[])
+static NCLError ncl_cmd_neardal_get_tag_properties(int argc, char *argv[])
 {
 	errorCode_t	ec;
-	char		*targetName	= NULL;
-	neardal_target	target;
+	char		*tagName	= NULL;
+	neardal_tag	tag;
 
 	if (argc <= 1)
 		return NCLERR_PARSING_PARAMETERS;
@@ -498,13 +497,13 @@ static NCLError ncl_cmd_neardal_get_target_properties(int argc, char *argv[])
 	if (sNclCmdCtx.cb_initialized == false)
 		ncl_cmd_install_callback();
 
-	targetName = argv[1];
-	ec = neardal_get_target_properties(targetName, &target);
+	tagName = argv[1];
+	ec = neardal_get_tag_properties(tagName, &tag);
 
 	if (ec == NEARDAL_SUCCESS)
-		ncl_cmd_prv_dump_target(target);
+		ncl_cmd_prv_dump_tag(tag);
 	else {
-		NCL_CMD_PRINTF("Read target properties error:%d='%s'.\n", ec,
+		NCL_CMD_PRINTF("Read tag properties error:%d='%s'.\n", ec,
 			       neardal_error_get_text(ec));
 		return NCLERR_LIB_ERROR;
 	}
@@ -514,7 +513,7 @@ static NCLError ncl_cmd_neardal_get_target_properties(int argc, char *argv[])
 	return NCLERR_NOERROR;
 }
 /******************************************************************************
- * ncl_cmd_neardal_get_target_properties : END
+ * ncl_cmd_neardal_get_tag_properties : END
  *****************************************************************************/
 
 /******************************************************************************
@@ -564,7 +563,7 @@ static NCLError ncl_cmd_neardal_get_records(int argc, char *argv[])
 
 /******************************************************************************
  * ncl_cmd_neardal_get_record_properties : BEGIN
- * Read a specific target
+ * Read a specific tag
  *****************************************************************************/
 static NCLError ncl_cmd_neardal_get_record_properties(int argc, char *argv[])
 {
@@ -898,19 +897,19 @@ static NCLCmdInterpretor itFunc[] = {
 
 	{ "get_records",
 	ncl_cmd_neardal_get_records,
-	"Get records list (1st parameter is target name)"},
+	"Get records list (1st parameter is tag name)"},
 
 	{ "get_record_properties",
 	ncl_cmd_neardal_get_record_properties,
 	"Read a specific record. (1st parameter is record name)"},
 
-	{ "get_targets",
-	ncl_cmd_neardal_get_targets,
-	"Get targets list (1st parameter is adapter name)"},
+	{ "get_tags",
+	ncl_cmd_neardal_get_tags,
+	"Get tags list (1st parameter is adapter name)"},
 
-	{ "get_target_properties",
-	ncl_cmd_neardal_get_target_properties,
-	"Get target properties (1st parameter is target name)"},
+	{ "get_tag_properties",
+	ncl_cmd_neardal_get_tag_properties,
+	"Get tag properties (1st parameter is tag name)"},
 
 	{ LISTCMD_NAME,
 	ncl_cmd_list,

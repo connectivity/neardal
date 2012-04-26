@@ -29,9 +29,6 @@
 #include "neardal.h"
 #include "neardal_prv.h"
 
-#include <glib-2.0/glib/glist.h>
-#include <glib-2.0/glib/gerror.h>
-
 neardalCtx neardalMgr = {NULL, NULL, {NULL}, NULL, NULL, NULL, NULL, NULL, NULL,
 NULL, NULL, NULL, NULL, NULL, NULL, 0, NULL};
 
@@ -140,11 +137,11 @@ errorCode_t neardal_set_cb_adapter_property_changed(
  * 'NEARDAL adapter added'.
  * cb_adp_added = NULL to remove actual callback.
  *****************************************************************************/
-errorCode_t neardal_set_cb_target_found(target_cb cb_tgt_found,
+errorCode_t neardal_set_cb_tag_found(tag_cb cb_tag_found,
 					void *user_data)
 {
-	neardalMgr.cb_tgt_found		= cb_tgt_found;
-	neardalMgr.cb_tgt_found_ud	= user_data;
+	neardalMgr.cb_tag_found		= cb_tag_found;
+	neardalMgr.cb_tag_found_ud	= user_data;
 
 	return NEARDAL_SUCCESS;
 }
@@ -154,11 +151,11 @@ errorCode_t neardal_set_cb_target_found(target_cb cb_tgt_found,
  * 'NEARDAL adapter added'.
  * cb_adp_removed = NULL to remove actual callback.
  *****************************************************************************/
-errorCode_t neardal_set_cb_target_lost(target_cb cb_tgt_lost,
+errorCode_t neardal_set_cb_tag_lost(tag_cb cb_tag_lost,
 				       void *user_data)
 {
-	neardalMgr.cb_tgt_lost		= cb_tgt_lost;
-	neardalMgr.cb_tgt_lost_ud	= user_data;
+	neardalMgr.cb_tag_lost		= cb_tag_lost;
+	neardalMgr.cb_tag_lost_ud	= user_data;
 
 	return NEARDAL_SUCCESS;
 }
@@ -166,7 +163,7 @@ errorCode_t neardal_set_cb_target_lost(target_cb cb_tgt_lost,
 
 /******************************************************************************
  * neardal_set_cb_record_found: setup a client callback for
- * 'NEARDAL target record found'.
+ * 'NEARDAL tag record found'.
  * cb_rcd_found = NULL to remove actual callback.
  *****************************************************************************/
 errorCode_t neardal_set_cb_record_found(record_cb cb_rcd_found,
@@ -179,7 +176,7 @@ errorCode_t neardal_set_cb_record_found(record_cb cb_rcd_found,
 }
 
 /******************************************************************************
- * neardal_free_array: free adapters array, targets array or records array
+ * neardal_free_array: free adapters array, tags array or records array
  *****************************************************************************/
 errorCode_t neardal_free_array(char ***array)
 {
@@ -324,7 +321,7 @@ errorCode_t neardal_get_adapter_properties(const char *adpName,
 {
 	errorCode_t	err		= NEARDAL_SUCCESS;
 	AdpProp		*adpProp	= NULL;
-	TgtProp		*target		= NULL;
+	TagProp		*tag		= NULL;
 	int		ct		= 0;	/* counter */
 	gsize		size;
 
@@ -360,22 +357,22 @@ errorCode_t neardal_get_adapter_properties(const char *adpName,
 		}
 	}
 
-	adapter->nbTargets	= (int) adpProp->tgtNb;
-	adapter->targets	= NULL;
-	if (adapter->nbTargets <= 0)
+	adapter->nbTags	= (int) adpProp->tagNb;
+	adapter->tags	= NULL;
+	if (adapter->nbTags <= 0)
 		goto exit;
 
 	err = NEARDAL_ERROR_NO_MEMORY;
-	size = (adapter->nbTargets + 1) * sizeof(char *);
-	adapter->targets = g_try_malloc0(size);
-	if (adapter->targets == NULL)
+	size = (adapter->nbTags + 1) * sizeof(char *);
+	adapter->tags = g_try_malloc0(size);
+	if (adapter->tags == NULL)
 		goto exit;
 
 	ct = 0;
-	while (ct < adapter->nbTargets) {
-		target = g_list_nth_data(adpProp->tgtList, ct);
-		if (target != NULL)
-			adapter->targets[ct++] = g_strdup(target->name);
+	while (ct < adapter->nbTags) {
+		tag = g_list_nth_data(adpProp->tagList, ct);
+		if (tag != NULL)
+			adapter->tags[ct++] = g_strdup(tag->name);
 	}
 	err = NEARDAL_SUCCESS;
 
@@ -386,12 +383,12 @@ exit:
 /******************************************************************************
  * neardal_get_adapter_properties: Get properties of a specific NEARDAL adapter
  *****************************************************************************/
-errorCode_t neardal_get_target_properties(const char *tgtName,
-					  neardal_target *target)
+errorCode_t neardal_get_tag_properties(const char *tagName,
+					  neardal_tag *tag)
 {
 	errorCode_t	err		= NEARDAL_SUCCESS;
 	AdpProp		*adpProp	= NULL;
-	TgtProp		*tgtProp	= NULL;
+	TagProp		*tagProp	= NULL;
 	int		ct		= 0;	/* counter */
 	RcdProp		*record		= NULL;
 	gsize		size;
@@ -399,56 +396,56 @@ errorCode_t neardal_get_target_properties(const char *tgtName,
 	if (neardalMgr.proxy == NULL)
 		neardal_prv_construct(&err);
 
-	if (err != NEARDAL_SUCCESS || tgtName == NULL || target == NULL)
+	if (err != NEARDAL_SUCCESS || tagName == NULL || tag == NULL)
 		goto exit;
 
-	target->records	= NULL;
-	target->tagType	= NULL;
-	err = neardal_mgr_prv_get_adapter((gchar *) tgtName, &adpProp);
+	tag->records	= NULL;
+	tag->tagType	= NULL;
+	err = neardal_mgr_prv_get_adapter((gchar *) tagName, &adpProp);
 	if (err != NEARDAL_SUCCESS)
 		goto exit;
 
-	err = neardal_mgr_prv_get_target(adpProp, (gchar *) tgtName, &tgtProp);
+	err = neardal_mgr_prv_get_tag(adpProp, (gchar *) tagName, &tagProp);
 	if (err != NEARDAL_SUCCESS)
 		goto exit;
 
-	target->name		= (const char *) tgtProp->name;
-	target->type		= (const char *) tgtProp->type;
-	target->readOnly	= (short) tgtProp->readOnly;
-	target->nbRecords	= (int) tgtProp->rcdLen;
-	if (target->nbRecords > 0) {
+	tag->name		= (const char *) tagProp->name;
+	tag->type		= (const char *) tagProp->type;
+	tag->readOnly	= (short) tagProp->readOnly;
+	tag->nbRecords	= (int) tagProp->rcdLen;
+	if (tag->nbRecords > 0) {
 		err = NEARDAL_ERROR_NO_MEMORY;
-		size = (target->nbRecords + 1) * sizeof(char *);
-		target->records = g_try_malloc0(size);
-		if (target->records == NULL)
+		size = (tag->nbRecords + 1) * sizeof(char *);
+		tag->records = g_try_malloc0(size);
+		if (tag->records == NULL)
 			goto exit;
 
 		ct = 0;
-		while (ct < target->nbRecords) {
-			record = g_list_nth_data(tgtProp->rcdList, ct);
+		while (ct < tag->nbRecords) {
+			record = g_list_nth_data(tagProp->rcdList, ct);
 			if (record != NULL)
-				target->records[ct++] = g_strdup(record->name);
+				tag->records[ct++] = g_strdup(record->name);
 		}
 		err = NEARDAL_SUCCESS;
 	}
 
-	target->nbTagTypes = 0;
-	target->tagType = NULL;
+	tag->nbTagTypes = 0;
+	tag->tagType = NULL;
 	/* Count TagTypes */
-	target->nbTagTypes = (int) tgtProp->tagTypeLen;
+	tag->nbTagTypes = (int) tagProp->tagTypeLen;
 
-	if (target->nbTagTypes <= 0)
+	if (tag->nbTagTypes <= 0)
 		goto exit;
 
 	err = NEARDAL_ERROR_NO_MEMORY;
-	size = (target->nbTagTypes + 1) * sizeof(char *);
-	target->tagType = g_try_malloc0(size);
-	if (target->tagType == NULL)
+	size = (tag->nbTagTypes + 1) * sizeof(char *);
+	tag->tagType = g_try_malloc0(size);
+	if (tag->tagType == NULL)
 		goto exit;
 
 	ct = 0;
-	while (ct < target->nbTagTypes) {
-		target->tagType[ct] = g_strdup(tgtProp->tagType[ct]);
+	while (ct < tag->nbTagTypes) {
+		tag->tagType[ct] = g_strdup(tagProp->tagType[ct]);
 		ct++;
 	}
 	err = NEARDAL_SUCCESS;
@@ -458,14 +455,14 @@ exit:
 }
 
  /******************************************************************************
- * neardal_get_record_properties: Get values of a specific target record
+ * neardal_get_record_properties: Get values of a specific tag record
   *****************************************************************************/
 errorCode_t neardal_get_record_properties(const char *recordName,
 					  neardal_record *record)
 {
 	errorCode_t	err		= NEARDAL_SUCCESS;
 	AdpProp		*adpProp	= NULL;
-	TgtProp		*tgtProp	= NULL;
+	TagProp		*tagProp	= NULL;
 	RcdProp		*rcdProp	= NULL;
 
 	if (recordName == NULL || record == NULL)
@@ -481,12 +478,12 @@ errorCode_t neardal_get_record_properties(const char *recordName,
 	if (err != NEARDAL_SUCCESS)
 		goto exit;
 
-	err = neardal_mgr_prv_get_target(adpProp, (gchar *) recordName,
-					 &tgtProp);
+	err = neardal_mgr_prv_get_tag(adpProp, (gchar *) recordName,
+					 &tagProp);
 	if (err != NEARDAL_SUCCESS)
 		goto exit;
 
-	err = neardal_mgr_prv_get_record(tgtProp, (gchar *) recordName,
+	err = neardal_mgr_prv_get_record(tagProp, (gchar *) recordName,
 					 &rcdProp);
 	if (err != NEARDAL_SUCCESS)
 		goto exit;

@@ -11,18 +11,16 @@
 		</method>
 		<method name="StartPoll"/>
 		<method name="StopPoll"/>
-		<method name="Publish">
-			<arg type="a{sv}" direction="in"/>
-		</method>
 		<signal name="PropertyChanged">
 			<arg type="s"/>
 			<arg type="v"/>
 		</signal>
-		<signal name="TargetFound">
+		<signal name="TagFound">
 			<arg type="o"/>
 		</signal>
-		<signal name="TargetLost">
+		<signal name="TagLost">
 			<arg type="o"/>
 		</signal>
 	</interface>
+	<node name="tag0"/>
 </node>

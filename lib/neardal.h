@@ -60,34 +60,34 @@ typedef struct {
 /*! \brief Neard adapter supported protocols list (use  @link
  * neardal_free_array @endlink(& ) to free) */
 	char	**protocols;
-/*! \brief Number of targets managed by this adapter */
-	int	nbTargets;
-/*! \brief Neard adapter targets list (use @link neardal_free_array @endlink
+/*! \brief Number of tags managed by this adapter */
+	int	nbTags;
+/*! \brief Neard adapter tags list (use @link neardal_free_array @endlink
  *(& ) to free) */
-	char	**targets;
+	char	**tags;
 } neardal_adapter;
 
 /*!
- * @brief NEARDAL Target client properties.
+ * @brief NEARDAL Tag client properties.
 */
 typedef struct {
-/*! @brief DBus interface target name (as identifier) */
+/*! @brief DBus interface tag name (as identifier) */
 	const char	*name;
 
-/*! @brief Number of records in target */
+/*! @brief Number of records in tag */
 	int		nbRecords;
-/*! @brief target records list (use @link neardal_free_array @endlink (& ) to
+/*! @brief tag records list (use @link neardal_free_array @endlink (& ) to
  * free) */
 	char		**records;
-/*! @brief Number of supported 'types' in target */
+/*! @brief Number of supported 'types' in tag */
 	int		nbTagTypes;
 /*! @brief types list (use @link neardal_free_array @endlink(& ) to free) */
 	char		**tagType;
-/*! @brief target type */
+/*! @brief tag type */
 	const char	*type;
-/*! @brief Read-Only flag (is target writable?) */
+/*! @brief Read-Only flag (is tag writable?) */
 	short		readOnly;
-} neardal_target;
+} neardal_tag;
 
 /*!
  * @brief NEARDAL Record client properties.
@@ -139,15 +139,15 @@ typedef void (*adapter_cb) (const char *adpName, void *user_data);
 typedef void (*adapter_prop_cb) (char *adpName, char *propName, void * value,
 				 void *user_data);
 
-/** @brief NEARDAL Target Callbacks (TargetFound/Lost)
+/** @brief NEARDAL Tag Callbacks (TagFound/Lost)
 */
 /**
- * @brief Callback prototype for 'NEARDAL target found/lost'
+ * @brief Callback prototype for 'NEARDAL tag found/lost'
  *
- * @param tgtName DBus interface target name (as identifier)
+ * @param tagName DBus interface tag name (as identifier)
  * @param user_data Client user data
  **/
-typedef void (*target_cb) (const char *tgtName, void *user_data);
+typedef void (*tag_cb) (const char *tagName, void *user_data);
 
 /** @brief NEARDAL Record Callbacks ('RecordFound')
 */
@@ -199,35 +199,35 @@ errorCode_t neardal_stop_poll(char *adpName);
  **/
 errorCode_t neardal_get_adapters(char ***array, int *len);
 
-/*! \fn errorCode_t neardal_get_targets(char *adpName, char ***array, int *len)
- * @brief get an array of NEARDAL targets present
+/*! \fn errorCode_t neardal_get_tags(char *adpName, char ***array, int *len)
+ * @brief get an array of NEARDAL tags present
  *
- * @param adpName adapter name (identifier) on which targets list must be
+ * @param adpName adapter name (identifier) on which tags list must be
  * retrieve
- * @param array array of DBus interface target name (as identifier), use @link
+ * @param array array of DBus interface tag name (as identifier), use @link
  * neardal_free_array @endlink(& ) to free
- * @param len (optional), number of targets
+ * @param len (optional), number of tags
  * @return errorCode_t error code
  **/
-errorCode_t neardal_get_targets(char *adpName, char ***array, int *len);
+errorCode_t neardal_get_tags(char *adpName, char ***array, int *len);
 
-/*! \fn errorCode_t neardal_get_records(char *tgtName, char ***array, int *len)
+/*! \fn errorCode_t neardal_get_records(char *tagName, char ***array, int *len)
  * @brief get an array of NEARDAL records present
  *
- * @param tgtName target name (identifier) on which records list must be
+ * @param tagName tag name (identifier) on which records list must be
  * retrieve
  * @param array array of DBus interface record name (as identifier), use @link
  * neardal_free_array @endlink(& ) to free
  * @param len (optional), number of records
  * @return errorCode_t error code
  **/
-errorCode_t neardal_get_records(char *tgtName, char ***array, int *len);
+errorCode_t neardal_get_records(char *tagName, char ***array, int *len);
 
 /*! @fn errorCode_t neardal_free_array(char ***array)
  *
- * @brief free memory used for adapters array, targets array or records array
+ * @brief free memory used for adapters array, tags array or records array
  *
- * @param array adapters array, targets array or records array
+ * @param array adapters array, tags array or records array
  * @return errorCode_t error code
  *
  **/
@@ -282,45 +282,45 @@ errorCode_t neardal_set_cb_adapter_property_changed(
 					adapter_prop_cb cb_adp_property_changed,
 						void *user_data);
 
-/*! \fn errorCode_t neardal_get_target_properties(const char* tgtName,
- * neardal_target *target)
- * @brief Get properties of a specific NEARDAL target
+/*! \fn errorCode_t neardal_get_tag_properties(const char* tagName,
+ * neardal_tag *tag)
+ * @brief Get properties of a specific NEARDAL tag
  *
- * @param tgtName target name (identifier) on which properties must be retrieve
- * @param target Pointer on client target struct to store datas
+ * @param tagName tag name (identifier) on which properties must be retrieve
+ * @param tag Pointer on client tag struct to store datas
  * @return errorCode_t error code
  **/
-errorCode_t neardal_get_target_properties(const char *tgtName,
-					   neardal_target *target);
+errorCode_t neardal_get_tag_properties(const char *tagName,
+					   neardal_tag *tag);
 
-/*! \fn errorCode_t neardal_set_cb_target_found(target_cb cb_tgt_found,
+/*! \fn errorCode_t neardal_set_cb_tag_found(tag_cb cb_tag_found,
  * void * user_data)
- * @brief setup a client callback for 'NEARDAL target found'.
- * cb_tgt_found = NULL to remove actual callback.
+ * @brief setup a client callback for 'NEARDAL tag found'.
+ * cb_tag_found = NULL to remove actual callback.
  *
- * @param cb_tgt_found Client callback 'target found'
+ * @param cb_tag_found Client callback 'tag found'
  * @param user_data Client user data
  * @return errorCode_t error code
  **/
-errorCode_t neardal_set_cb_target_found(target_cb cb_tgt_found,
+errorCode_t neardal_set_cb_tag_found(tag_cb cb_tag_found,
 					 void *user_data);
 
-/*! \fn errorCode_t neardal_set_cb_target_lost(target_cb cb_tgt_lost,
+/*! \fn errorCode_t neardal_set_cb_tag_lost(tag_cb cb_tag_lost,
  * void * user_data)
- * @brief setup a client callback for 'NEARDAL target lost'.
- * cb_tgt_lost = NULL to remove actual callback.
+ * @brief setup a client callback for 'NEARDAL tag lost'.
+ * cb_tag_lost = NULL to remove actual callback.
  *
- * @param cb_tgt_lost Client callback 'target lost'
+ * @param cb_tag_lost Client callback 'tag lost'
  * @param user_data Client user data
  * @return errorCode_t error code
  **/
-errorCode_t neardal_set_cb_target_lost(target_cb cb_tgt_lost,
+errorCode_t neardal_set_cb_tag_lost(tag_cb cb_tag_lost,
 					void *user_data);
 
 
 /*! \fn errorCode_t neardal_get_record_properties(const char *recordName,
  *					      neardal_record *record)
- * @brief Get properties of a specific NEARDAL target record
+ * @brief Get properties of a specific NEARDAL tag record
  *
  * @param recordName DBus interface record name (as identifier)
  * @param record Pointer on client record struct to store datas
@@ -341,7 +341,7 @@ errorCode_t neardal_publish(neardal_record *record);
 
 /*! \fn errorCode_t neardal_set_cb_record_found( record_cb cb_rcd_found,
  * void * user_data)
- * @brief Setup a client callback for 'NEARDAL target record found'.
+ * @brief Setup a client callback for 'NEARDAL tag record found'.
  * cb_rcd_found = NULL to remove actual callback
  *
  * @param cb_rcd_found Client callback 'record found'
