@@ -49,7 +49,7 @@ dist_neardalheaders_HEADERS =	neardal.h \
 				neardal_errors.h
 
 CLEANFILES = $(BUILT_SOURCES)
-EXTRA_DIST = interface/org.neard.Manager.xml interface/org.neard.Adapter.xml interface/org.neard.Target.xml interface/org.neard.Record.xml
+EXTRA_DIST = interface/org.neard.Manager.xml interface/org.neard.Adapter.xml interface/org.neard.Tag.xml interface/org.neard.Record.xml
 
 lib_LTLIBRARIES =		libneardal.la
 libneardal_la_SOURCES =	neardal.c \
