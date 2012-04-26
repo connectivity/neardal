@@ -38,22 +38,6 @@ autoreconf --force --install
 %configure --prefix=/usr
 make
   
-%package dev
-Summary:    Headers for neardal
-Group:      Development/Libraries
-Requires:   %{name} = %{version}-%{release}
-
-%description dev
-Development headers and libraries for neardal
-
-%package ncl
-Summary:    Neardal Command Line: Simple command line interpretor for neardal/Neard
-Group:      Development/Libraries
-Requires:   %{name} = ncl-%{version}-%{release}
-
-%description ncl
-Neardal Command Line: Simple command line interpretor for neardal/Neard
-
 %install      
 rm -rf %{buildroot}
 %make_install
@@ -85,12 +69,4 @@ rm -rf %{buildroot}
 # pkg-config files
 %{libneardal_pkg}/*.pc
 %changelog
-
-%files dev
-%{libneardal_inc}/*.h
-%{libneardal_pkg}/neardal.pc
-
-%files ncl
-%{_bindir}/ncl
-
 
