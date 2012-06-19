@@ -29,7 +29,7 @@ extern "C" {
 /******************************************************************************
  * neardal_tools_prv_free_gerror: freeing gerror in neardal context
  *****************************************************************************/
-void neardal_tools_prv_free_gerror(neardal_t neardalMgr);
+void neardal_tools_prv_free_gerror(GError **gerror);
 
 /******************************************************************************
  * neardal_tools_prv_cmp_path: Compare dbus path.

@@ -67,13 +67,6 @@ errorCode_t neardal_adp_add(gchar *adapterName);
  *****************************************************************************/
 errorCode_t neardal_adp_remove(AdpProp *adpProp);
 
-/******************************************************************************
- * neardal_adp_publish: Creates and publish NDEF record to be written to
- * an NFC tag
- *****************************************************************************/
-errorCode_t neardal_adp_publish(AdpProp *adpProp, RcdProp *rcd);
-
-
 #ifdef __cplusplus
 }
 #endif	/* __cplusplus */

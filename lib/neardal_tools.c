@@ -33,13 +33,13 @@
 /******************************************************************************
  * neardal_tools_prv_free_gerror: freeing gerror in neardal context
  *****************************************************************************/
-void neardal_tools_prv_free_gerror(neardal_t neardalMgr)
+void neardal_tools_prv_free_gerror(GError **gerror)
 {
-	g_assert(neardalMgr != NULL);
+	g_assert(gerror != NULL);
 
-	if (neardalMgr->gerror != NULL)
-		g_error_free(neardalMgr->gerror);
-	neardalMgr->gerror = NULL;
+	if (*gerror != NULL)
+		g_error_free(*gerror);
+	*gerror = NULL;
 }
 
 /******************************************************************************

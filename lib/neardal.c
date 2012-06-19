@@ -58,12 +58,12 @@ void neardal_prv_construct(errorCode_t *ec)
 
 			/* No Neard daemon, destroying neardal object... */
 			if (err == NEARDAL_ERROR_DBUS_CANNOT_CREATE_PROXY)
-				neardal_tools_prv_free_gerror(&neardalMgr);
+				neardal_tools_prv_free_gerror(&neardalMgr.gerror);
 		}
 	} else {
 		NEARDAL_TRACE_ERR("Unable to connect to dbus: %s\n",
 				 neardalMgr.gerror->message);
-		neardal_tools_prv_free_gerror(&neardalMgr);
+		neardal_tools_prv_free_gerror(&neardalMgr.gerror);
 		err = NEARDAL_ERROR_DBUS;
 	}
 
@@ -83,7 +83,7 @@ void neardal_destroy(void)
 {
 	NEARDAL_TRACEIN();
 	if (neardalMgr.proxy != NULL) {
-		neardal_tools_prv_free_gerror(&neardalMgr);
+		neardal_tools_prv_free_gerror(&neardalMgr.gerror);
 		neardal_mgr_destroy();
 	}
 }
@@ -231,7 +231,7 @@ errorCode_t neardal_start_poll(char *adpName)
 					, neardalMgr.gerror->code
 					, neardalMgr.gerror->message);
 			err = NEARDAL_ERROR_DBUS_INVOKE_METHOD_ERROR;
-			neardal_tools_prv_free_gerror(&neardalMgr);
+			neardal_tools_prv_free_gerror(&neardalMgr.gerror);
 		}
 	} else
 		err = NEARDAL_ERROR_POLLING_ALREADY_ACTIVE;
@@ -271,7 +271,7 @@ errorCode_t neardal_stop_poll(char *adpName)
 					, neardalMgr.gerror->code
 					, neardalMgr.gerror->message);
 			err = NEARDAL_ERROR_DBUS_INVOKE_METHOD_ERROR;
-			neardal_tools_prv_free_gerror(&neardalMgr);
+			neardal_tools_prv_free_gerror(&neardalMgr.gerror);
 		}
 	}
 
@@ -280,12 +280,13 @@ exit:
 }
 
 /******************************************************************************
- * neardal_publish: Write NDEF record to an NFC tag
+ * neardal_write: Write NDEF record to an NFC tag
  *****************************************************************************/
-errorCode_t neardal_publish(neardal_record *record)
+errorCode_t neardal_write(neardal_record *record)
 {
 	errorCode_t	err	= NEARDAL_SUCCESS;
 	AdpProp		*adpProp;
+	TagProp		*tagProp;
 	RcdProp		rcd;
 
 
@@ -298,6 +299,10 @@ errorCode_t neardal_publish(neardal_record *record)
 	err = neardal_mgr_prv_get_adapter((gchar *) record->name, &adpProp);
 	if (err != NEARDAL_SUCCESS)
 		goto exit;
+	err = neardal_mgr_prv_get_tag(adpProp, (gchar *) record->name, &tagProp);
+	if (err != NEARDAL_SUCCESS)
+		goto exit;
+	
 	rcd.name		= (gchar *) record->name;
 	rcd.action		= (gchar *) record->action;
 	rcd.encoding		= (gchar *) record->encoding;
@@ -308,7 +313,7 @@ errorCode_t neardal_publish(neardal_record *record)
 	rcd.uriObjSize		= record->uriObjSize;
 	rcd.mime		= (gchar *) record->mime;
 
-	 neardal_adp_publish(adpProp, &rcd);
+	 neardal_tag_write(tagProp, &rcd);
 exit:
 	return err;
 }

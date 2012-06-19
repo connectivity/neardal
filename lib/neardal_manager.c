@@ -137,7 +137,7 @@ static errorCode_t neardal_mgr_prv_get_all_adapters(gchar ***adpArray,
 		errCode = NEARDAL_ERROR_DBUS_CANNOT_INVOKE_METHOD;
 		NEARDAL_TRACE_ERR("%d:%s\n", neardalMgr.gerror->code,
 				 neardalMgr.gerror->message);
-		neardal_tools_prv_free_gerror(&neardalMgr);
+		neardal_tools_prv_free_gerror(&neardalMgr.gerror);
 	}
 
 	return errCode;
@@ -301,7 +301,7 @@ errorCode_t neardal_mgr_create(void)
 			"Unable to create Neard Manager Proxy (%d:%s)\n",
 				 neardalMgr.gerror->code,
 				neardalMgr.gerror->message);
-		neardal_tools_prv_free_gerror(&neardalMgr);
+		neardal_tools_prv_free_gerror(&neardalMgr.gerror);
 		return NEARDAL_ERROR_DBUS_CANNOT_CREATE_PROXY;
 	}
 

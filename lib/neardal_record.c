@@ -111,7 +111,7 @@ static errorCode_t neardal_rcd_prv_init(RcdProp *rcd)
 			"Unable to create Neard Record Proxy (%d:%s)\n",
 				 neardalMgr.gerror->code,
 				neardalMgr.gerror->message);
-		neardal_tools_prv_free_gerror(&neardalMgr);
+		neardal_tools_prv_free_gerror(&neardalMgr.gerror);
 		return NEARDAL_ERROR_DBUS_CANNOT_CREATE_PROXY;
 	}
 

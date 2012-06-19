@@ -35,11 +35,6 @@ extern "C" {
 #endif	/* __cplusplus */
 
 
-/*! @typedef neardal_t
- *  @brief NEARDAL Context
- */
-typedef struct neardalCtx	*neardal_t;
-
 /*!
  * @addtogroup NEARDAL_COMMON_TYPES Types
  * @ingroup NEARDAL_COMMON
@@ -233,8 +228,8 @@ errorCode_t neardal_get_records(char *tagName, char ***array, int *len);
  **/
 errorCode_t neardal_free_array(char ***array);
 
-/*! \fn errorCode_t neardal_get_adapter_properties(neardal_t neardalMgr,
- * const char* adpName, neardal_adapter *adapter)
+/*! \fn errorCode_t neardal_get_adapter_properties(const char* adpName, 
+ * neardal_adapter *adapter)
  * @brief Get properties of a specific NEARDAL adapter
  *
  * @param adpName DBus interface adapter name (as identifier)
@@ -329,14 +324,13 @@ errorCode_t neardal_set_cb_tag_lost(tag_cb cb_tag_lost,
 errorCode_t neardal_get_record_properties(const char *recordName,
 					  neardal_record *record);
 
-/*! \fn errorCode_t neardal_publish(neardal_t neardalMgr,
- * neardal_record *record)
+/*! \fn errorCode_t neardal_write(neardal_record *record)
  * @brief Write NDEF record to an NFC tag
  *
  * @param record Pointer on client record used to create NDEF record
  * @return errorCode_t error code
  **/
-errorCode_t neardal_publish(neardal_record *record);
+errorCode_t neardal_write(neardal_record *record);
 
 
 /*! \fn errorCode_t neardal_set_cb_record_found( record_cb cb_rcd_found,

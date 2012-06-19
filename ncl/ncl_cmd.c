@@ -597,10 +597,10 @@ static NCLError ncl_cmd_neardal_get_record_properties(int argc, char *argv[])
  *****************************************************************************/
 
 /******************************************************************************
- * ncl_cmd_neardal_publish : BEGIN
+ * ncl_cmd_neardal_write : BEGIN
  * write NDEF record to tag
  *****************************************************************************/
-static NCLError ncl_cmd_neardal_publish(int argc, char *argv[])
+static NCLError ncl_cmd_neardal_write(int argc, char *argv[])
 {
 	errorCode_t		ec = NEARDAL_SUCCESS;
 	NCLError		nclErr;
@@ -611,8 +611,8 @@ static GOptionEntry options[] = {
 		{ "act", 'c', 0, G_OPTION_ARG_STRING, &rcd.action
 				  , "Action", "save"},
 
-		{ "adp", 'a', 0, G_OPTION_ARG_STRING, &rcd.name
-				  , "Adapter name", "/org/neard/nfc0"},
+		{ "tag", 'a', 0, G_OPTION_ARG_STRING, &rcd.name
+				  , "Tag name", "/org/neard/nfc0/tag0"},
 
 		{ "encoding", 'e', 0, G_OPTION_ARG_STRING, &rcd.encoding
 				, "Encoding", "UTF-8" },
@@ -638,21 +638,22 @@ static GOptionEntry options[] = {
 		{ NULL, 0, 0, 0, NULL, NULL, NULL} /* End of List */
 	};
 
-	if (argc <= 1)
-		return NCLERR_PARSING_PARAMETERS;
-
+	if (argc > 1) {
 	/* Parse options */
-	memset(&rcd, 0, sizeof(neardal_record));
-	nclErr = ncl_cmd_prv_parseOptions(&argc, &argv, options);
-	if (nclErr == NCLERR_NOERROR_HELP_DISP) {
+		memset(&rcd, 0, sizeof(neardal_record));
+		nclErr = ncl_cmd_prv_parseOptions(&argc, &argv, options);
+	} else
+		nclErr = NCLERR_PARSING_PARAMETERS;
+	
+	if (nclErr != NCLERR_NOERROR) {
 		ncl_cmd_print(stdout, "Sample (Type 'Text'):");
-		ncl_cmd_print(stdout, "e.g. < publish --type Text --lang en-US \
+		ncl_cmd_print(stdout, "e.g. < write --type Text --lang en-US \
 --encoding UTF-8 --rep \"Simple text\" --adp /org/neard/nfc0 >\n");
 		ncl_cmd_print(stdout, "Sample (Type 'URI'):");
-		ncl_cmd_print(stdout, "e.g. < publish --type URI \
+		ncl_cmd_print(stdout, "e.g. < write --type URI \
 --uri=http://www.nfc-forum.com  --adp /org/neard/nfc0 >\n");
 		ncl_cmd_print(stdout, "Sample (Type 'SmartPoster'):");
-		ncl_cmd_print(stdout, "e.g. < publish --type=SmartPoster \
+		ncl_cmd_print(stdout, "e.g. < write --type=SmartPoster \
 --uri=http://www.nfc-forum.com > --adp /org/neard/nfc0 >\n");
 	}
 
@@ -663,7 +664,7 @@ static GOptionEntry options[] = {
 	if (sNclCmdCtx.cb_initialized == false)
 		ncl_cmd_install_callback();
 
-	ec = neardal_publish(&rcd);
+	ec = neardal_write(&rcd);
 
 exit:
 	NCL_CMD_PRINT("\nExit with error code %d:%s\n", ec,
@@ -688,7 +689,7 @@ exit:
 	return nclErr;
 }
 /******************************************************************************
- * ncl_cmd_neardal_publish : END
+ * ncl_cmd_neardal_write : END
  *****************************************************************************/
 
 
@@ -915,8 +916,8 @@ static NCLCmdInterpretor itFunc[] = {
 	ncl_cmd_list,
 	"List all available commands. 'cmd' --help -h /? for a specific help" },
 
-	{ "publish",
-	ncl_cmd_neardal_publish,
+	{ "write",
+	ncl_cmd_neardal_write,
 	"Creates a NDEF record from parametersto be written to an NFC tag"},
 
 	{ "quit",

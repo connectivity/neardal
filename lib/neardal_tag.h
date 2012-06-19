@@ -66,6 +66,13 @@ errorCode_t neardal_tag_add(gchar *tagName, void * parent);
  *****************************************************************************/
 void neardal_tag_remove(TagProp *tagProp);
 
+/******************************************************************************
+ * neardal_tag_write: Creates and write NDEF record to be written to
+ * an NFC tag
+ *****************************************************************************/
+errorCode_t neardal_tag_write(TagProp *tagProp, RcdProp *rcd);
+
+
 
 #ifdef __cplusplus
 }
