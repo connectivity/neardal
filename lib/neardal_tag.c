@@ -251,7 +251,7 @@ errorCode_t neardal_get_tags(char *adpName, char ***array, int *len)
 
 	tagNb = g_list_length(adpProp->tagList);
 	if (tagNb <= 0)
-		return NEARDAL_ERROR_NO_TARGET;
+		return NEARDAL_ERROR_NO_TAG;
 
 	err = NEARDAL_ERROR_NO_MEMORY;
 	tags = g_try_malloc0((tagNb + 1) * sizeof(char *));

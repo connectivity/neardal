@@ -208,7 +208,7 @@ errorCode_t neardal_mgr_prv_get_adapter_from_proxy(orgNeardAdp *adpProxy,
 errorCode_t neardal_mgr_prv_get_tag(AdpProp *adpProp, gchar *tagName,
 				       TagProp **tagProp)
 {
-	errorCode_t	errCode	= NEARDAL_ERROR_NO_TARGET;
+	errorCode_t	errCode	= NEARDAL_ERROR_NO_TAG;
 	guint		len;
 	TagProp		*tag	= NULL;
 	GList		*tmpList;

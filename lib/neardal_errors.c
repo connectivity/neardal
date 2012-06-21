@@ -48,7 +48,7 @@ char *neardal_error_get_text(errorCode_t ec)
 	case NEARDAL_ERROR_NO_ADAPTER:
 		return "No NFC adapter found...";
 
-	case NEARDAL_ERROR_NO_TARGET:
+	case NEARDAL_ERROR_NO_TAG:
 		return "No NFC tag found...";
 
 	case NEARDAL_ERROR_NO_RECORD:

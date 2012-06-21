@@ -62,7 +62,7 @@ typedef		int	errorCode_t;
 /*! @brief Neard service, polling already active */
 #define NEARDAL_ERROR_POLLING_ALREADY_ACTIVE		((errorCode_t) -8)
 /*! @brief Neard service, no NEARDAL tag present */
-#define NEARDAL_ERROR_NO_TARGET			((errorCode_t) -9)
+#define NEARDAL_ERROR_NO_TAG			((errorCode_t) -9)
 /*! @brief Neard service, no NEARDAL record present */
 #define NEARDAL_ERROR_NO_RECORD			((errorCode_t) -10)
 
