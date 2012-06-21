@@ -18,8 +18,8 @@
  *
  */
 
-#ifndef __NEARDAL_TARGET_H
-#define __NEARDAL_TARGET_H
+#ifndef __NEARDAL_TAG_H
+#define __NEARDAL_TAG_H
 
 #include "neard_tag_proxy.h"
 #include "neardal_record.h"
@@ -28,7 +28,7 @@
 extern "C" {
 #endif	/* __cplusplus */
 
-#define NEARD_TARGETS_IF_NAME		"org.neard.Tag"
+#define NEARD_TAGS_IF_NAME		"org.neard.Tag"
 #define NEARD_TGT_SIG_PROPCHANGED	"property-changed"
 
 /* NEARDAL Tag Properties */
@@ -78,4 +78,4 @@ errorCode_t neardal_tag_write(TagProp *tagProp, RcdProp *rcd);
 }
 #endif	/* __cplusplus */
 
-#endif /* __NEARDAL_TARGET_H */
+#endif /* __NEARDAL_TAG_H */

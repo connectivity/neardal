@@ -4,28 +4,16 @@ neardal_LT_AGE = 0
 
 #Rule to generate the binding headers
 neard_manager_proxy.h:  interface/org.neard.Manager.xml
-	gdbus-codegen --generate-c-code neard_manager_proxy \
-			--c-namespace orgNeardMgr \
-			--interface-prefix org.neard.Manager \
-			$<
+	dbus-binding-tool --mode=glib-client $<> $@
 	
 neard_adapter_proxy.h:  interface/org.neard.Adapter.xml
-	gdbus-codegen --generate-c-code neard_adapter_proxy \
-			--c-namespace orgNeardAdp \
-			--interface-prefix org.neard.Adapter \
-			$<
+	dbus-binding-tool --mode=glib-client $<> $@
 
 neard_tag_proxy.h:  	interface/org.neard.Tag.xml
-	gdbus-codegen --generate-c-code neard_tag_proxy \
-			--c-namespace orgNeardTag \
-			--interface-prefix org.neard.Tag \
-			$<
+	dbus-binding-tool --mode=glib-client $<> $@
 
 neard_record_proxy.h:  interface/org.neard.Record.xml
-	gdbus-codegen --generate-c-code neard_record_proxy \
-			--c-namespace orgNeardRcd \
-			--interface-prefix org.neard.Record \
-			$<
+	dbus-binding-tool --mode=glib-client $<> $@
 
 BUILT_SOURCES =	neard_manager_proxy.h \
 		neard_adapter_proxy.h \

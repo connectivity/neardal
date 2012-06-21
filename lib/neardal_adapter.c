@@ -102,7 +102,7 @@ static void neardal_adp_prv_cb_property_changed(orgNeardAdp *proxy,
 						void        *user_data)
 {
 	AdpProp		*adpProp	= NULL;
-	errorCode_t	errCode		= NEARDAL_ERROR_NO_TARGET;
+	errorCode_t	errCode		= NEARDAL_ERROR_NO_TAG;
 	char		*tagName	= NULL;
 	void		*clientValue	= NULL;
 	TagProp		*tagProp	= NULL;
@@ -166,7 +166,7 @@ static void neardal_adp_prv_cb_property_changed(orgNeardAdp *proxy,
 			errCode = neardal_mgr_prv_get_tag(adpProp,
 							     tagName,
 							     &tagProp);
-			if (errCode == NEARDAL_ERROR_NO_TARGET) {
+			if (errCode == NEARDAL_ERROR_NO_TAG) {
 				neardal_adp_prv_cb_tag_found(NULL,
 								tagName,
 								adpProp);
@@ -266,7 +266,7 @@ exit:
 errorCode_t neardal_adp_prv_get_tag(AdpProp *adpProp, gchar *tagName,
 				       TagProp **tagProp)
 {
-	errorCode_t	errCode	= NEARDAL_ERROR_NO_TARGET;
+	errorCode_t	errCode	= NEARDAL_ERROR_NO_TAG;
 	guint		len = 0;
 	TagProp		*tag;
 

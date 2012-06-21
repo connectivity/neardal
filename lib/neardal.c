@@ -501,7 +501,7 @@ errorCode_t neardal_get_record_properties(const char *recordName,
 	record->type		= (const char *) rcdProp->type;
 	record->representation	= (const char *) rcdProp->representation;
 	record->uri		= (const char *) rcdProp->uri;
-	record->uriObjSize	= (uint) rcdProp->uriObjSize;
+	record->uriObjSize	= (unsigned int) rcdProp->uriObjSize;
 	record->mime		= (const char *) rcdProp->mime;
 
 exit:
