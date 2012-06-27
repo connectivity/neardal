@@ -29,17 +29,18 @@ extern "C" {
 #endif	/* __cplusplus */
 
 #define NEARD_TAGS_IF_NAME		"org.neard.Tag"
-#define NEARD_TGT_SIG_PROPCHANGED	"property-changed"
+#define NEARD_TAG_SIG_PROPCHANGED	"PropertyChanged"
 
 /* NEARDAL Tag Properties */
 typedef struct {
-	orgNeardTag	*proxy;	  /* proxy to Neard NEARDAL Tag interface */
+	DBusGProxy	*proxy;	  /* proxy to Neard NEARDAL Tag interface */
 	gchar		*name;	  /* DBus interface name (as identifier) */
 	void		*parent;  /* parent (adapter ) */
 	gboolean	notified; /* Already notified to client? */
 
 	gchar		*type;
 
+	GPtrArray	*rcdArray;	/* temporary storage */
 	gsize		rcdLen;
 	GList		*rcdList;	/* tag's records paths */
 

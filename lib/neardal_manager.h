@@ -31,9 +31,9 @@ extern "C" {
 #define NEARD_MGR_PATH				"/"
 #define NEARD_MGR_IF_NAME			"org.neard.Manager"
 #define NEARD_MGR_SECTION_ADAPTERS		"Adapters"
-#define NEARD_MGR_SIG_PROPCHANGED		"property-changed"
-#define NEARD_MGR_SIG_ADP_ADDED			"adapter-added"
-#define NEARD_MGR_SIG_ADP_RM			"adapter-removed"
+#define NEARD_MGR_SIG_PROPCHANGED		"PropertyChanged"
+#define NEARD_MGR_SIG_ADP_ADDED			"AdapterAdded"
+#define NEARD_MGR_SIG_ADP_RM			"AdapterRemoved"
 
 /* NEARDAL Manager Properties */
 typedef struct {
@@ -48,7 +48,7 @@ errorCode_t neardal_mgr_prv_get_adapter(gchar *adpName, AdpProp **adpProp);
 /******************************************************************************
  * neardal_mgr_prv_get_adapter_from_proxy: Get NEARDAL Adapter from proxy
  *****************************************************************************/
-errorCode_t neardal_mgr_prv_get_adapter_from_proxy(orgNeardAdp *adpProxy,
+errorCode_t neardal_mgr_prv_get_adapter_from_proxy(DBusGProxy *adpProxy,
 							AdpProp **adpProp);
 
 /******************************************************************************

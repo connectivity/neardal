@@ -22,6 +22,8 @@
 #include <string.h>
 #include <glib.h>
 #include <glib-object.h>
+#include <dbus/dbus-glib.h>
+#include "dbus/dbus.h"
 
 #include "neard_manager_proxy.h"
 #include "neard_adapter_proxy.h"
@@ -46,7 +48,7 @@ void neardal_prv_construct(errorCode_t *ec)
 	NEARDAL_TRACEIN();
 	/* Create DBUS connection */
 	g_type_init();
-	neardalMgr.conn = g_bus_get_sync(G_BUS_TYPE_SYSTEM, NULL,
+	neardalMgr.conn = dbus_g_bus_get(DBUS_BUS_SYSTEM,
 					   &neardalMgr.gerror);
 	if (neardalMgr.conn != NULL) {
 		/* We have a DBUS connection, create proxy on Neard Manager */
@@ -221,7 +223,7 @@ errorCode_t neardal_start_poll(char *adpName)
 		goto exit;
 
 	if (!adpProp->polling) {
-		org_neard_adp__call_start_poll_sync(adpProp->proxy, NULL,
+		org_neard_Adapter_start_poll(adpProp->proxy, 
 						    &neardalMgr.gerror);
 
 		err = NEARDAL_SUCCESS;
@@ -261,8 +263,8 @@ errorCode_t neardal_stop_poll(char *adpName)
 		goto exit;
 
 	if (adpProp->polling) {
-		org_neard_adp__call_stop_poll_sync(adpProp->proxy, NULL,
-						   &neardalMgr.gerror);
+		org_neard_Adapter_stop_poll(adpProp->proxy, 
+					    &neardalMgr.gerror);
 
 		err = NEARDAL_SUCCESS;
 		if (neardalMgr.gerror != NULL) {
@@ -313,7 +315,7 @@ errorCode_t neardal_write(neardal_record *record)
 	rcd.uriObjSize		= record->uriObjSize;
 	rcd.mime		= (gchar *) record->mime;
 
-	 neardal_tag_write(tagProp, &rcd);
+// 	 neardal_tag_write(tagProp, &rcd);
 exit:
 	return err;
 }

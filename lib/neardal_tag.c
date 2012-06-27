@@ -33,29 +33,57 @@
  * neardal_tag_prv_cb_property_changed: Callback called when a NFC tag
  * property is changed
  *****************************************************************************/
-static void neardal_tag_prv_cb_property_changed(orgNeardTag *proxy,
-						const gchar *arg_unnamed_arg0,
-						GVariant *arg_unnamed_arg1,
+static void neardal_tag_prv_cb_property_changed(DBusGProxy *proxy,
+					       const char	*arg_unnamed_arg0,
+					       GValue		*gvalue,
 						void		*user_data)
 {
-	errorCode_t	errCode		= NEARDAL_SUCCESS;
+	GPtrArray	*pathsGpa	= NULL;
+	errorCode_t	err		= NEARDAL_ERROR_NO_TAG;
 	TagProp		*tagProp	= user_data;
 
 	(void) proxy; /* remove warning */
-	(void) arg_unnamed_arg1; /* remove warning */
 
 	NEARDAL_TRACEIN();
 
 	if (tagProp == NULL || arg_unnamed_arg0 == NULL)
 		return;
 
-	NEARDAL_TRACEF("str0='%s'\n", arg_unnamed_arg0);
-	NEARDAL_TRACEF("arg_unnamed_arg1=%s (%s)\n",
-		       g_variant_print (arg_unnamed_arg1, TRUE),
-		       g_variant_get_type_string(arg_unnamed_arg1));
+	NEARDAL_TRACEF("arg_unnamed_arg0='%s'\n", arg_unnamed_arg0);
+	if (!strcmp(arg_unnamed_arg0, "Tags")) {
+		if (!G_VALUE_HOLDS(gvalue, DBUS_TYPE_G_ARRAY_OF_OBJECT_PATH)) {
+			NEARDAL_TRACE_ERR("Unexpected type: %s",
+					  G_VALUE_TYPE_NAME(&gvalue));
+			err = NEARDAL_ERROR_DBUS;
+			return;
+		}
 
-	NEARDAL_TRACE_ERR("Exit with error code %d:%s\n", errCode,
-			  neardal_error_get_text(errCode));
+		/* Extract the tags arrays List from the GValue */
+		err = NEARDAL_ERROR_NO_TAG;
+		pathsGpa = g_value_get_boxed(gvalue);
+		if (pathsGpa == NULL)
+			goto error;
+
+		if (pathsGpa->len <= 0)
+			goto error;
+
+		/* Getting last tag */
+		gvalue = g_ptr_array_index(pathsGpa, pathsGpa->len - 1);
+		if (gvalue != NULL)
+			err = NEARDAL_SUCCESS;
+		else
+			err = NEARDAL_ERROR_NO_TAG;
+	}
+
+	return;
+
+error:
+	if (err != NEARDAL_SUCCESS) {
+		NEARDAL_TRACE_ERR("Exit with error code %d:%s\n", err,
+				neardal_error_get_text(err));
+		if (pathsGpa != NULL)
+			g_boxed_free(G_TYPE_STRV, pathsGpa);
+	}
 
 	return;
 }
@@ -65,68 +93,65 @@ static void neardal_tag_prv_cb_property_changed(orgNeardTag *proxy,
  *****************************************************************************/
 static errorCode_t neardal_tag_prv_read_properties(TagProp *tagProp)
 {
-	errorCode_t	errCode		= NEARDAL_SUCCESS;
+	errorCode_t	err			= NEARDAL_SUCCESS;
+	GHashTable	*neardTagPropHash	= NULL;
 	GError		*gerror		= NULL;
 	GVariant	*tmp		= NULL;
-	GVariant	*tmpOut		= NULL;
 	gsize		len;
-	gchar		**rcdArray	= NULL;
+	GPtrArray	*rcdArray		= NULL;
 
 	NEARDAL_TRACEIN();
 	g_assert(tagProp != NULL);
 	g_assert(tagProp->proxy != NULL);
 
-	org_neard_tag__call_get_properties_sync(tagProp->proxy, &tmp, NULL,
+	org_neard_Tag_get_properties(tagProp->proxy,
+					&neardTagPropHash,
 						&gerror);
 	if (gerror != NULL) {
-		errCode = NEARDAL_ERROR_DBUS_CANNOT_INVOKE_METHOD;
+		err = NEARDAL_ERROR_DBUS_CANNOT_INVOKE_METHOD;
 		NEARDAL_TRACE_ERR(
 			"Unable to read tag's properties (%d:%s)\n",
 				 gerror->code, gerror->message);
 		g_error_free(gerror);
 		goto exit;
 	}
-	NEARDAL_TRACE_LOG("Reading:\n%s\n", g_variant_print(tmp, TRUE));
-	tmpOut = g_variant_lookup_value(tmp, "Records", G_VARIANT_TYPE_ARRAY);
-	if (tmpOut != NULL) {
-		rcdArray = g_variant_dup_objv(tmpOut, &len);
-		tagProp->rcdLen = len;
-		if (len == 0) {
-			g_strfreev(rcdArray);
-			rcdArray = NULL;
-		} else {
-			guint len = 0;
+	err = neardal_tools_prv_hashtable_get(neardTagPropHash,
+						   "Records",
+					    DBUS_TYPE_G_ARRAY_OF_OBJECT_PATH,
+					    &rcdArray);
+	if (err == NEARDAL_SUCCESS){
 			char *rcdName;
+		neardal_tools_prv_g_ptr_array_copy(&tagProp->rcdArray, rcdArray);
 
+		tagProp->rcdLen = rcdArray->len;
 			while (len < tagProp->rcdLen &&
-				errCode == NEARDAL_SUCCESS) {
-				rcdName = rcdArray[len++];
-				errCode = neardal_rcd_add(rcdName, tagProp);
-			}
+			err == NEARDAL_SUCCESS) {
+			rcdName = g_ptr_array_index(rcdArray, len++);
+			err = neardal_rcd_add(rcdName, tagProp);
 		}
 	}
 
-	tmpOut = g_variant_lookup_value(tmp, "TagType", G_VARIANT_TYPE_ARRAY);
-	if (tmpOut != NULL) {
-		tagProp->tagType = g_variant_dup_strv(tmpOut, &len);
-		tagProp->tagTypeLen = len;
-		if (len == 0) {
-			g_strfreev(tagProp->tagType);
-			tagProp->tagType = NULL;
-		}
-	}
+	err = neardal_tools_prv_hashtable_get(neardTagPropHash,
+						   "TagType",
+						    G_TYPE_STRV, &tmp);
+	if (err == NEARDAL_SUCCESS)
+		tagProp->tagType = g_boxed_copy(G_TYPE_STRV, tmp);
 
-	tmpOut = g_variant_lookup_value(tmp, "Type", G_VARIANT_TYPE_STRING);
-	if (tmpOut != NULL)
-		tagProp->type = g_variant_dup_string(tmpOut, NULL);
+	err = neardal_tools_prv_hashtable_get(neardTagPropHash, "Type",
+						   G_TYPE_STRING, &tmp);
+	if (err == NEARDAL_SUCCESS)
+		tagProp->type = g_strdup((const gchar*) tmp);
 
-	tmpOut = g_variant_lookup_value(tmp, "ReadOnly",
-					G_VARIANT_TYPE_BOOLEAN);
-	if (tmpOut != NULL)
-		tagProp->readOnly = g_variant_get_boolean(tmpOut);
+	err = neardal_tools_prv_hashtable_get(neardTagPropHash,
+						   "ReadOnly", G_TYPE_BOOLEAN,
+						   &tmp);
+	if (err == NEARDAL_SUCCESS)
+		tagProp->readOnly = (gboolean) tmp;
+
+	g_hash_table_destroy(neardTagPropHash);
 
 exit:
-	return errCode;
+	return err;
 }
 
 /******************************************************************************
@@ -136,13 +161,16 @@ exit:
  *****************************************************************************/
 static errorCode_t neardal_tag_prv_init(TagProp *tagProp)
 {
-	errorCode_t	errCode = NEARDAL_SUCCESS;
+	errorCode_t	err = NEARDAL_SUCCESS;
+//	guint		len = 0;
+//	char		*rcdName;
 
 	NEARDAL_TRACEIN();
 	g_assert(tagProp != NULL);
 
 	if (tagProp->proxy != NULL) {
-		g_signal_handlers_disconnect_by_func(tagProp->proxy,
+		dbus_g_proxy_disconnect_signal(tagProp->proxy,
+					       NEARD_TAG_SIG_PROPCHANGED,
 				G_CALLBACK(neardal_tag_prv_cb_property_changed),
 						     NULL);
 		g_object_unref(tagProp->proxy);
@@ -150,32 +178,50 @@ static errorCode_t neardal_tag_prv_init(TagProp *tagProp)
 	}
 	tagProp->proxy = NULL;
 
-	tagProp->proxy = org_neard_tag__proxy_new_sync(neardalMgr.conn,
-					G_DBUS_OBJECT_MANAGER_CLIENT_FLAGS_NONE,
-							NEARD_DBUS_SERVICE,
+	err = neardal_tools_prv_create_proxy(neardalMgr.conn,
+						  &tagProp->proxy,
 							tagProp->name,
-							NULL, /* GCancellable */
-							&neardalMgr.gerror);
-	if (neardalMgr.gerror != NULL) {
-		NEARDAL_TRACE_ERR(
-			"Unable to create Neard Tag Proxy (%d:%s)\n",
-				  neardalMgr.gerror->code,
-				  neardalMgr.gerror->message);
-		neardal_tools_prv_free_gerror(&neardalMgr.gerror);
-		return NEARDAL_ERROR_DBUS_CANNOT_CREATE_PROXY;
-	}
+						  NEARD_TAGS_IF_NAME);
+	if (err != NEARDAL_SUCCESS)
+		return err;
 
 	/* Populate Tag datas... */
-	errCode = neardal_tag_prv_read_properties(tagProp);
-	if (errCode != NEARDAL_SUCCESS)
-		return errCode;
+	err = neardal_tag_prv_read_properties(tagProp);
+	if (err != NEARDAL_SUCCESS)
+		return err;
+
+// 	if (tagProp->rcdArray == NULL)
+// 		return NEARDAL_ERROR_GENERAL_ERROR;
+// 
+// 	if (tagProp->rcdArray->len <= 0)
+// 		return NEARDAL_ERROR_NO_TAG;
+// 
+// 	len = 0;
+// 	while (len < tagProp->rcdArray->len && err == NEARDAL_SUCCESS) {
+// 		if (err == NEARDAL_SUCCESS &&
+// 			neardalMgr.cb_tag_found != NULL)
+// 			(neardalMgr.cb_tag_found)(tagProp->name,
+// 					       neardalMgr.cb_tag_found_ud);
+// 		if (neardalMgr.cb_rcd_found != NULL)
+// 			(neardalMgr.cb_rcd_found)(rcdName,
+// 					       neardalMgr.cb_rcd_found_ud);
+// 		len++;
+// 	}
+
+	/* Register Marshaller for signals (String,Variant) */
+	dbus_g_object_register_marshaller(neardal_marshal_VOID__STRING_BOXED,
+					   G_TYPE_NONE, G_TYPE_STRING,
+					   G_TYPE_VALUE, G_TYPE_INVALID);
 
 	NEARDAL_TRACEF("Register Neard-Tag Signal 'PropertyChanged'\n");
-	g_signal_connect(tagProp->proxy, NEARD_TGT_SIG_PROPCHANGED,
+	dbus_g_proxy_add_signal(tagProp->proxy, NEARD_TAG_SIG_PROPCHANGED,
+				 G_TYPE_STRING, G_TYPE_VALUE, G_TYPE_INVALID);
+	dbus_g_proxy_connect_signal(tagProp->proxy,
+				    NEARD_TAG_SIG_PROPCHANGED,
 			G_CALLBACK(neardal_tag_prv_cb_property_changed),
-			  tagProp);
+				    tagProp, NULL);
 
-	return errCode;
+	return err;
 }
 
 /******************************************************************************
@@ -185,7 +231,8 @@ static void neardal_tag_prv_free(TagProp **tagProp)
 {
 	NEARDAL_TRACEIN();
 	if ((*tagProp)->proxy != NULL) {
-		g_signal_handlers_disconnect_by_func((*tagProp)->proxy,
+		dbus_g_proxy_disconnect_signal((*tagProp)->proxy,
+					       NEARD_TAG_SIG_PROPCHANGED,
 				G_CALLBACK(neardal_tag_prv_cb_property_changed),
 						     NULL);
 		g_object_unref((*tagProp)->proxy);
@@ -193,9 +240,9 @@ static void neardal_tag_prv_free(TagProp **tagProp)
 	}
 	g_free((*tagProp)->name);
 	g_free((*tagProp)->type);
-	g_strfreev((*tagProp)->tagType);
-	g_free((*tagProp));
-	(*tagProp) = NULL;
+	neardal_tools_prv_g_ptr_array_free((*tagProp)->rcdArray);
+	if ((*tagProp)->tagType != NULL)
+		g_boxed_free(G_TYPE_STRV, (*tagProp)->tagType);
 }
 
 /******************************************************************************
@@ -231,7 +278,7 @@ void neardal_tag_notify_tag_found(TagProp *tagProp)
  *****************************************************************************/
 errorCode_t neardal_get_tags(char *adpName, char ***array, int *len)
 {
-	errorCode_t	err		= NEARDAL_SUCCESS;
+	errorCode_t	err		= NEARDAL_ERROR_NO_TAG;
 	AdpProp		*adpProp	= NULL;
 	int		tagNb		= 0;
 	int		ct		= 0;	/* counter */
@@ -273,44 +320,44 @@ errorCode_t neardal_get_tags(char *adpName, char ***array, int *len)
 	return err;
 }
 
-/******************************************************************************
- * neardal_tag_write: Creates and write NDEF record to be written to
- * an NFC tag
- *****************************************************************************/
-errorCode_t neardal_tag_write(TagProp *tagProp, RcdProp *rcd)
-{
-	GVariantBuilder	*builder = NULL;
-	GVariant	*in;
-	errorCode_t	err;
-	GError		*gerror	= NULL;
-
-	g_assert(tagProp != NULL);
-	
-	builder = g_variant_builder_new(G_VARIANT_TYPE_ARRAY);
-	if (builder == NULL)
-		return NEARDAL_ERROR_NO_MEMORY;
-
-	g_variant_builder_init(builder,  G_VARIANT_TYPE_ARRAY);
-	err = neardal_rcd_prv_format(builder, rcd);
-	if (err != NEARDAL_SUCCESS)
-		goto exit;
-
-	in = g_variant_builder_end(builder);
-	NEARDAL_TRACE_LOG("Sending:\n%s\n", g_variant_print(in, TRUE));
-	org_neard_tag__call_write_sync(tagProp->proxy, in, NULL, &gerror);
-
-exit:
-	if (gerror != NULL) {
-		NEARDAL_TRACE_ERR("Unable to write tag record (%d:%s)\n",
-				 gerror->code, gerror->message);
-		g_error_free(gerror);
-		err = NEARDAL_ERROR_DBUS;
-	}
-	if (builder != NULL)
-		g_variant_builder_unref(builder);
-
-	return err;
-}
+// /******************************************************************************
+//  * neardal_tag_write: Creates and write NDEF record to be written to
+//  * an NFC tag
+//  *****************************************************************************/
+// errorCode_t neardal_tag_write(TagProp *tagProp, RcdProp *rcd)
+// {
+// 	GVariantBuilder	*builder = NULL;
+// 	GVariant	*in;
+// 	errorCode_t	err;
+// 	GError		*gerror	= NULL;
+// 
+// 	g_assert(tagProp != NULL);
+// 	
+// 	builder = g_variant_builder_new(G_VARIANT_TYPE_ARRAY);
+// 	if (builder == NULL)
+// 		return NEARDAL_ERROR_NO_MEMORY;
+// 
+// 	g_variant_builder_init(builder,  G_VARIANT_TYPE_ARRAY);
+// 	err = neardal_rcd_prv_format(builder, rcd);
+// 	if (err != NEARDAL_SUCCESS)
+// 		goto exit;
+// 
+// 	in = g_variant_builder_end(builder);
+// 	NEARDAL_TRACE_LOG("Sending:\n%s\n", g_variant_print(in, TRUE));
+// 	org_neard_tag__call_write_sync(tagProp->proxy, in, NULL, &gerror);
+// 
+// exit:
+// 	if (gerror != NULL) {
+// 		NEARDAL_TRACE_ERR("Unable to write tag record (%d:%s)\n",
+// 				 gerror->code, gerror->message);
+// 		g_error_free(gerror);
+// 		err = NEARDAL_ERROR_DBUS;
+// 	}
+// 	if (builder != NULL)
+// 		g_variant_builder_unref(builder);
+// 
+// 	return err;
+// }
 
 /******************************************************************************
  * neardal_tag_add: add new NFC tag, initialize DBus Proxy connection,
@@ -318,7 +365,7 @@ exit:
  *****************************************************************************/
 errorCode_t neardal_tag_add(gchar *tagName, void * parent)
 {
-	errorCode_t	errCode		= NEARDAL_ERROR_NO_MEMORY;
+	errorCode_t	err		= NEARDAL_ERROR_NO_MEMORY;
 	TagProp		*tagProp	= NULL;
 	AdpProp		*adpProp	= parent;
 
@@ -333,12 +380,12 @@ errorCode_t neardal_tag_add(gchar *tagName, void * parent)
 	tagProp->parent	= adpProp;
 
 	adpProp->tagList = g_list_prepend(adpProp->tagList, tagProp);
-	errCode = neardal_tag_prv_init(tagProp);
+	err = neardal_tag_prv_init(tagProp);
 
 	NEARDAL_TRACEF("NEARDAL LIB tagList contains %d elements\n",
 		      g_list_length(adpProp->tagList));
 
-	return errCode;
+	return err;
 
 error:
 	if (tagProp->name != NULL)
@@ -346,7 +393,7 @@ error:
 	if (tagProp != NULL)
 		g_free(tagProp);
 
-	return errCode;
+	return err;
 }
 
 /******************************************************************************

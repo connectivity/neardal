@@ -31,13 +31,15 @@ extern "C" {
 
 /* NEARDAL Record Properties */
 typedef struct {
-	orgNeardRcd	*proxy;	/* proxy to Neard NFC Record interface */
+	DBusGProxy	*proxy;	/* proxy to Neard NFC Record interface */
 	gchar		*name;	/* DBus interface name (as identifier) */
 	void		*parent; /* parent (tag) */
 	gboolean	notified; /* Already notified to client? */
 
 	gchar		*encoding;
+	gboolean	handOver;
 	gchar		*language;
+	gboolean	smartPoster;
 	gchar		*action;
 	gchar		*type;
 	gchar		*representation;
@@ -61,7 +63,7 @@ void neardal_rcd_remove(RcdProp *rcdProp);
 /******************************************************************************
  * neardal_rcd_prv_format: Insert key/value in a GHashTable
  *****************************************************************************/
-errorCode_t neardal_rcd_prv_format(GVariantBuilder *builder, RcdProp *rcdProp);
+errorCode_t neardal_rcd_prv_format(GHashTable ** hash, RcdProp *rcd);
 
 #ifdef __cplusplus
 }

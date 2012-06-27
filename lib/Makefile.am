@@ -6,6 +6,7 @@ neardal_LT_AGE = 0
 neard_manager_proxy.h:  interface/org.neard.Manager.xml
 	dbus-binding-tool --mode=glib-client $<> $@
 	
+	
 neard_adapter_proxy.h:  interface/org.neard.Adapter.xml
 	dbus-binding-tool --mode=glib-client $<> $@
 
@@ -42,21 +43,17 @@ EXTRA_DIST = interface/org.neard.Manager.xml interface/org.neard.Adapter.xml int
 lib_LTLIBRARIES =		libneardal.la
 libneardal_la_SOURCES =	neardal.c \
 				neardal_adapter.c \
-				neard_adapter_proxy.c \
 				neardal_errors.c \
 				neardal_manager.c \
-				neard_manager_proxy.c \
 				neardal_record.c \
-				neard_record_proxy.c \
 				neardal_tag.c \
-				neard_tag_proxy.c \
 				neardal_tools.c \
 				neardal_traces.c
 
 libneardal_la_LDFLAGS = -version-info $(neardal_LT_CURRENT):$(neardal_LT_REVISION):$(neardal_LT_AGE)
-libneardal_la_CFLAGS = $(GLIB_CFLAGS) $(GIO_UNIX_CFLAGS)
+libneardal_la_CFLAGS = $(GLIB_CFLAGS) $(DBUS_CFLAGS)
 
-libneardal_la_LIBADD = $(GLIB_LIBS) $(GIO_UNIX_LIBS)
+libneardal_la_LIBADD = $(GLIB_LIBS) $(DBUS_LIBS)
 
 neardalheadersdir = $(includedir)/neardal
 

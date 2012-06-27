@@ -34,56 +34,71 @@
  *****************************************************************************/
 static errorCode_t neardal_rcd_prv_read_properties(RcdProp *rcd)
 {
-	errorCode_t	errCode		= NEARDAL_SUCCESS;
+	errorCode_t	err		= NEARDAL_SUCCESS;
+	GHashTable	*rcdHash	= NULL;
 	GError		*gerror		= NULL;
-	GVariant	*tmp		= NULL;
-	GVariant	*tmpOut		= NULL;
+	char		*tmp		= NULL;
 
 	NEARDAL_TRACEIN();
 	g_assert(rcd != NULL);
 	g_assert(rcd->proxy != NULL);
 
-	org_neard_rcd__call_get_properties_sync(rcd->proxy, &tmp, NULL,
-						&gerror);
+	org_neard_Record_get_properties(rcd->proxy, &rcdHash, &gerror);
 	if (gerror != NULL) {
-		errCode = NEARDAL_ERROR_DBUS;
+		err = NEARDAL_ERROR_DBUS;
 		NEARDAL_TRACE_ERR(
 			"Unable to read record's properties (%d:%s)\n",
 				   gerror->code, gerror->message);
 		g_error_free(gerror);
-		return errCode;
+		return err;
 	}
-	NEARDAL_TRACE_LOG("Reading:\n%s\n", g_variant_print(tmp, TRUE));
 
-	tmpOut = g_variant_lookup_value(tmp, "Type", G_VARIANT_TYPE_STRING);
-	if (tmpOut != NULL)
-		rcd->type = g_variant_dup_string(tmpOut, NULL);
+	err = neardal_tools_prv_hashtable_get(rcdHash, "Type",
+					      G_TYPE_STRING, &tmp);
+	if (err == NEARDAL_SUCCESS)
+		rcd->type = g_strdup(tmp);
 
-	tmpOut = g_variant_lookup_value(tmp, "Representation",
-					G_VARIANT_TYPE_STRING);
-	if (tmpOut != NULL)
-		rcd->representation = g_variant_dup_string(tmpOut,
-								NULL);
+	if (!strcmp(rcd->type, "Text")) {
+		err = neardal_tools_prv_hashtable_get(rcdHash,
+						      "Representation",
+						      G_TYPE_STRING, &tmp);
+		if (err == NEARDAL_SUCCESS)
+			rcd->representation = g_strdup(tmp);
+	}
 
-	tmpOut = g_variant_lookup_value(tmp, "Encoding", G_VARIANT_TYPE_STRING);
-	if (tmpOut != NULL)
-		rcd->encoding = g_variant_dup_string(tmpOut, NULL);
+	err = neardal_tools_prv_hashtable_get(rcdHash, "Encoding",
+					      G_TYPE_STRING, &tmp);
+	if (err == NEARDAL_SUCCESS)
+		rcd->encoding = g_strdup(tmp);
 
-	tmpOut = g_variant_lookup_value(tmp, "Language", G_VARIANT_TYPE_STRING);
-	if (tmpOut != NULL)
-		rcd->language = g_variant_dup_string(tmpOut, NULL);
+	err = neardal_tools_prv_hashtable_get(rcdHash, "Language",
+					      G_TYPE_STRING, &tmp);
+	if (err == NEARDAL_SUCCESS)
+		rcd->language = g_strdup(tmp);
 
-	tmpOut = g_variant_lookup_value(tmp, "MIME",
-					G_VARIANT_TYPE_STRING);
-	if (tmpOut != NULL)
-		rcd->mime = g_variant_dup_string(tmpOut, NULL);
+	if (!strcmp(rcd->type, "MIME Type (RFC 2046)")) {
+		err = neardal_tools_prv_hashtable_get(rcdHash, "MIME",
+						      G_TYPE_STRING, &tmp);
+		if (err == NEARDAL_SUCCESS)
+			rcd->mime = g_strdup(tmp);
+	}
 
-	tmpOut = g_variant_lookup_value(tmp, "URI",
-					G_VARIANT_TYPE_STRING);
-	if (tmpOut != NULL)
-		rcd->uri = g_variant_dup_string(tmpOut, NULL);
+	if (!strcmp(rcd->type, "URI")) {
+		err = neardal_tools_prv_hashtable_get(rcdHash, "URI",
+						      G_TYPE_STRING, &tmp);
+		if (err == NEARDAL_SUCCESS)
+			rcd->uri = g_strdup(tmp);
+	}
 
-	return errCode;
+	err = neardal_tools_prv_hashtable_get(rcdHash, "HandOver",
+					      G_TYPE_BOOLEAN,
+					      &rcd->handOver);
+	err = neardal_tools_prv_hashtable_get(rcdHash, "SmartPoster",
+					      G_TYPE_BOOLEAN,
+					      &rcd->smartPoster);
+	g_hash_table_destroy(rcdHash);
+
+	return NEARDAL_SUCCESS;
 }
 
 /******************************************************************************
@@ -93,6 +108,8 @@ static errorCode_t neardal_rcd_prv_read_properties(RcdProp *rcd)
  *****************************************************************************/
 static errorCode_t neardal_rcd_prv_init(RcdProp *rcd)
 {
+	errorCode_t err;
+	
 	NEARDAL_TRACEIN();
 	g_assert(rcd != NULL);
 
@@ -100,13 +117,11 @@ static errorCode_t neardal_rcd_prv_init(RcdProp *rcd)
 		g_object_unref(rcd->proxy);
 	rcd->proxy = NULL;
 
-	rcd->proxy = org_neard_rcd__proxy_new_sync(neardalMgr.conn,
-					G_DBUS_OBJECT_MANAGER_CLIENT_FLAGS_NONE,
-							NEARD_DBUS_SERVICE,
+	err = neardal_tools_prv_create_proxy(neardalMgr.conn,
+						  &rcd->proxy,
 							rcd->name,
-							NULL, /* GCancellable */
-							&neardalMgr.gerror);
-	if (neardalMgr.gerror != NULL) {
+						  NEARD_RECORDS_IF_NAME);
+	if (err != NEARDAL_SUCCESS) {
 		NEARDAL_TRACE_ERR(
 			"Unable to create Neard Record Proxy (%d:%s)\n",
 				 neardalMgr.gerror->code,
@@ -141,48 +156,77 @@ static void neardal_rcd_prv_free(RcdProp **rcd)
 /******************************************************************************
  * neardal_rcd_prv_format: Insert key/value in a GHashTable
  *****************************************************************************/
-errorCode_t neardal_rcd_prv_format(GVariantBuilder *builder, RcdProp *rcd)
+static errorCode_t neardal_rcd_prv_format_std_properties(GHashTable **hash,
+							  RcdProp *rcd)
 {
-	errorCode_t	errCode		= NEARDAL_SUCCESS;
+	errorCode_t	err		= NEARDAL_SUCCESS;
+
+
+	// Type
+
+	if (rcd->type != NULL)
+		neardal_tools_add_dict_entry(*hash, "Type", rcd->type);
+
+	// Encoding
+	if (rcd->encoding != NULL)
+		neardal_tools_add_dict_entry(*hash, "Encoding", rcd->encoding);
+
+	if (rcd->language != NULL)
+		neardal_tools_add_dict_entry(*hash, "Language", rcd->language);
+
+	if (rcd->mime != NULL)
+		neardal_tools_add_dict_entry(*hash, "MIME", rcd->mime);
+
+	if (rcd->representation != NULL)
+		neardal_tools_add_dict_entry(*hash, "Representation",
+					      rcd->representation);
+
+	if (rcd->uri != NULL) {
+		neardal_tools_add_dict_entry(*hash, "URI", rcd->uri);
+//		neardal_tools_add_dict_entry(*hash, "Size", rcd->uriObjSize);
+
+	}
+	if (rcd->mime != NULL)
+		neardal_tools_add_dict_entry(*hash, "MIME", rcd->mime);
+
+	if (rcd->action != NULL)
+		neardal_tools_add_dict_entry(*hash, "Action", rcd->action);
+	return err;
+}
+
+/******************************************************************************
+ * neardal_rcd_prv_read_sp_properties: Insert key/value in a GHashTable for
+ * smartPoster tag
+ *****************************************************************************/
+static errorCode_t neardal_rcd_prv_format_sp_properties(GHashTable **hash,
+							 RcdProp *rcd)
+{
+	/* TODO */
+	(void) hash; /* remove warning */
+	(void) rcd; /* remove warning */
+
+	return NEARDAL_ERROR_GENERAL_ERROR;
+}
+
+
+/******************************************************************************
+ * neardal_rcd_prv_format: Insert key/value in a GHashTable
+ *****************************************************************************/
+errorCode_t neardal_rcd_prv_format(GHashTable ** hash, RcdProp *rcd)
+{
+	errorCode_t	err		= NEARDAL_SUCCESS;
 
 
 	NEARDAL_TRACEIN();
 	g_assert(rcd != NULL);
+	g_assert(rcd->proxy != NULL);
 
-	if (rcd->type != NULL)
-		neardal_tools_add_dict_entry(builder, "Type", rcd->type,
-					    (int) G_TYPE_STRING);
+	if (rcd->smartPoster == FALSE)
+		err = neardal_rcd_prv_format_std_properties(hash, rcd);
+	else
+		err = neardal_rcd_prv_format_sp_properties(hash, rcd);
 
-	if (rcd->encoding != NULL)
-		neardal_tools_add_dict_entry(builder, "Encoding", rcd->encoding,
-					    (int) G_TYPE_STRING);
-
-	if (rcd->language != NULL)
-		neardal_tools_add_dict_entry(builder, "Language", rcd->language,
-					    (int) G_TYPE_STRING);
-
-	if (rcd->representation != NULL)
-		neardal_tools_add_dict_entry(builder, "Representation",
-					     rcd->representation,
-					    (int) G_TYPE_STRING);
-
-	if (rcd->uri != NULL) {
-		neardal_tools_add_dict_entry(builder, "URI", rcd->uri,
-					    (int) G_TYPE_STRING);
-		neardal_tools_add_dict_entry(builder, "Size",
-					    (void *) rcd->uriObjSize,
-					    (int) G_TYPE_UINT);
-
-	}
-	if (rcd->mime != NULL)
-		neardal_tools_add_dict_entry(builder, "MIME", rcd->mime,
-						(int) G_TYPE_STRING);
-
-	if (rcd->action != NULL)
-		neardal_tools_add_dict_entry(builder, "Action", rcd->action,
-					    (int) G_TYPE_STRING);
-
-	return errCode;
+	return err;
 }
 
 
@@ -245,7 +289,7 @@ exit:
  *****************************************************************************/
 errorCode_t neardal_rcd_add(char *rcdName, void *parent)
 {
-	errorCode_t	errCode		= NEARDAL_ERROR_NO_MEMORY;
+	errorCode_t	err		= NEARDAL_ERROR_NO_MEMORY;
 	RcdProp		*rcd	= NULL;
 	TagProp		*tagProp = parent;
 
@@ -264,23 +308,23 @@ errorCode_t neardal_rcd_add(char *rcdName, void *parent)
 	rcd->parent = tagProp;
 
 	tagProp->rcdList = g_list_prepend(tagProp->rcdList, (gpointer) rcd);
-	errCode = neardal_rcd_prv_init(rcd);
-	if (errCode != NEARDAL_SUCCESS)
+	err = neardal_rcd_prv_init(rcd);
+	if (err != NEARDAL_SUCCESS)
 		goto exit;
 
 	NEARDAL_TRACEF("NEARDAL LIB recordList contains %d elements\n",
 		      g_list_length(tagProp->rcdList));
 
-	errCode = NEARDAL_SUCCESS;
+	err = NEARDAL_SUCCESS;
 
 exit:
-	if (errCode != NEARDAL_SUCCESS) {
+	if (err != NEARDAL_SUCCESS) {
 		tagProp->rcdList = g_list_remove(tagProp->rcdList,
 						 (gpointer) rcd);
 		neardal_rcd_prv_free(&rcd);
 	}
 
-	return errCode;
+	return err;
 }
 
 /******************************************************************************

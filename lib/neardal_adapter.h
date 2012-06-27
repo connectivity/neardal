@@ -29,13 +29,13 @@ extern "C" {
 #endif	/* __cplusplus */
 
 #define NEARD_ADP_IF_NAME				"org.neard.Adapter"
-#define NEARD_ADP_SIG_PROPCHANGED			"property-changed"
-#define NEARD_ADP_SIG_TGT_FOUND				"tag-found"
-#define NEARD_ADP_SIG_TGT_LOST				"tag-lost"
+#define NEARD_ADP_SIG_PROPCHANGED			"PropertyChanged"
+#define NEARD_ADP_SIG_TAG_FOUND			"TagFound"
+#define NEARD_ADP_SIG_TAG_LOST				"TagLost"
 
 /* NEARDAL Adapter Properties */
 typedef struct {
-	orgNeardAdp		*proxy;		/* The proxy connected to Neard
+	DBusGProxy		*proxy;		/* The proxy connected to Neard
 						Adapter interface */
 	gchar			*name;		/* DBus interface name
 						(as id) */
@@ -43,6 +43,7 @@ typedef struct {
 	gboolean		polling;	/* adapter polling active ? */
 	gboolean		powered;	/* adapter powered ? */
 	gchar			**protocols;	/* protocols list */
+	GPtrArray		*tagArray;	/* temporary storage */
 	gsize			lenProtocols;
 	gsize			tagNb;
 	GList			*tagList;	/* Neard adapter tags list

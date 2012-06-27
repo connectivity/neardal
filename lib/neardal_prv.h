@@ -26,16 +26,21 @@
 #include "neardal_tools.h"
 #include "neardal_traces_prv.h"
 #include "neardal.h"
+#include <dbus/dbus-glib.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif	/* __cplusplus */
 
 
+/* GType for Dict(string, variant) */
+#define DBUS_TYPE_G_ARRAY_OF_OBJECT_PATH    (dbus_g_type_get_collection( \
+						"GPtrArray", \
+						DBUS_TYPE_G_OBJECT_PATH))
 /* NEARDAL context */
 typedef struct neardalCtx {
-	GDBusConnection	*conn;			/* DBus connection */
-	orgNeardMgr	*proxy;			/* Neard Mgr dbus proxy */
+	DBusGConnection	*conn;			/* DBus connection */
+	DBusGProxy	*proxy;			/* Neard Mgr dbus proxy */
 	MgrProp		prop;			/* Mgr Properties
 							(adapter list) */
 	adapter_cb	cb_adp_added;		/* Client callback for
