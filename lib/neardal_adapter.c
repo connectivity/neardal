@@ -356,19 +356,6 @@ static errorCode_t neardal_adp_prv_init(AdpProp *adpProp)
 
 	err = neardal_adp_prv_read_properties(adpProp);
 	
-	if (err == NEARDAL_SUCCESS)
-		if (adpProp->powered == FALSE) {
-			NEARDAL_TRACEF("Adapter Power ON!\n");
-			GValue *powered = NULL;
-			powered = g_try_malloc0(sizeof(GValue));
-			NEARDAL_TRACEF("g_value_init...\n");
-			g_value_init(powered, G_TYPE_BOOLEAN);
-			NEARDAL_TRACEF("g_value_set_boolean...\n");
-			g_value_set_boolean(powered, 1);
-			NEARDAL_TRACEF("org_neard_Adapter_set_property...\n");
-			org_neard_Adapter_set_property(adpProp->proxy, "Powered", powered, &neardalMgr.gerror);
-	}
-
 	/* Register Marshaller for signals (String,Variant) */
 	dbus_g_object_register_marshaller(neardal_marshal_VOID__STRING_BOXED,
 						G_TYPE_NONE, G_TYPE_STRING,

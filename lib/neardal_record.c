@@ -156,14 +156,15 @@ static void neardal_rcd_prv_free(RcdProp **rcd)
 /******************************************************************************
  * neardal_rcd_prv_format: Insert key/value in a GHashTable
  *****************************************************************************/
-static errorCode_t neardal_rcd_prv_format_std_properties(GHashTable **hash,
-							  RcdProp *rcd)
+errorCode_t neardal_rcd_prv_format(GHashTable ** hash, RcdProp *rcd)
 {
 	errorCode_t	err		= NEARDAL_SUCCESS;
 
 
-	// Type
+	NEARDAL_TRACEIN();
+	g_assert(rcd != NULL);
 
+	// Type
 	if (rcd->type != NULL)
 		neardal_tools_add_dict_entry(*hash, "Type", rcd->type);
 
@@ -173,9 +174,6 @@ static errorCode_t neardal_rcd_prv_format_std_properties(GHashTable **hash,
 
 	if (rcd->language != NULL)
 		neardal_tools_add_dict_entry(*hash, "Language", rcd->language);
-
-	if (rcd->mime != NULL)
-		neardal_tools_add_dict_entry(*hash, "MIME", rcd->mime);
 
 	if (rcd->representation != NULL)
 		neardal_tools_add_dict_entry(*hash, "Representation",
@@ -191,40 +189,8 @@ static errorCode_t neardal_rcd_prv_format_std_properties(GHashTable **hash,
 
 	if (rcd->action != NULL)
 		neardal_tools_add_dict_entry(*hash, "Action", rcd->action);
-	return err;
-}
 
-/******************************************************************************
- * neardal_rcd_prv_read_sp_properties: Insert key/value in a GHashTable for
- * smartPoster tag
- *****************************************************************************/
-static errorCode_t neardal_rcd_prv_format_sp_properties(GHashTable **hash,
-							 RcdProp *rcd)
-{
-	/* TODO */
-	(void) hash; /* remove warning */
-	(void) rcd; /* remove warning */
-
-	return NEARDAL_ERROR_GENERAL_ERROR;
-}
-
-
-/******************************************************************************
- * neardal_rcd_prv_format: Insert key/value in a GHashTable
- *****************************************************************************/
-errorCode_t neardal_rcd_prv_format(GHashTable ** hash, RcdProp *rcd)
-{
-	errorCode_t	err		= NEARDAL_SUCCESS;
-
-
-	NEARDAL_TRACEIN();
-	g_assert(rcd != NULL);
-	g_assert(rcd->proxy != NULL);
-
-	if (rcd->smartPoster == FALSE)
-		err = neardal_rcd_prv_format_std_properties(hash, rcd);
-	else
-		err = neardal_rcd_prv_format_sp_properties(hash, rcd);
+// 	neardal_tools_add_dict_entry(*hash, "SmartPoster", rcd->smartPoster);
 
 	return err;
 }

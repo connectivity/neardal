@@ -320,44 +320,38 @@ errorCode_t neardal_get_tags(char *adpName, char ***array, int *len)
 	return err;
 }
 
-// /******************************************************************************
-//  * neardal_tag_write: Creates and write NDEF record to be written to
-//  * an NFC tag
-//  *****************************************************************************/
-// errorCode_t neardal_tag_write(TagProp *tagProp, RcdProp *rcd)
-// {
-// 	GVariantBuilder	*builder = NULL;
-// 	GVariant	*in;
-// 	errorCode_t	err;
-// 	GError		*gerror	= NULL;
-// 
-// 	g_assert(tagProp != NULL);
-// 	
-// 	builder = g_variant_builder_new(G_VARIANT_TYPE_ARRAY);
-// 	if (builder == NULL)
-// 		return NEARDAL_ERROR_NO_MEMORY;
-// 
-// 	g_variant_builder_init(builder,  G_VARIANT_TYPE_ARRAY);
-// 	err = neardal_rcd_prv_format(builder, rcd);
-// 	if (err != NEARDAL_SUCCESS)
-// 		goto exit;
-// 
-// 	in = g_variant_builder_end(builder);
-// 	NEARDAL_TRACE_LOG("Sending:\n%s\n", g_variant_print(in, TRUE));
-// 	org_neard_tag__call_write_sync(tagProp->proxy, in, NULL, &gerror);
-// 
-// exit:
-// 	if (gerror != NULL) {
-// 		NEARDAL_TRACE_ERR("Unable to write tag record (%d:%s)\n",
-// 				 gerror->code, gerror->message);
-// 		g_error_free(gerror);
-// 		err = NEARDAL_ERROR_DBUS;
-// 	}
-// 	if (builder != NULL)
-// 		g_variant_builder_unref(builder);
-// 
-// 	return err;
-// }
+/******************************************************************************
+ * neardal_tag_write: Creates and write NDEF record to be written to
+ * an NFC tag
+ *****************************************************************************/
+errorCode_t neardal_tag_write(TagProp *tagProp, RcdProp *rcd)
+{
+	errorCode_t	err;
+	GError		*gerror	= NULL;
+	GHashTable	*hash;
+
+	g_assert(tagProp != NULL);
+
+	if ( (hash = neardal_tools_create_dict()) != NULL)
+	{
+		err = neardal_rcd_prv_format(&hash, rcd);
+	} else
+		err = NEARDAL_ERROR_NO_MEMORY;
+	
+	if (err != NEARDAL_SUCCESS)
+		goto exit;
+	org_neard_Tag_write(tagProp->proxy, hash, &gerror);
+
+exit:
+	if (gerror != NULL) {
+		NEARDAL_TRACE_ERR("Unable to write tag record (%d:%s)\n",
+				 gerror->code, gerror->message);
+		g_error_free(gerror);
+		err = NEARDAL_ERROR_DBUS;
+	}
+
+	return err;
+}
 
 /******************************************************************************
  * neardal_tag_add: add new NFC tag, initialize DBus Proxy connection,

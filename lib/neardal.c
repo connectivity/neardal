@@ -315,7 +315,7 @@ errorCode_t neardal_write(neardal_record *record)
 	rcd.uriObjSize		= record->uriObjSize;
 	rcd.mime		= (gchar *) record->mime;
 
-// 	 neardal_tag_write(tagProp, &rcd);
+ 	 neardal_tag_write(tagProp, &rcd);
 exit:
 	return err;
 }
@@ -384,6 +384,55 @@ errorCode_t neardal_get_adapter_properties(const char *adpName,
 	err = NEARDAL_SUCCESS;
 
 exit:
+	return err;
+}
+
+/******************************************************************************
+ * neardal_set_adapter_property: Set a property on a specific NEARDAL adapter
+ *****************************************************************************/
+errorCode_t neardal_set_adapter_property(const char *adpName,
+					   int adpPropId, void * value)
+{
+	errorCode_t	err		= NEARDAL_SUCCESS;
+	AdpProp		*adpProp	= NULL;
+	GValue		*gProperty	= NULL;
+
+	if (neardalMgr.proxy == NULL)
+		neardal_prv_construct(&err);
+
+	if (err != NEARDAL_SUCCESS || adpName == NULL)
+		goto exit;
+
+	err = neardal_mgr_prv_get_adapter((gchar *) adpName, &adpProp);
+	if (err != NEARDAL_SUCCESS)
+		goto exit;
+
+
+	gProperty = g_try_malloc0(sizeof(GValue));
+	switch(adpPropId) {
+	case NEARD_ADP_PROP_POWERED:
+		g_value_init(gProperty, G_TYPE_BOOLEAN);
+		g_value_set_boolean(gProperty, (gboolean) value);
+		org_neard_Adapter_set_property(adpProp->proxy, "Powered", gProperty, &neardalMgr.gerror);
+		break;
+	case NEARD_ADP_PROP_MODE:
+		g_value_init(gProperty, G_TYPE_STRING);
+		g_value_set_string(gProperty, (gchar*) value);
+		org_neard_Adapter_set_property(adpProp->proxy, "Mode", gProperty, &neardalMgr.gerror);
+		break;
+	default:
+		break;
+	}
+
+
+	if (neardalMgr.gerror == NULL)
+		err = NEARDAL_SUCCESS;
+	else
+		err = NEARDAL_ERROR_DBUS_INVOKE_METHOD_ERROR;
+
+exit:
+	neardal_tools_prv_free_gerror(&neardalMgr.gerror);
+	neardalMgr.gerror = NULL;
 	return err;
 }
 
