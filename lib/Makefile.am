@@ -55,7 +55,6 @@ lib_LTLIBRARIES =		libneardal.la
 libneardal_la_SOURCES =	neardal.c \
 				neardal_adapter.c \
 				neard_adapter_proxy.c \
-				neardal_errors.c \
 				neardal_manager.c \
 				neard_manager_proxy.c \
 				neardal_record.c \

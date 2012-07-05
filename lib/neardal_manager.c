@@ -29,10 +29,10 @@
 #include "neardal.h"
 #include "neardal_prv.h"
 
-/******************************************************************************
+/*****************************************************************************
  * neardal_mgr_prv_cb_property_changed: Callback called when a NFC Manager
  * Property is changed
- *****************************************************************************/
+ ****************************************************************************/
 static void neardal_mgr_prv_cb_property_changed(orgNeardMgr *proxy,
 						const gchar *arg_unnamed_arg0,
 						GVariant *arg_unnamed_arg1,
@@ -51,33 +51,33 @@ static void neardal_mgr_prv_cb_property_changed(orgNeardMgr *proxy,
 	/* Adapters List ignored... */
 }
 
-/******************************************************************************
+/*****************************************************************************
  * neardal_mgr_prv_cb_adapter_added: Callback called when a NFC adapter is
  * added
- *****************************************************************************/
+ ****************************************************************************/
 static void neardal_mgr_prv_cb_adapter_added(orgNeardMgr *proxy,
 					     const gchar *arg_unnamed_arg0,
 					     void        *user_data)
 {
-	errorCode_t	errCode = NEARDAL_SUCCESS;
+	errorCode_t	err = NEARDAL_SUCCESS;
 
 	NEARDAL_TRACEIN();
 	g_assert(arg_unnamed_arg0 != NULL);
 	(void) proxy; /* remove warning */
 	(void) user_data; /* remove warning */
 
-	errCode = neardal_adp_add((char *) arg_unnamed_arg0);
-	if (errCode != NEARDAL_SUCCESS)
+	err = neardal_adp_add((char *) arg_unnamed_arg0);
+	if (err != NEARDAL_SUCCESS)
 		return;
 
 	NEARDAL_TRACEF("NEARDAL LIB adapterList contains %d elements\n",
 		      g_list_length(neardalMgr.prop.adpList));
 }
 
-/******************************************************************************
+/*****************************************************************************
  * neardal_mgr_prv_cb_adapter_removed: Callback called when a NFC adapter
  * is removed
- *****************************************************************************/
+ ****************************************************************************/
 static void neardal_mgr_prv_cb_adapter_removed(orgNeardMgr *proxy,
 					       const gchar *arg_unnamed_arg0,
 					       void *user_data)
@@ -107,13 +107,13 @@ static void neardal_mgr_prv_cb_adapter_removed(orgNeardMgr *proxy,
 		      g_list_length(neardalMgr.prop.adpList));
 }
 
-/******************************************************************************
+/*****************************************************************************
  * neardal_mgr_prv_get_all_adapters: Check if neard has an adapter
- *****************************************************************************/
+ ****************************************************************************/
 static errorCode_t neardal_mgr_prv_get_all_adapters(gchar ***adpArray,
 						    gsize *len)
 {
-	errorCode_t	errCode			= NEARDAL_ERROR_NO_ADAPTER;
+	errorCode_t	err			= NEARDAL_ERROR_NO_ADAPTER;
 	GVariant	*tmp		= NULL;
 	GVariant	*tmpOut		= NULL;
 
@@ -130,26 +130,26 @@ static errorCode_t neardal_mgr_prv_get_all_adapters(gchar ***adpArray,
 						G_VARIANT_TYPE_ARRAY);
 		if (tmpOut != NULL) {
 			*adpArray = g_variant_dup_objv(tmpOut, len);
-			errCode = NEARDAL_SUCCESS;
+			err = NEARDAL_SUCCESS;
 		} else
-			errCode = NEARDAL_ERROR_NO_ADAPTER;
+			err = NEARDAL_ERROR_NO_ADAPTER;
 	} else {
-		errCode = NEARDAL_ERROR_DBUS_CANNOT_INVOKE_METHOD;
+		err = NEARDAL_ERROR_DBUS_CANNOT_INVOKE_METHOD;
 		NEARDAL_TRACE_ERR("%d:%s\n", neardalMgr.gerror->code,
 				 neardalMgr.gerror->message);
 		neardal_tools_prv_free_gerror(&neardalMgr.gerror);
 	}
 
-	return errCode;
+	return err;
 }
 
 
-/******************************************************************************
+/*****************************************************************************
  * neardal_mgr_prv_get_adapter: Get NFC Adapter from name
- *****************************************************************************/
+ ****************************************************************************/
 errorCode_t neardal_mgr_prv_get_adapter(gchar *adpName, AdpProp **adpProp)
 {
-	errorCode_t	errCode	= NEARDAL_ERROR_NO_ADAPTER;
+	errorCode_t	err	= NEARDAL_ERROR_NO_ADAPTER;
 	guint		len	= 0;
 	AdpProp		*adapter;
 	GList		*tmpList;
@@ -163,23 +163,23 @@ errorCode_t neardal_mgr_prv_get_adapter(gchar *adpName, AdpProp **adpProp)
 			if (neardal_tools_prv_cmp_path(adapter->name,
 							adpName)) {
 				*adpProp = adapter;
-				errCode = NEARDAL_SUCCESS;
+				err = NEARDAL_SUCCESS;
 				break;
 			}
 		}
 		len++;
 	}
 
-	return errCode;
+	return err;
 }
 
-/******************************************************************************
+/*****************************************************************************
  * neardal_mgr_prv_get_adapter_from_proxy: Get NFC Adapter from proxy
- *****************************************************************************/
+ ****************************************************************************/
 errorCode_t neardal_mgr_prv_get_adapter_from_proxy(orgNeardAdp *adpProxy,
 						   AdpProp **adpProp)
 {
-	errorCode_t	errCode	= NEARDAL_ERROR_NO_ADAPTER;
+	errorCode_t	err	= NEARDAL_ERROR_NO_ADAPTER;
 	guint		len = 0;
 	AdpProp		*adapter;
 	GList		*tmpList;
@@ -192,23 +192,23 @@ errorCode_t neardal_mgr_prv_get_adapter_from_proxy(orgNeardAdp *adpProxy,
 		if (adapter != NULL) {
 			if (adapter->proxy == adpProxy) {
 				*adpProp = adapter;
-				errCode = NEARDAL_SUCCESS;
+				err = NEARDAL_SUCCESS;
 				break;
 			}
 		}
 		len++;
 	}
 
-	return errCode;
+	return err;
 }
 
-/******************************************************************************
+/*****************************************************************************
  * neardal_mgr_prv_get_tag: Get specific tag from adapter
- *****************************************************************************/
+ ****************************************************************************/
 errorCode_t neardal_mgr_prv_get_tag(AdpProp *adpProp, gchar *tagName,
 				       TagProp **tagProp)
 {
-	errorCode_t	errCode	= NEARDAL_ERROR_NO_TAG;
+	errorCode_t	err	= NEARDAL_ERROR_NO_TAG;
 	guint		len;
 	TagProp		*tag	= NULL;
 	GList		*tmpList;
@@ -223,22 +223,22 @@ errorCode_t neardal_mgr_prv_get_tag(AdpProp *adpProp, gchar *tagName,
 		tag = g_list_nth_data(tmpList, len);
 		if (neardal_tools_prv_cmp_path(tag->name, tagName)) {
 			*tagProp = tag;
-			errCode = NEARDAL_SUCCESS;
+			err = NEARDAL_SUCCESS;
 			break;
 		}
 		len++;
 	}
 
-	return errCode;
+	return err;
 }
 
-/******************************************************************************
+/*****************************************************************************
  * neardal_mgr_prv_get_record: Get specific record from tag
- *****************************************************************************/
+ ****************************************************************************/
 errorCode_t neardal_mgr_prv_get_record(TagProp *tagProp, gchar *rcdName,
 				       RcdProp **rcdProp)
 {
-	errorCode_t	errCode	= NEARDAL_ERROR_NO_RECORD;
+	errorCode_t	err	= NEARDAL_ERROR_NO_RECORD;
 	guint		len;
 	RcdProp	*rcd	= NULL;
 
@@ -251,24 +251,24 @@ errorCode_t neardal_mgr_prv_get_record(TagProp *tagProp, gchar *rcdName,
 		rcd = g_list_nth_data(tagProp->rcdList, len);
 		if (neardal_tools_prv_cmp_path(rcd->name, rcdName)) {
 			*rcdProp = rcd;
-			errCode = NEARDAL_SUCCESS;
+			err = NEARDAL_SUCCESS;
 			break;
 		}
 		len++;
 	}
 
-	return errCode;
+	return err;
 }
 
 
-/******************************************************************************
+/*****************************************************************************
  * neardal_mgr_create: Get Neard Manager Properties = NFC Adapters list.
  * Create a DBus proxy for the first one NFC adapter if present
  * Register Neard Manager signals ('PropertyChanged')
- *****************************************************************************/
+ ****************************************************************************/
 errorCode_t neardal_mgr_create(void)
 {
-	errorCode_t	errCode;
+	errorCode_t	err;
 	gchar		**adpArray = NULL;
 	gsize		adpArrayLen;
 	char		*adpName;
@@ -306,12 +306,12 @@ errorCode_t neardal_mgr_create(void)
 	}
 
 	/* Get and store NFC adapters (is present) */
-	errCode = neardal_mgr_prv_get_all_adapters(&adpArray, &adpArrayLen);
+	err = neardal_mgr_prv_get_all_adapters(&adpArray, &adpArrayLen);
 	if (adpArray != NULL && adpArrayLen > 0) {
 		len = 0;
-		while (len < adpArrayLen && errCode == NEARDAL_SUCCESS) {
+		while (len < adpArrayLen && err == NEARDAL_SUCCESS) {
 			adpName =  adpArray[len++];
-			errCode = neardal_adp_add(adpName);
+			err = neardal_adp_add(adpName);
 		}
 		g_strfreev(adpArray);
 	}
@@ -337,12 +337,12 @@ errorCode_t neardal_mgr_create(void)
 			 G_CALLBACK(neardal_mgr_prv_cb_adapter_removed),
 			 NULL);
 
-	return errCode;
+	return err;
 }
 
-/******************************************************************************
+/*****************************************************************************
  * neardal_mgr_destroy: unref DBus proxy, disconnect Neard Manager signals
- *****************************************************************************/
+ ****************************************************************************/
 void neardal_mgr_destroy(void)
 {
 	GList	*node;

@@ -29,12 +29,12 @@
 #include "neardal_prv.h"
 
 
-/******************************************************************************
+/*****************************************************************************
  * neardal_rcd_prv_read_properties: Get Neard Record Properties
- *****************************************************************************/
+ ****************************************************************************/
 static errorCode_t neardal_rcd_prv_read_properties(RcdProp *rcd)
 {
-	errorCode_t	errCode		= NEARDAL_SUCCESS;
+	errorCode_t	err		= NEARDAL_SUCCESS;
 	GError		*gerror		= NULL;
 	GVariant	*tmp		= NULL;
 	GVariant	*tmpOut		= NULL;
@@ -46,12 +46,12 @@ static errorCode_t neardal_rcd_prv_read_properties(RcdProp *rcd)
 	org_neard_rcd__call_get_properties_sync(rcd->proxy, &tmp, NULL,
 						&gerror);
 	if (gerror != NULL) {
-		errCode = NEARDAL_ERROR_DBUS;
+		err = NEARDAL_ERROR_DBUS;
 		NEARDAL_TRACE_ERR(
 			"Unable to read record's properties (%d:%s)\n",
 				   gerror->code, gerror->message);
 		g_error_free(gerror);
-		return errCode;
+		return err;
 	}
 	NEARDAL_TRACE_LOG("Reading:\n%s\n", g_variant_print(tmp, TRUE));
 
@@ -83,14 +83,14 @@ static errorCode_t neardal_rcd_prv_read_properties(RcdProp *rcd)
 	if (tmpOut != NULL)
 		rcd->uri = g_variant_dup_string(tmpOut, NULL);
 
-	return errCode;
+	return err;
 }
 
-/******************************************************************************
+/*****************************************************************************
  * neardal_rcd_init: Get Neard Manager Properties = NFC Records list.
  * Create a DBus proxy for the first one NFC record if present
  * Register Neard Manager signals ('PropertyChanged')
- *****************************************************************************/
+ ****************************************************************************/
 static errorCode_t neardal_rcd_prv_init(RcdProp *rcd)
 {
 	NEARDAL_TRACEIN();
@@ -118,9 +118,9 @@ static errorCode_t neardal_rcd_prv_init(RcdProp *rcd)
 	return neardal_rcd_prv_read_properties(rcd);
 }
 
-/******************************************************************************
+/*****************************************************************************
  * neardal_rcd_prv_free: unref DBus proxy, disconnect Neard Record signals
- *****************************************************************************/
+ ****************************************************************************/
 static void neardal_rcd_prv_free(RcdProp **rcd)
 {
 	NEARDAL_TRACEIN();
@@ -138,12 +138,12 @@ static void neardal_rcd_prv_free(RcdProp **rcd)
 	(*rcd) = NULL;
 }
 
-/******************************************************************************
+/*****************************************************************************
  * neardal_rcd_prv_format: Insert key/value in a GHashTable
- *****************************************************************************/
+ ****************************************************************************/
 errorCode_t neardal_rcd_prv_format(GVariantBuilder *builder, RcdProp *rcd)
 {
-	errorCode_t	errCode		= NEARDAL_SUCCESS;
+	errorCode_t	err		= NEARDAL_SUCCESS;
 
 
 	NEARDAL_TRACEIN();
@@ -182,70 +182,17 @@ errorCode_t neardal_rcd_prv_format(GVariantBuilder *builder, RcdProp *rcd)
 		neardal_tools_add_dict_entry(builder, "Action", rcd->action,
 					    (int) G_TYPE_STRING);
 
-	return errCode;
-}
-
-
-/******************************************************************************
- * neardal_get_records: get an array of tag records
- *****************************************************************************/
-errorCode_t neardal_get_records(char *tagName, char ***array, int *len)
-{
-	errorCode_t	err		= NEARDAL_SUCCESS;
-	AdpProp		*adpProp	= NULL;
-	TagProp		*tagProp	= NULL;
-	int		rcdLen		= 0;
-	int		ct		= 0;	/* counter */
-	char		**rcds		= NULL;
-	RcdProp		*rcd		= NULL;
-
-
-	if (neardalMgr.proxy == NULL)
-		neardal_prv_construct(&err);
-
-	if (err != NEARDAL_SUCCESS || tagName == NULL || array == NULL)
-		return NEARDAL_ERROR_INVALID_PARAMETER;
-
-	err = neardal_mgr_prv_get_adapter(tagName, &adpProp);
-	if (err != NEARDAL_SUCCESS)
-		goto exit;
-
-	err = neardal_adp_prv_get_tag(adpProp, tagName, &tagProp);
-	if (err != NEARDAL_SUCCESS)
-		goto exit;
-
-	err		= NEARDAL_ERROR_NO_RECORD;
-	rcdLen = g_list_length(tagProp->rcdList);
-	if (rcdLen <= 0)
-		goto exit;
-
-	err = NEARDAL_ERROR_NO_MEMORY;
-	rcds = g_try_malloc0((rcdLen + 1) * sizeof(char *));
-	if (rcds == NULL)
-		goto exit;
-
-	while (ct < rcdLen) {
-		rcd = g_list_nth_data(tagProp->rcdList, ct);
-		if (rcd != NULL)
-			rcds[ct++] = g_strdup(rcd->name);
-	}
-	err = NEARDAL_SUCCESS;
-
-exit:
-	if (len != NULL)
-		*len = rcdLen;
-	*array	= rcds;
-
 	return err;
 }
 
-/******************************************************************************
+
+/*****************************************************************************
  * neardal_rcd_add: add new NFC record, initialize DBus Proxy connection,
  * register record signal
- *****************************************************************************/
+ ****************************************************************************/
 errorCode_t neardal_rcd_add(char *rcdName, void *parent)
 {
-	errorCode_t	errCode		= NEARDAL_ERROR_NO_MEMORY;
+	errorCode_t	err		= NEARDAL_ERROR_NO_MEMORY;
 	RcdProp		*rcd	= NULL;
 	TagProp		*tagProp = parent;
 
@@ -264,29 +211,29 @@ errorCode_t neardal_rcd_add(char *rcdName, void *parent)
 	rcd->parent = tagProp;
 
 	tagProp->rcdList = g_list_prepend(tagProp->rcdList, (gpointer) rcd);
-	errCode = neardal_rcd_prv_init(rcd);
-	if (errCode != NEARDAL_SUCCESS)
+	err = neardal_rcd_prv_init(rcd);
+	if (err != NEARDAL_SUCCESS)
 		goto exit;
 
 	NEARDAL_TRACEF("NEARDAL LIB recordList contains %d elements\n",
 		      g_list_length(tagProp->rcdList));
 
-	errCode = NEARDAL_SUCCESS;
+	err = NEARDAL_SUCCESS;
 
 exit:
-	if (errCode != NEARDAL_SUCCESS) {
+	if (err != NEARDAL_SUCCESS) {
 		tagProp->rcdList = g_list_remove(tagProp->rcdList,
 						 (gpointer) rcd);
 		neardal_rcd_prv_free(&rcd);
 	}
 
-	return errCode;
+	return err;
 }
 
-/******************************************************************************
+/*****************************************************************************
  * neardal_rcd_remove: remove NFC record, unref DBus Proxy connection,
  * unregister record signal
- *****************************************************************************/
+ ****************************************************************************/
 void neardal_rcd_remove(RcdProp *rcd)
 {
 	TagProp		*tagProp;

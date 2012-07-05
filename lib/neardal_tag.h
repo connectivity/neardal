@@ -29,7 +29,7 @@ extern "C" {
 #endif	/* __cplusplus */
 
 #define NEARD_TAGS_IF_NAME		"org.neard.Tag"
-#define NEARD_TGT_SIG_PROPCHANGED	"property-changed"
+#define NEARD_TAG_SIG_PROPCHANGED	"property-changed"
 
 /* NEARDAL Tag Properties */
 typedef struct {
@@ -48,29 +48,29 @@ typedef struct {
 	gboolean	readOnly;	/* Read-Only flag */
 } TagProp;
 
-/******************************************************************************
+/*****************************************************************************
  * neardal_tag_notify_tag_found: Invoke client callback for 'record found'
  * if present, and 'tag found' (if not already nofied)
- *****************************************************************************/
+ ****************************************************************************/
 void neardal_tag_notify_tag_found(TagProp *tagProp);
 
-/******************************************************************************
- * neardal_tag_add: add new NEARDAL tag, initialize DBus Proxy connection,
+/*****************************************************************************
+ * neardal_tag_prv_add: add new NEARDAL tag, initialize DBus Proxy connection,
  * register tag signal
- *****************************************************************************/
-errorCode_t neardal_tag_add(gchar *tagName, void * parent);
+ ****************************************************************************/
+errorCode_t neardal_tag_prv_add(gchar *tagName, void *parent);
 
-/******************************************************************************
+/*****************************************************************************
  * neardal_tag_remove: remove NEARDAL tag, unref DBus Proxy connection,
  * unregister tag signal
- *****************************************************************************/
-void neardal_tag_remove(TagProp *tagProp);
+ ****************************************************************************/
+void neardal_tag_prv_remove(TagProp *tagProp);
 
-/******************************************************************************
- * neardal_tag_write: Creates and write NDEF record to be written to
+/*****************************************************************************
+ * neardal_tag_prv_write: Creates and write NDEF record to be written to
  * an NFC tag
- *****************************************************************************/
-errorCode_t neardal_tag_write(TagProp *tagProp, RcdProp *rcd);
+ ****************************************************************************/
+errorCode_t neardal_tag_prv_write(TagProp *tagProp, RcdProp *rcd);
 
 
 

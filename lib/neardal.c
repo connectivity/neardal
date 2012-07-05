@@ -16,6 +16,7 @@
  *     along with this program; if not, write to the Free Software Foundation,
  *     Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  *
+ *     This file contains all Public APIs
  */
 
 #include <stdio.h>
@@ -29,13 +30,25 @@
 #include "neardal.h"
 #include "neardal_prv.h"
 
+
+#define NEARDAL_SET_STRING_VALUE(gValue, value) do { \
+		gValue = g_variant_new_string(value); \
+		 } while (0);
+
+#define NEARDAL_SET_BOOL_VALUE(gValue, value)  do { \
+		gValue = g_variant_new_boolean((gboolean) value); \
+		 } while (0);
+
 neardalCtx neardalMgr = {NULL, NULL, {NULL}, NULL, NULL, NULL, NULL, NULL, NULL,
 NULL, NULL, NULL, NULL, NULL, NULL, 0, NULL};
 
-/******************************************************************************
- * neardal_prv_construct: create NEARDAL object instance, Neard Dbus connection,
- * register Neard's events
- *****************************************************************************/
+/*---------------------------------------------------------------------------
+ * Context Management
+ ---------------------------------------------------------------------------*/
+/*****************************************************************************
+ * neardal_prv_construct: create NEARDAL object instance, Neard Dbus
+ * connection, register Neard's events
+ ****************************************************************************/
 void neardal_prv_construct(errorCode_t *ec)
 {
 	errorCode_t	err = NEARDAL_SUCCESS;
@@ -56,10 +69,10 @@ void neardal_prv_construct(errorCode_t *ec)
 				"neardal_mgr_create() exit (err %d: %s)\n",
 				err, neardal_error_get_text(err));
 
-			/* No Neard daemon, destroying neardal object... */
-			if (err == NEARDAL_ERROR_DBUS_CANNOT_CREATE_PROXY)
-				neardal_tools_prv_free_gerror(&neardalMgr.gerror);
 		}
+		/* No Neard daemon, destroying neardal object... */
+		if (err == NEARDAL_ERROR_DBUS_CANNOT_CREATE_PROXY)
+			neardal_tools_prv_free_gerror(&neardalMgr.gerror);
 	} else {
 		NEARDAL_TRACE_ERR("Unable to connect to dbus: %s\n",
 				 neardalMgr.gerror->message);
@@ -75,10 +88,10 @@ void neardal_prv_construct(errorCode_t *ec)
 }
 
 
-/******************************************************************************
+/*****************************************************************************
  * neardal_destroy: destroy NEARDAL object instance, Disconnect Neard Dbus
  * connection, unregister Neard's events
- *****************************************************************************/
+ ****************************************************************************/
 void neardal_destroy(void)
 {
 	NEARDAL_TRACEIN();
@@ -88,11 +101,11 @@ void neardal_destroy(void)
 	}
 }
 
-/******************************************************************************
+/*****************************************************************************
  * neardal_set_cb_adapter_added: setup a client callback for
  * 'NEARDAL adapter added'.
  * cb_adp_added = NULL to remove actual callback.
- *****************************************************************************/
+ ****************************************************************************/
 errorCode_t neardal_set_cb_adapter_added(adapter_cb cb_adp_added,
 					 void *user_data)
 {
@@ -102,11 +115,11 @@ errorCode_t neardal_set_cb_adapter_added(adapter_cb cb_adp_added,
 	return NEARDAL_SUCCESS;
 }
 
-/******************************************************************************
+/*****************************************************************************
  * neardal_set_cb_adapter_removed: setup a client callback for
  * 'NEARDAL adapter added'.
  * cb_adp_removed = NULL to remove actual callback.
- *****************************************************************************/
+ ****************************************************************************/
 errorCode_t neardal_set_cb_adapter_removed(adapter_cb cb_adp_removed,
 					   void *user_data)
 {
@@ -117,11 +130,11 @@ errorCode_t neardal_set_cb_adapter_removed(adapter_cb cb_adp_removed,
 	return NEARDAL_SUCCESS;
 }
 
-/******************************************************************************
+/*****************************************************************************
  * neardal_set_manager_cb_property_changed: setup a client callback for
  * 'NEARDAL Adapter Property Change'.
  * cb_mgr_adp_property_changed = NULL to remove actual callback.
- *****************************************************************************/
+ ****************************************************************************/
 errorCode_t neardal_set_cb_adapter_property_changed(
 					adapter_prop_cb cb_adp_property_changed,
 					void *user_data)
@@ -132,11 +145,11 @@ errorCode_t neardal_set_cb_adapter_property_changed(
 	return NEARDAL_SUCCESS;
 }
 
-/******************************************************************************
+/*****************************************************************************
  * neardal_set_cb_adapter_added: setup a client callback for
  * 'NEARDAL adapter added'.
  * cb_adp_added = NULL to remove actual callback.
- *****************************************************************************/
+ ****************************************************************************/
 errorCode_t neardal_set_cb_tag_found(tag_cb cb_tag_found,
 					void *user_data)
 {
@@ -146,11 +159,11 @@ errorCode_t neardal_set_cb_tag_found(tag_cb cb_tag_found,
 	return NEARDAL_SUCCESS;
 }
 
-/******************************************************************************
+/*****************************************************************************
  * neardal_set_cb_adapter_removed: setup a client callback for
  * 'NEARDAL adapter added'.
  * cb_adp_removed = NULL to remove actual callback.
- *****************************************************************************/
+ ****************************************************************************/
 errorCode_t neardal_set_cb_tag_lost(tag_cb cb_tag_lost,
 				       void *user_data)
 {
@@ -161,11 +174,11 @@ errorCode_t neardal_set_cb_tag_lost(tag_cb cb_tag_lost,
 }
 
 
-/******************************************************************************
+/*****************************************************************************
  * neardal_set_cb_record_found: setup a client callback for
  * 'NEARDAL tag record found'.
  * cb_rcd_found = NULL to remove actual callback.
- *****************************************************************************/
+ ****************************************************************************/
 errorCode_t neardal_set_cb_record_found(record_cb cb_rcd_found,
 					void *user_data)
 {
@@ -175,9 +188,9 @@ errorCode_t neardal_set_cb_record_found(record_cb cb_rcd_found,
 	return NEARDAL_SUCCESS;
 }
 
-/******************************************************************************
+/*****************************************************************************
  * neardal_free_array: free adapters array, tags array or records array
- *****************************************************************************/
+ ****************************************************************************/
 errorCode_t neardal_free_array(char ***array)
 {
 	errorCode_t	err = NEARDAL_SUCCESS;
@@ -197,130 +210,102 @@ errorCode_t neardal_free_array(char ***array)
 	return err;
 }
 
-
-/******************************************************************************
- * neardal_start_poll: Request Neard to start polling
- *****************************************************************************/
-errorCode_t neardal_start_poll(char *adpName)
+/*****************************************************************************
+ * neardal_error_get_text: return string error form error code
+ ****************************************************************************/
+char *neardal_error_get_text(errorCode_t ec)
 {
-	errorCode_t	err		= NEARDAL_SUCCESS;
-	AdpProp		*adpProp	= NULL;
+	switch (ec) {
+	case NEARDAL_SUCCESS:
+		return "Success";
 
-	if (neardalMgr.proxy == NULL)
-		neardal_prv_construct(&err);
-	if (err != NEARDAL_SUCCESS)
-		return err;
+	case NEARDAL_ERROR_GENERAL_ERROR:
+		return "General error";
 
-	err = neardal_mgr_prv_get_adapter(adpName, &adpProp);
+	case NEARDAL_ERROR_INVALID_PARAMETER:
+		return "Invalid parameter";
 
-	err = NEARDAL_ERROR_NO_ADAPTER;
-	if (adpProp == NULL)
-		goto exit;
+	case NEARDAL_ERROR_NO_MEMORY:
+		return "Memory allocation error";
 
-	if (adpProp->proxy == NULL)
-		goto exit;
+	case NEARDAL_ERROR_DBUS:
+		return "DBUS general error";
 
-	if (!adpProp->polling) {
-		org_neard_adp__call_start_poll_sync(adpProp->proxy, NULL,
-						    &neardalMgr.gerror);
+	case NEARDAL_ERROR_DBUS_CANNOT_CREATE_PROXY:
+		return "Can not create a DBUS proxy";
 
-		err = NEARDAL_SUCCESS;
-		if (neardalMgr.gerror != NULL) {
-			NEARDAL_TRACE_ERR(
-				"Error with neard dbus method (err:%d:'%s')\n"
-					, neardalMgr.gerror->code
-					, neardalMgr.gerror->message);
-			err = NEARDAL_ERROR_DBUS_INVOKE_METHOD_ERROR;
-			neardal_tools_prv_free_gerror(&neardalMgr.gerror);
-		}
-	} else
-		err = NEARDAL_ERROR_POLLING_ALREADY_ACTIVE;
+	case NEARDAL_ERROR_DBUS_CANNOT_INVOKE_METHOD:
+		return "Can not invoke a DBUS method";
 
-exit:
-	return err;
-}
+	case NEARDAL_ERROR_NO_ADAPTER:
+		return "No NFC adapter found...";
 
-/******************************************************************************
- * neardal_stop_poll: Request Neard to stop polling
- *****************************************************************************/
-errorCode_t neardal_stop_poll(char *adpName)
-{
-	errorCode_t	err = NEARDAL_SUCCESS;
-	AdpProp		*adpProp	= NULL;
+	case NEARDAL_ERROR_NO_TAG:
+		return "No NFC tag found...";
 
-	if (neardalMgr.proxy == NULL)
-		neardal_prv_construct(&err);
+	case NEARDAL_ERROR_NO_RECORD:
+		return "No tag record found...";
 
-	if (err == NEARDAL_SUCCESS)
-		err = neardal_mgr_prv_get_adapter(adpName, &adpProp);
+	case NEARDAL_ERROR_POLLING_ALREADY_ACTIVE:
+		return "Polling already active";
 
-	if (adpProp == NULL)
-		goto exit;
-
-	if (adpProp->proxy == NULL)
-		goto exit;
-
-	if (adpProp->polling) {
-		org_neard_adp__call_stop_poll_sync(adpProp->proxy, NULL,
-						   &neardalMgr.gerror);
-
-		err = NEARDAL_SUCCESS;
-		if (neardalMgr.gerror != NULL) {
-			NEARDAL_TRACE_ERR(
-				"Error with neard dbus method (err:%d:'%s')\n"
-					, neardalMgr.gerror->code
-					, neardalMgr.gerror->message);
-			err = NEARDAL_ERROR_DBUS_INVOKE_METHOD_ERROR;
-			neardal_tools_prv_free_gerror(&neardalMgr.gerror);
-		}
+	case NEARDAL_ERROR_DBUS_INVOKE_METHOD_ERROR:
+		return "Error while invoking method";
 	}
 
-exit:
-	return err;
+	return "UNKNOWN ERROR !!!";
 }
 
-/******************************************************************************
- * neardal_write: Write NDEF record to an NFC tag
- *****************************************************************************/
-errorCode_t neardal_write(neardal_record *record)
-{
-	errorCode_t	err	= NEARDAL_SUCCESS;
-	AdpProp		*adpProp;
-	TagProp		*tagProp;
-	RcdProp		rcd;
 
+/*---------------------------------------------------------------------------
+ * NFC Adapter Management
+ ---------------------------------------------------------------------------*/
+/*****************************************************************************
+ * neardal_get_adapters: get an array of NFC adapters (adpName) present
+ ****************************************************************************/
+errorCode_t neardal_get_adapters(char ***array, int *len)
+{
+	errorCode_t	err		= NEARDAL_SUCCESS;
+	int		adpNb		= 0;
+	int		ct		= 0;	/* counter */
+	char		**adps		= NULL;
+	AdpProp		*adapter	= NULL;
+	gsize		size;
 
 	if (neardalMgr.proxy == NULL)
 		neardal_prv_construct(&err);
 
-	if (err != NEARDAL_SUCCESS || record == NULL)
-		goto exit;
+	if (err != NEARDAL_SUCCESS || array == NULL)
+		return NEARDAL_ERROR_INVALID_PARAMETER;
 
-	err = neardal_mgr_prv_get_adapter((gchar *) record->name, &adpProp);
-	if (err != NEARDAL_SUCCESS)
-		goto exit;
-	err = neardal_mgr_prv_get_tag(adpProp, (gchar *) record->name, &tagProp);
-	if (err != NEARDAL_SUCCESS)
-		goto exit;
-	
-	rcd.name		= (gchar *) record->name;
-	rcd.action		= (gchar *) record->action;
-	rcd.encoding		= (gchar *) record->encoding;
-	rcd.language		= (gchar *) record->language;
-	rcd.type		= (gchar *) record->type;
-	rcd.representation	= (gchar *) record->representation;
-	rcd.uri			= (gchar *) record->uri;
-	rcd.uriObjSize		= record->uriObjSize;
-	rcd.mime		= (gchar *) record->mime;
+	adpNb = g_list_length(neardalMgr.prop.adpList);
+	if (adpNb > 0) {
+		err = NEARDAL_ERROR_NO_MEMORY;
+		size = (adpNb + 1) * sizeof(char *);
+		adps = g_try_malloc0(size);
+		if (adps != NULL) {
+			GList	*list;
+			while (ct < adpNb) {
+				list = neardalMgr.prop.adpList;
+				adapter = g_list_nth_data(list, ct);
+				if (adapter != NULL)
+					adps[ct++] = g_strdup(adapter->name);
+			}
+			err = NEARDAL_SUCCESS;
+		}
+	} else
+		err = NEARDAL_ERROR_NO_ADAPTER;
 
-	 neardal_tag_write(tagProp, &rcd);
-exit:
+	if (len != NULL)
+		*len = adpNb;
+	*array	= adps;
+
 	return err;
 }
 
-/******************************************************************************
+/*****************************************************************************
  * neardal_get_adapter_properties: Get properties of a specific NEARDAL adapter
- *****************************************************************************/
+ ****************************************************************************/
 errorCode_t neardal_get_adapter_properties(const char *adpName,
 					   neardal_adapter *adapter)
 {
@@ -385,9 +370,203 @@ exit:
 	return err;
 }
 
-/******************************************************************************
- * neardal_get_adapter_properties: Get properties of a specific NEARDAL adapter
- *****************************************************************************/
+/*****************************************************************************
+ * neardal_set_adapter_property: Set a property on a specific NEARDAL adapter
+ ****************************************************************************/
+errorCode_t neardal_set_adapter_property(const char *adpName,
+					   int adpPropId, void *value)
+{
+	errorCode_t	err		= NEARDAL_SUCCESS;
+	AdpProp		*adpProp	= NULL;
+	const gchar	*propKey	= NULL;
+	GVariant	*propValue	= NULL;
+	GVariant	*variantTmp	= NULL;
+
+	if (neardalMgr.proxy == NULL)
+		neardal_prv_construct(&err);
+
+	if (err != NEARDAL_SUCCESS || adpName == NULL)
+		goto exit;
+
+	err = neardal_mgr_prv_get_adapter((gchar *) adpName, &adpProp);
+	if (err != NEARDAL_SUCCESS)
+		goto exit;
+
+	switch (adpPropId) {
+	case NEARD_ADP_PROP_POWERED:
+		propKey = "Powered";
+		NEARDAL_SET_BOOL_VALUE(variantTmp, value);
+		break;
+	case NEARD_ADP_PROP_MODE:
+		propKey = "Mode";
+		NEARDAL_SET_STRING_VALUE(variantTmp, value);
+		break;
+	default:
+		break;
+	}
+
+	propValue = g_variant_new_variant(variantTmp);
+	NEARDAL_TRACE_LOG("Sending:\n%s=%s\n", propKey,
+			  g_variant_print(propValue, TRUE));
+	org_neard_adp__call_set_property_sync(adpProp->proxy, propKey,
+					      propValue, NULL,
+					      &neardalMgr.gerror);
+
+
+	if (neardalMgr.gerror == NULL)
+		err = NEARDAL_SUCCESS;
+	else {
+		NEARDAL_TRACE_ERR(
+			"DBUS Error (%d): %s\n",
+				 neardalMgr.gerror->code,
+				neardalMgr.gerror->message);
+		err = NEARDAL_ERROR_DBUS_INVOKE_METHOD_ERROR;
+	}
+
+exit:
+	neardal_tools_prv_free_gerror(&neardalMgr.gerror);
+	neardalMgr.gerror = NULL;
+	g_variant_unref(propValue);
+	g_variant_unref(variantTmp);
+	return err;
+}
+
+/*****************************************************************************
+ * neardal_start_poll: Request Neard to start polling
+ ****************************************************************************/
+errorCode_t neardal_start_poll(char *adpName)
+{
+	errorCode_t	err		= NEARDAL_SUCCESS;
+	AdpProp		*adpProp	= NULL;
+
+	if (neardalMgr.proxy == NULL)
+		neardal_prv_construct(&err);
+	if (err != NEARDAL_SUCCESS)
+		return err;
+
+	err = neardal_mgr_prv_get_adapter(adpName, &adpProp);
+
+	err = NEARDAL_ERROR_NO_ADAPTER;
+	if (adpProp == NULL)
+		goto exit;
+
+	if (adpProp->proxy == NULL)
+		goto exit;
+
+	if (!adpProp->polling) {
+		org_neard_adp__call_start_poll_sync(adpProp->proxy, NULL,
+						    &neardalMgr.gerror);
+
+		err = NEARDAL_SUCCESS;
+		if (neardalMgr.gerror != NULL) {
+			NEARDAL_TRACE_ERR(
+				"Error with neard dbus method (err:%d:'%s')\n"
+					, neardalMgr.gerror->code
+					, neardalMgr.gerror->message);
+			err = NEARDAL_ERROR_DBUS_INVOKE_METHOD_ERROR;
+			neardal_tools_prv_free_gerror(&neardalMgr.gerror);
+		}
+	} else
+		err = NEARDAL_ERROR_POLLING_ALREADY_ACTIVE;
+
+exit:
+	return err;
+}
+
+/*****************************************************************************
+ * neardal_stop_poll: Request Neard to stop polling
+ ****************************************************************************/
+errorCode_t neardal_stop_poll(char *adpName)
+{
+	errorCode_t	err = NEARDAL_SUCCESS;
+	AdpProp		*adpProp	= NULL;
+
+	if (neardalMgr.proxy == NULL)
+		neardal_prv_construct(&err);
+
+	if (err == NEARDAL_SUCCESS)
+		err = neardal_mgr_prv_get_adapter(adpName, &adpProp);
+
+	if (adpProp == NULL)
+		goto exit;
+
+	if (adpProp->proxy == NULL)
+		goto exit;
+
+	if (adpProp->polling) {
+		org_neard_adp__call_stop_poll_sync(adpProp->proxy, NULL,
+						   &neardalMgr.gerror);
+
+		err = NEARDAL_SUCCESS;
+		if (neardalMgr.gerror != NULL) {
+			NEARDAL_TRACE_ERR(
+				"Error with neard dbus method (err:%d:'%s')\n"
+					, neardalMgr.gerror->code
+					, neardalMgr.gerror->message);
+			err = NEARDAL_ERROR_DBUS_INVOKE_METHOD_ERROR;
+			neardal_tools_prv_free_gerror(&neardalMgr.gerror);
+		}
+	}
+
+exit:
+	return err;
+}
+
+
+/*---------------------------------------------------------------------------
+ * NFC Tag Management
+ ---------------------------------------------------------------------------*/
+/*****************************************************************************
+ * neardal_get_tags: get an array of NFC tags present
+ ****************************************************************************/
+errorCode_t neardal_get_tags(char *adpName, char ***array, int *len)
+{
+	errorCode_t	err		= NEARDAL_ERROR_NO_TAG;
+	AdpProp		*adpProp	= NULL;
+	int		tagNb		= 0;
+	int		ct		= 0;	/* counter */
+	char		**tags		= NULL;
+	TagProp		*tag		= NULL;
+
+
+	if (neardalMgr.proxy == NULL)
+		neardal_prv_construct(&err);
+
+	if (err != NEARDAL_SUCCESS || adpName == NULL || array == NULL)
+		return NEARDAL_ERROR_INVALID_PARAMETER;
+
+	err = neardal_mgr_prv_get_adapter(adpName, &adpProp);
+	if (err != NEARDAL_SUCCESS)
+		return err;
+
+	tagNb = g_list_length(adpProp->tagList);
+	if (tagNb <= 0)
+		return NEARDAL_ERROR_NO_TAG;
+
+	err = NEARDAL_ERROR_NO_MEMORY;
+	tags = g_try_malloc0((tagNb + 1) * sizeof(char *));
+
+	if (tags == NULL)
+		return NEARDAL_ERROR_NO_MEMORY;
+
+	while (ct < tagNb) {
+		tag = g_list_nth_data(adpProp->tagList, ct);
+		if (tag != NULL)
+			tags[ct++] = g_strdup(tag->name);
+	}
+	err = NEARDAL_SUCCESS;
+
+	if (len != NULL)
+		*len = tagNb;
+	*array	= tags;
+
+	return err;
+}
+
+/*****************************************************************************
+ * neardal_get_tag_properties: Get properties of a specific NEARDAL
+ * tag
+ ****************************************************************************/
 errorCode_t neardal_get_tag_properties(const char *tagName,
 					  neardal_tag *tag)
 {
@@ -459,9 +638,105 @@ exit:
 	return err;
 }
 
- /******************************************************************************
+/*****************************************************************************
+ * neardal_write: Write NDEF record to an NFC tag
+ ****************************************************************************/
+errorCode_t neardal_write(neardal_record *record)
+{
+	errorCode_t	err	= NEARDAL_SUCCESS;
+	AdpProp		*adpProp;
+	TagProp		*tagProp;
+	RcdProp		rcd;
+
+
+	if (neardalMgr.proxy == NULL)
+		neardal_prv_construct(&err);
+
+	if (err != NEARDAL_SUCCESS || record == NULL)
+		goto exit;
+
+	err = neardal_mgr_prv_get_adapter((gchar *) record->name, &adpProp);
+	if (err != NEARDAL_SUCCESS)
+		goto exit;
+	err = neardal_mgr_prv_get_tag(adpProp, (gchar *) record->name,
+				      &tagProp);
+	if (err != NEARDAL_SUCCESS)
+		goto exit;
+
+	rcd.name		= (gchar *) record->name;
+	rcd.action		= (gchar *) record->action;
+	rcd.encoding		= (gchar *) record->encoding;
+	rcd.language		= (gchar *) record->language;
+	rcd.type		= (gchar *) record->type;
+	rcd.representation	= (gchar *) record->representation;
+	rcd.uri			= (gchar *) record->uri;
+	rcd.uriObjSize		= record->uriObjSize;
+	rcd.mime		= (gchar *) record->mime;
+
+	neardal_tag_prv_write(tagProp, &rcd);
+exit:
+	return err;
+}
+
+/*---------------------------------------------------------------------------
+ * NFC Record Management
+ ---------------------------------------------------------------------------*/
+/******************************************************************************
+ * neardal_get_records: get an array of tag records
+ *****************************************************************************/
+errorCode_t neardal_get_records(char *tagName, char ***array, int *len)
+{
+	errorCode_t	err		= NEARDAL_SUCCESS;
+	AdpProp		*adpProp	= NULL;
+	TagProp		*tagProp	= NULL;
+	int		rcdLen		= 0;
+	int		ct		= 0;	/* counter */
+	char		**rcds		= NULL;
+	RcdProp		*rcd		= NULL;
+
+
+	if (neardalMgr.proxy == NULL)
+		neardal_prv_construct(&err);
+
+	if (err != NEARDAL_SUCCESS || tagName == NULL || array == NULL)
+		return NEARDAL_ERROR_INVALID_PARAMETER;
+
+	err = neardal_mgr_prv_get_adapter(tagName, &adpProp);
+	if (err != NEARDAL_SUCCESS)
+		goto exit;
+
+	err = neardal_adp_prv_get_tag(adpProp, tagName, &tagProp);
+	if (err != NEARDAL_SUCCESS)
+		goto exit;
+
+	err		= NEARDAL_ERROR_NO_RECORD;
+	rcdLen = g_list_length(tagProp->rcdList);
+	if (rcdLen <= 0)
+		goto exit;
+
+	err = NEARDAL_ERROR_NO_MEMORY;
+	rcds = g_try_malloc0((rcdLen + 1) * sizeof(char *));
+	if (rcds == NULL)
+		goto exit;
+
+	while (ct < rcdLen) {
+		rcd = g_list_nth_data(tagProp->rcdList, ct);
+		if (rcd != NULL)
+			rcds[ct++] = g_strdup(rcd->name);
+	}
+	err = NEARDAL_SUCCESS;
+
+exit:
+	if (len != NULL)
+		*len = rcdLen;
+	*array	= rcds;
+
+	return err;
+}
+
+/*****************************************************************************
  * neardal_get_record_properties: Get values of a specific tag record
-  *****************************************************************************/
+ ****************************************************************************/
 errorCode_t neardal_get_record_properties(const char *recordName,
 					  neardal_record *record)
 {
@@ -507,3 +782,5 @@ errorCode_t neardal_get_record_properties(const char *recordName,
 exit:
 	return err;
 }
+
+

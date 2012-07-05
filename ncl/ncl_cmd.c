@@ -47,9 +47,9 @@ typedef struct {
 
 
 /* Local Utilities functions */
-/******************************************************************************
+/*****************************************************************************
  * Tool function : help command to dump parameters command
- *****************************************************************************/
+ ****************************************************************************/
 static void ncl_cmd_prv_dumpOptions(GOptionEntry *options)
 {
 	GOptionEntry	*optP = options;
@@ -67,10 +67,10 @@ static void ncl_cmd_prv_dumpOptions(GOptionEntry *options)
 }
 
 
-/******************************************************************************
+/*****************************************************************************
  * Tool function : parse parameters command (like g_option_context_parse but
  * implicit exit() on '--help' disabled
- *****************************************************************************/
+ ****************************************************************************/
 static NCLError ncl_cmd_prv_parseOptions(int *argc, char **argv[],
 					 GOptionEntry *options)
 {
@@ -121,9 +121,9 @@ static NCLError ncl_cmd_prv_parseOptions(int *argc, char **argv[],
 /* BEGIN : Interpretor commands array */
 static NCLCmdInterpretor itFunc[];
 
-/******************************************************************************
+/*****************************************************************************
  * Display Interpretor command list
- *****************************************************************************/
+ ****************************************************************************/
 NCLError ncl_cmd_list(int argc, char *argv[])
 {
 	int index;
@@ -142,9 +142,9 @@ NCLError ncl_cmd_list(int argc, char *argv[])
 }
 
 
-/******************************************************************************
+/*****************************************************************************
  * Dump properties of an adapter
- *****************************************************************************/
+ ****************************************************************************/
 static void ncl_cmd_prv_dump_adapter(neardal_adapter adapter)
 {
 	char **protocols;
@@ -185,9 +185,9 @@ static void ncl_cmd_prv_dump_adapter(neardal_adapter adapter)
 	NCL_CMD_PRINT("\n");
 }
 
-/******************************************************************************
+/*****************************************************************************
  * Dump properties of a tag
- *****************************************************************************/
+ ****************************************************************************/
 static void ncl_cmd_prv_dump_tag(neardal_tag tag)
 {
 	char **records;
@@ -227,9 +227,9 @@ static void ncl_cmd_prv_dump_tag(neardal_tag tag)
 		      tag.readOnly ? "TRUE" : "FALSE");
 }
 
-/******************************************************************************
+/*****************************************************************************
  * Dump properties of a record
- *****************************************************************************/
+ ****************************************************************************/
 static void ncl_cmd_prv_dump_record(neardal_record record)
 {
 	NCL_CMD_PRINT("Record\n");
@@ -244,9 +244,9 @@ static void ncl_cmd_prv_dump_record(neardal_record record)
 	NCL_CMD_PRINT(".. MIME:\t\t%s\n"	, record.mime);
 }
 
-/******************************************************************************
+/*****************************************************************************
  * neardal callbacks : BEGIN
- *****************************************************************************/
+ ****************************************************************************/
 static void ncl_cmd_cb_adapter_added(const char *adpName, void *user_data)
 {
 	errorCode_t	ec;
@@ -335,9 +335,9 @@ static void ncl_cmd_cb_record_found(const char *rcdName, void *user_data)
 
 	return;
 }
-/******************************************************************************
+/*****************************************************************************
  * neardal callbacks : END
- *****************************************************************************/
+ ****************************************************************************/
 
 static void ncl_cmd_install_callback(void)
 {
@@ -354,11 +354,11 @@ static void ncl_cmd_install_callback(void)
 	sNclCmdCtx.cb_initialized = true;
 }
 
-/******************************************************************************
+/*****************************************************************************
  * neardal_get_adapters : BEGIN
  * Get adapters List
- *****************************************************************************/
-static NCLError ncl_cmd_neardal_get_adapters(int argc, char *argv[])
+ ****************************************************************************/
+static NCLError ncl_cmd_get_adapters(int argc, char *argv[])
 {
 	errorCode_t	ec;
 	NCLError	nclErr;
@@ -395,15 +395,15 @@ static NCLError ncl_cmd_neardal_get_adapters(int argc, char *argv[])
 
 	return nclErr;
 }
-/******************************************************************************
+/*****************************************************************************
  * neardal_get_adapters : END
- *****************************************************************************/
+ ****************************************************************************/
 
-/******************************************************************************
- * ncl_cmd_neardal_get_adapter_properties : BEGIN
+/*****************************************************************************
+ * ncl_cmd_get_adapter_properties : BEGIN
  * Read adapter properties
- *****************************************************************************/
-static NCLError ncl_cmd_neardal_get_adapter_properties(int argc, char *argv[])
+ ****************************************************************************/
+static NCLError ncl_cmd_get_adapter_properties(int argc, char *argv[])
 {
 	errorCode_t	ec;
 	char		*adapterName	= NULL;
@@ -431,15 +431,15 @@ static NCLError ncl_cmd_neardal_get_adapter_properties(int argc, char *argv[])
 
 	return NCLERR_NOERROR;
 }
-/******************************************************************************
- * ncl_cmd_neardal_get_adapter_properties : END
- *****************************************************************************/
+/*****************************************************************************
+ * ncl_cmd_get_adapter_properties : END
+ ****************************************************************************/
 
-/******************************************************************************
+/*****************************************************************************
  * neardal_get_tags : BEGIN
  * Get tags List
- *****************************************************************************/
-static NCLError ncl_cmd_neardal_get_tags(int argc, char *argv[])
+ ****************************************************************************/
+static NCLError ncl_cmd_get_tags(int argc, char *argv[])
 {
 	errorCode_t	ec;
 	NCLError	nclErr;
@@ -476,15 +476,15 @@ static NCLError ncl_cmd_neardal_get_tags(int argc, char *argv[])
 
 	return nclErr;
 }
-/******************************************************************************
+/*****************************************************************************
  * neardal_get_tags : END
- *****************************************************************************/
+ ****************************************************************************/
 
-/******************************************************************************
- * ncl_cmd_neardal_get_tag_properties : BEGIN
+/*****************************************************************************
+ * ncl_cmd_get_tag_properties : BEGIN
  * Read tag properties
- *****************************************************************************/
-static NCLError ncl_cmd_neardal_get_tag_properties(int argc, char *argv[])
+ ****************************************************************************/
+static NCLError ncl_cmd_get_tag_properties(int argc, char *argv[])
 {
 	errorCode_t	ec;
 	char		*tagName	= NULL;
@@ -512,15 +512,15 @@ static NCLError ncl_cmd_neardal_get_tag_properties(int argc, char *argv[])
 
 	return NCLERR_NOERROR;
 }
-/******************************************************************************
- * ncl_cmd_neardal_get_tag_properties : END
- *****************************************************************************/
+/*****************************************************************************
+ * ncl_cmd_get_tag_properties : END
+ ****************************************************************************/
 
-/******************************************************************************
+/*****************************************************************************
  * neardal_get_records : BEGIN
  * Get records List
- *****************************************************************************/
-static NCLError ncl_cmd_neardal_get_records(int argc, char *argv[])
+ ****************************************************************************/
+static NCLError ncl_cmd_get_records(int argc, char *argv[])
 {
 	errorCode_t	ec;
 	NCLError	nclErr;
@@ -557,15 +557,15 @@ static NCLError ncl_cmd_neardal_get_records(int argc, char *argv[])
 
 	return nclErr;
 }
-/******************************************************************************
+/*****************************************************************************
  * neardal_get_records : END
- *****************************************************************************/
+ ****************************************************************************/
 
-/******************************************************************************
- * ncl_cmd_neardal_get_record_properties : BEGIN
+/*****************************************************************************
+ * ncl_cmd_get_record_properties : BEGIN
  * Read a specific tag
- *****************************************************************************/
-static NCLError ncl_cmd_neardal_get_record_properties(int argc, char *argv[])
+ ****************************************************************************/
+static NCLError ncl_cmd_get_record_properties(int argc, char *argv[])
 {
 	errorCode_t ec;
 	char		*recordName	= NULL;
@@ -592,15 +592,15 @@ static NCLError ncl_cmd_neardal_get_record_properties(int argc, char *argv[])
 
 	return NCLERR_NOERROR;
 }
-/******************************************************************************
- * ncl_cmd_neardal_get_record_properties : END
- *****************************************************************************/
+/*****************************************************************************
+ * ncl_cmd_get_record_properties : END
+ ****************************************************************************/
 
-/******************************************************************************
- * ncl_cmd_neardal_write : BEGIN
+/*****************************************************************************
+ * ncl_cmd_write : BEGIN
  * write NDEF record to tag
- *****************************************************************************/
-static NCLError ncl_cmd_neardal_write(int argc, char *argv[])
+ ****************************************************************************/
+static NCLError ncl_cmd_write(int argc, char *argv[])
 {
 	errorCode_t		ec = NEARDAL_SUCCESS;
 	NCLError		nclErr;
@@ -688,16 +688,83 @@ exit:
 
 	return nclErr;
 }
-/******************************************************************************
- * ncl_cmd_neardal_write : END
- *****************************************************************************/
+/*****************************************************************************
+ * ncl_cmd_write : END
+ ****************************************************************************/
 
 
-/******************************************************************************
- * ncl_cmd_neardal_start_poll : BEGIN
+/*****************************************************************************
+ * ncl_cmd_set_adp_property : BEGIN
+ * write NDEF record to tag
+ ****************************************************************************/
+static NCLError ncl_cmd_set_adapter_property(int argc, char *argv[])
+{
+	errorCode_t	ec		= NEARDAL_SUCCESS;
+	NCLError	nclErr;
+	static int	powered		= -1;
+	static char	*strMode	= NULL;
+	char		*adapterName	= NULL;
+
+static GOptionEntry options[] = {
+		{ "powered", 's', 0, G_OPTION_ARG_INT , &powered
+				, "Set Adapter power ON/OFF", "<>0 or =0" },
+				
+		{ "mode", 's', 0, G_OPTION_ARG_STRING , &strMode
+				, "Set Adapter mode initiator/target",
+				"'initiator' or 'target'" },
+
+		{ NULL, 0, 0, 0, NULL, NULL, NULL} /* End of List */
+	};
+
+	if (argc > 2) {
+		/* Parse options */
+//		memset(&rcd, 0, sizeof(neardal_record));
+		nclErr = ncl_cmd_prv_parseOptions(&argc, &argv, options);
+	} else
+		nclErr = NCLERR_PARSING_PARAMETERS;
+
+	if (nclErr != NCLERR_NOERROR) {
+		ncl_cmd_print(stdout, "e.g. < %s /org/neard/nfc0 --powered=1 \
+ >\n", argv[0]);
+	}
+
+	if (nclErr != NCLERR_NOERROR)
+		goto exit;
+
+	/* Install Neardal Callback*/
+	if (sNclCmdCtx.cb_initialized == false)
+		ncl_cmd_install_callback();
+
+	adapterName = argv[1];
+	if (powered >= 0)
+		ec = neardal_set_adapter_property(adapterName,
+						  NEARD_ADP_PROP_POWERED,
+						  (void*) powered);
+
+	if (strMode != NULL)
+		ec = neardal_set_adapter_property(adapterName,
+						  NEARD_ADP_PROP_MODE,
+						  strMode);
+
+	
+exit:
+	NCL_CMD_PRINT("\nExit with error code %d:%s\n", ec,
+		      neardal_error_get_text(ec));
+	
+	if (strMode != NULL)
+		g_free(strMode);
+
+	return nclErr;
+}
+/*****************************************************************************
+ * ncl_cmd_set_adp_property : END
+ ****************************************************************************/
+
+/*****************************************************************************
+ * ncl_cmd_start_poll : BEGIN
  * Request Neard to start polling
- *****************************************************************************/
-static NCLError ncl_cmd_neardal_start_poll(int argc, char *argv[])
+ ****************************************************************************/
+static NCLError ncl_cmd_start_poll(int argc, char *argv[])
 {
 	errorCode_t	ec		= NEARDAL_SUCCESS;
 	char		*adpName	= NULL;
@@ -723,15 +790,15 @@ static NCLError ncl_cmd_neardal_start_poll(int argc, char *argv[])
 
 	return NCLERR_NOERROR;
 }
-/******************************************************************************
- * ncl_cmd_neardal_start_poll : END
- *****************************************************************************/
+/*****************************************************************************
+ * ncl_cmd_start_poll : END
+ ****************************************************************************/
 
-/******************************************************************************
- * ncl_cmd_neardal_stop_poll : BEGIN
+/*****************************************************************************
+ * ncl_cmd_stop_poll : BEGIN
  * Request Neard to stop polling
- *****************************************************************************/
-static NCLError ncl_cmd_neardal_stop_poll(int argc, char *argv[])
+ ****************************************************************************/
+static NCLError ncl_cmd_stop_poll(int argc, char *argv[])
 {
 	errorCode_t	ec		= NEARDAL_SUCCESS;
 	char		*adpName	= NULL;
@@ -755,13 +822,13 @@ static NCLError ncl_cmd_neardal_stop_poll(int argc, char *argv[])
 
 	return NCLERR_NOERROR;
 }
-/******************************************************************************
- * ncl_cmd_neardal_stop_poll : END
- *****************************************************************************/
+/*****************************************************************************
+ * ncl_cmd_stop_poll : END
+ ****************************************************************************/
 
-/******************************************************************************
+/*****************************************************************************
  * test parameter type (sample code) : BEGIN
- *****************************************************************************/
+ ****************************************************************************/
 static gboolean test_cb(const gchar *opt, const gchar *arg, gpointer data,
 			GError **err)
 {
@@ -851,16 +918,16 @@ static GOptionEntry options[] = {
 
 	return err;
 }
-/******************************************************************************
+/*****************************************************************************
  * test parameter type : END
- *****************************************************************************/
+ ****************************************************************************/
 
 
-/******************************************************************************
+/*****************************************************************************
  *
- *****************************************************************************/
+ ****************************************************************************/
 /* Exiting from command line interpretor */
-static NCLError ncl_cmd_quit(int argc, char *argv[])
+static NCLError ncl_cmd_exit(int argc, char *argv[])
 {
 	NCLError	err		= NCLERR_NOERROR;
 	NCLContext	*nclCtxP	= NULL;
@@ -883,33 +950,33 @@ static NCLError ncl_cmd_quit(int argc, char *argv[])
 /* END : Interpretor commands */
 
 
-/******************************************************************************
+/*****************************************************************************
  *
- *****************************************************************************/
+ ****************************************************************************/
 /* Array of command line functions interpretor (alphabetical order) */
 static NCLCmdInterpretor itFunc[] = {
 	{ "get_adapters",
-	ncl_cmd_neardal_get_adapters,
+	ncl_cmd_get_adapters,
 	"Get adapters list"},
 
 	{ "get_adapter_properties",
-	ncl_cmd_neardal_get_adapter_properties,
+	ncl_cmd_get_adapter_properties,
 	"Get adapter properties (1st parameter is adapter name)"},
 
 	{ "get_records",
-	ncl_cmd_neardal_get_records,
+	ncl_cmd_get_records,
 	"Get records list (1st parameter is tag name)"},
 
 	{ "get_record_properties",
-	ncl_cmd_neardal_get_record_properties,
+	ncl_cmd_get_record_properties,
 	"Read a specific record. (1st parameter is record name)"},
 
 	{ "get_tags",
-	ncl_cmd_neardal_get_tags,
+	ncl_cmd_get_tags,
 	"Get tags list (1st parameter is adapter name)"},
 
 	{ "get_tag_properties",
-	ncl_cmd_neardal_get_tag_properties,
+	ncl_cmd_get_tag_properties,
 	"Get tag properties (1st parameter is tag name)"},
 
 	{ LISTCMD_NAME,
@@ -917,19 +984,23 @@ static NCLCmdInterpretor itFunc[] = {
 	"List all available commands. 'cmd' --help -h /? for a specific help" },
 
 	{ "write",
-	ncl_cmd_neardal_write,
+	ncl_cmd_write,
 	"Creates a NDEF record from parametersto be written to an NFC tag"},
 
-	{ "quit",
-	ncl_cmd_quit,
+	{ "exit",
+	ncl_cmd_exit,
 	"Exit from command line interpretor" },
 
+	{ "set_adp_property",
+	ncl_cmd_set_adapter_property,
+	"Request Neard to set a proprety on defined adapter"},
+
 	{ "start_poll",
-	ncl_cmd_neardal_start_poll,
+	ncl_cmd_start_poll,
 	"Request Neard to start polling (1st parameter is adapter name)"},
 
 	{ "stop_poll",
-	ncl_cmd_neardal_stop_poll,
+	ncl_cmd_stop_poll,
 	"Request Neard to stop polling (1st parameter is adapter name)"},
 
 	{ "test_parameters",
@@ -939,9 +1010,9 @@ static NCLCmdInterpretor itFunc[] = {
 #define NB_CL_FUNC		(sizeof(itFunc) / sizeof(NCLCmdInterpretor))
 
 
-/******************************************************************************
+/*****************************************************************************
  *
- *****************************************************************************/
+ ****************************************************************************/
 void ncl_cmd_print(FILE *stream, char *format, ...)
 {
 	gchar	*bufTrace;
@@ -959,9 +1030,9 @@ void ncl_cmd_print(FILE *stream, char *format, ...)
 }
 
 
-/******************************************************************************
+/*****************************************************************************
  *
- *****************************************************************************/
+ ****************************************************************************/
 NCLCmdInterpretor *ncl_cmd_get_list(int *nbCmd)
 {
 	if (nbCmd != NULL)
@@ -970,26 +1041,26 @@ NCLCmdInterpretor *ncl_cmd_get_list(int *nbCmd)
 }
 
 
-/******************************************************************************
+/*****************************************************************************
  *
- *****************************************************************************/
+ ****************************************************************************/
 int ncl_cmd_get_nbCmd(void)
 {
 	return NB_CL_FUNC;
 }
 
 
-/******************************************************************************
+/*****************************************************************************
  *
- *****************************************************************************/
+ ****************************************************************************/
 NCLCmdContext *ncl_cmd_get_ctx(void)
 {
 	return &sNclCmdCtx;
 }
 
-/******************************************************************************
+/*****************************************************************************
  *
- *****************************************************************************/
+ ****************************************************************************/
 NCLError ncl_cmd_init(char *execCmdLineStr)
 {
 	memset(&sNclCmdCtx, 0, sizeof(sNclCmdCtx));
@@ -1008,9 +1079,9 @@ NCLError ncl_cmd_init(char *execCmdLineStr)
 }
 
 
-/******************************************************************************
+/*****************************************************************************
  *
- *****************************************************************************/
+ ****************************************************************************/
 void ncl_cmd_finalize(void)
 {
 

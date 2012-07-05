@@ -30,9 +30,9 @@
 #include "neardal_prv.h"
 
 
-/******************************************************************************
+/*****************************************************************************
  * neardal_tools_prv_free_gerror: freeing gerror in neardal context
- *****************************************************************************/
+ ****************************************************************************/
 void neardal_tools_prv_free_gerror(GError **gerror)
 {
 	g_assert(gerror != NULL);
@@ -42,10 +42,10 @@ void neardal_tools_prv_free_gerror(GError **gerror)
 	*gerror = NULL;
 }
 
-/******************************************************************************
+/*****************************************************************************
  * neardal_tools_prv_cmp_path: Compare dbus path.
  * return true (<>0) if path is same, 0 otherwise
- *****************************************************************************/
+ ****************************************************************************/
 int neardal_tools_prv_cmp_path(const char *neardalPath, const char *reqPath)
 {
 	const char	*shortest;
@@ -77,17 +77,17 @@ int neardal_tools_prv_cmp_path(const char *neardalPath, const char *reqPath)
 	return ret;
 }
 
-/******************************************************************************
+/*****************************************************************************
  * neardal_tools_create_dict: Create a GHashTable for dict_entries.
- *****************************************************************************/
+ ****************************************************************************/
 GHashTable *neardal_tools_create_dict(void)
 {
 	return g_hash_table_new(g_str_hash, g_str_equal);
 }
 
-/******************************************************************************
+/*****************************************************************************
  * neardal_tools_add_dict_entry: add an entry in a dictionnary
- *****************************************************************************/
+ ****************************************************************************/
 errorCode_t neardal_tools_add_dict_entry(GVariantBuilder *builder, gchar *key,
 					  void *value, int gVariantType)
 {

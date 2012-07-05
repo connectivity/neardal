@@ -30,8 +30,8 @@ extern "C" {
 
 #define NEARD_ADP_IF_NAME				"org.neard.Adapter"
 #define NEARD_ADP_SIG_PROPCHANGED			"property-changed"
-#define NEARD_ADP_SIG_TGT_FOUND				"tag-found"
-#define NEARD_ADP_SIG_TGT_LOST				"tag-lost"
+#define NEARD_ADP_SIG_TAG_FOUND				"tag-found"
+#define NEARD_ADP_SIG_TAG_LOST				"tag-lost"
 
 /* NEARDAL Adapter Properties */
 typedef struct {
@@ -49,22 +49,22 @@ typedef struct {
 						available */
 } AdpProp;
 
-/******************************************************************************
+/*****************************************************************************
  * neardal_adp_prv_get_tag: Get NEARDAL tag from name
- *****************************************************************************/
-errorCode_t neardal_adp_prv_get_tag(AdpProp *adpProp, gchar *tagName,
-				       TagProp **tagProp);
+ ****************************************************************************/
+errorCode_t neardal_adp_prv_get_tag(AdpProp * adpProp, gchar *tagName,
+				       TagProp * *tagProp);
 
-/******************************************************************************
+/*****************************************************************************
  * neardal_adp_add: add new NEARDAL adapter, initialize DBus Proxy
  * connection, register adapter signal
- *****************************************************************************/
+ ****************************************************************************/
 errorCode_t neardal_adp_add(gchar *adapterName);
 
-/******************************************************************************
+/*****************************************************************************
  * neardal_adp_remove: remove NEARDAL adapter, unref DBus Proxy
  * connection, unregister adapter signal
- *****************************************************************************/
+ ****************************************************************************/
 errorCode_t neardal_adp_remove(AdpProp *adpProp);
 
 #ifdef __cplusplus
