@@ -33,13 +33,15 @@
 #include "neardal_prv.h"
 
 
-#define NEARDAL_SET_STRING_VALUE(gValue, value) \
+#define NEARDAL_SET_STRING_VALUE(gValue, value) do { \
 		g_value_init(gValue, G_TYPE_STRING); \
-		g_value_set_string(gValue, (gchar *) value);
+		g_value_set_string(gValue, (gchar *) value); \
+		} while (0);
 
-#define NEARDAL_SET_BOOL_VALUE(gValue, value) \
+#define NEARDAL_SET_BOOL_VALUE(gValue, value)  do { \
 		g_value_init(gValue, G_TYPE_BOOLEAN); \
-		g_value_set_boolean(gValue, (gboolean) value);
+		g_value_set_boolean(gValue, (gboolean) value); \
+		} while (0);
 
 neardalCtx neardalMgr = {NULL, NULL, {NULL}, NULL, NULL, NULL, NULL, NULL, NULL,
 NULL, NULL, NULL, NULL, NULL, NULL, 0, NULL};
@@ -381,7 +383,7 @@ errorCode_t neardal_set_adapter_property(const char *adpName,
 	errorCode_t	err		= NEARDAL_SUCCESS;
 	AdpProp		*adpProp	= NULL;
 	const gchar	*propKey	= NULL;
-	GValue	 	*propValue	= NULL;
+	GValue		*propValue	= NULL;
 
 	if (neardalMgr.proxy == NULL)
 		neardal_prv_construct(&err);
