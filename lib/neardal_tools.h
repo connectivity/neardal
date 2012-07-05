@@ -41,25 +41,26 @@ int neardal_tools_prv_cmp_path(const char *neardalPath, const char *reqPath);
  * neardal_tools_prv_hashtable_get: Parse a hashtable and get value of GType
  * 'type' with a specific key
  *****************************************************************************/
-errorCode_t neardal_tools_prv_hashtable_get(GHashTable *hashTable,
-					gconstpointer key, GType gtype,
-					void *value);
+errorCode_t neardal_tools_prv_hashtable_get(GHashTable * hashTable,
+					     gconstpointer key, GType gtype,
+					     void *value);
 
 /******************************************************************************
  * neardal_tools_prv_create_proxy: create dbus proxy to Neard daemon
  *****************************************************************************/
-errorCode_t neardal_tools_prv_create_proxy(DBusGConnection *conn,
-				       DBusGProxy **oProxy, const char *path,
-				       const char *iface);
+errorCode_t neardal_tools_prv_create_proxy(DBusGConnection * conn,
+					    DBusGProxy * *oProxy,
+					    const char *path,
+					    const char *iface);
 
 /******************************************************************************
  * neardal_marshal_VOID__STRING_BOXED: marshaller function for signal
  * invocations
  *****************************************************************************/
-void neardal_marshal_VOID__STRING_BOXED(GClosure	*closure,
-					 GValue		*return_value,
+void neardal_marshal_VOID__STRING_BOXED(GClosure	* closure,
+					 GValue		* return_value,
 					 guint		n_param_values,
-					 const GValue	*param_values,
+					 const GValue	* param_values,
 					 gpointer	invocation_hint,
 					 gpointer	marshal_data);
 
@@ -74,15 +75,15 @@ void neardal_tools_prv_g_ptr_array_copy(GPtrArray **dest, GPtrArray *source);
 void neardal_tools_prv_g_ptr_array_free(GPtrArray *array);
 
 /******************************************************************************
- * neardal_tools_create_dict: Create a GHashTable for dict_entries.
+ * neardal_tools_prv_create_dict: Create a GHashTable for dict_entries.
  *****************************************************************************/
-GHashTable *neardal_tools_create_dict(void);
+GHashTable *neardal_tools_prv_create_dict(void);
 
 /******************************************************************************
- * neardal_tools_add_dict_entry: add an entry in a dictionnary
+ * neardal_tools_prv_add_dict_entry: add an entry in a dictionnary
  *****************************************************************************/
-errorCode_t neardal_tools_add_dict_entry(GHashTable *hash, gchar *key,
-					  gchar *value);
+errorCode_t neardal_tools_prv_add_dict_entry(GHashTable *hash, gchar * key,
+					      gchar * value);
 
 #ifdef __cplusplus
 }

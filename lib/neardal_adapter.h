@@ -53,8 +53,8 @@ typedef struct {
 /******************************************************************************
  * neardal_adp_prv_get_tag: Get NEARDAL tag from name
  *****************************************************************************/
-errorCode_t neardal_adp_prv_get_tag(AdpProp *adpProp, gchar *tagName,
-				       TagProp **tagProp);
+errorCode_t neardal_adp_prv_get_tag(AdpProp * adpProp, gchar *tagName,
+				       TagProp * *tagProp);
 
 /******************************************************************************
  * neardal_adp_add: add new NEARDAL adapter, initialize DBus Proxy

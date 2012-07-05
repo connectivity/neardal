@@ -131,7 +131,7 @@ typedef void (*adapter_cb) (const char *adpName, void *user_data);
  * @param value Property value
  * @param user_data Client user data
  **/
-typedef void (*adapter_prop_cb) (char *adpName, char *propName, void * value,
+typedef void (*adapter_prop_cb) (char *adpName, char *propName, void *value,
 				 void *user_data);
 
 /** @brief NEARDAL Tag Callbacks (TagFound/Lost)
@@ -247,7 +247,7 @@ errorCode_t neardal_free_array(char ***array);
  * @return errorCode_t error code
  **/
 errorCode_t neardal_get_adapter_properties(const char *adpName,
-					   neardal_adapter *adapter);
+					   neardal_adapter * adapter);
 
 /*! \fn errorCode_t neardal_set_adapter_properties(const char* adpName,
  * int adpPropId, void * value)
@@ -259,7 +259,7 @@ errorCode_t neardal_get_adapter_properties(const char *adpName,
  * @return errorCode_t error code
  **/
 errorCode_t neardal_set_adapter_property(const char *adpName,
-					   int adpPropId, void * value);
+					   int adpPropId, void *value);
 
 /*! \fn errorCode_t neardal_set_cb_adapter_added( adapter_cb cb_adp_added,
  *					     void * user_data)
@@ -308,7 +308,7 @@ errorCode_t neardal_set_cb_adapter_property_changed(
  * @return errorCode_t error code
  **/
 errorCode_t neardal_get_tag_properties(const char *tagName,
-					   neardal_tag *tag);
+					   neardal_tag * tag);
 
 /*! \fn errorCode_t neardal_set_cb_tag_found(tag_cb cb_tag_found,
  * void * user_data)
@@ -344,7 +344,7 @@ errorCode_t neardal_set_cb_tag_lost(tag_cb cb_tag_lost,
  * @return errorCode_t error code
  **/
 errorCode_t neardal_get_record_properties(const char *recordName,
-					  neardal_record *record);
+					  neardal_record * record);
 
 /*! \fn errorCode_t neardal_write(neardal_record *record)
  * @brief Write NDEF record to an NFC tag

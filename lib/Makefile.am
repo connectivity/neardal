@@ -43,7 +43,6 @@ EXTRA_DIST = interface/org.neard.Manager.xml interface/org.neard.Adapter.xml int
 lib_LTLIBRARIES =		libneardal.la
 libneardal_la_SOURCES =	neardal.c \
 				neardal_adapter.c \
-				neardal_errors.c \
 				neardal_manager.c \
 				neardal_record.c \
 				neardal_tag.c \

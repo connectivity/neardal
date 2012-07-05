@@ -30,7 +30,7 @@
 #include "neardal_prv.h"
 
 
-#define g_marshal_value_peek_string(v)   (char *) g_value_get_string(v)
+#define g_marshal_value_peek_string(v)   ((char *) g_value_get_string(v))
 #define g_marshal_value_peek_boxed(v)    g_value_get_boxed(v)
 
 void
@@ -69,9 +69,9 @@ typedef void (*GMarshalFunc_VOID__STRING_BOXED)(gpointer data1, gpointer arg_1,
 		 data2);
 }
 
-/******************************************************************************
+/*****************************************************************************
  * neardal_tools_prv__g_ptr_array_copy: duplicate a 'GPtrArray' array
- *****************************************************************************/
+ ****************************************************************************/
 static void neardal_tools_g_ptr_array_add(gpointer data, gpointer array)
 {
 	char *tmp;
@@ -85,9 +85,9 @@ void neardal_tools_prv_g_ptr_array_copy(GPtrArray **dest, GPtrArray *source)
 	g_ptr_array_foreach(source, neardal_tools_g_ptr_array_add, *dest);
 }
 
-/******************************************************************************
+/*****************************************************************************
  * neardal_tools_prv_g_ptr_array_free: free a 'GPtrArray' array
- *****************************************************************************/
+ ****************************************************************************/
 static void neardal_tools_g_ptr_array_free_node(gpointer data, gpointer array)
 {
 	(void) array; /* remove warning */
@@ -99,9 +99,9 @@ void neardal_tools_prv_g_ptr_array_free(GPtrArray *array)
 	g_ptr_array_free(array, TRUE);
 }
 
-/******************************************************************************
+/*****************************************************************************
  * neardal_tools_prv_create_proxy: create dbus proxy to Neard daemon
- *****************************************************************************/
+ ****************************************************************************/
 errorCode_t neardal_tools_prv_create_proxy(DBusGConnection *conn,
 				       DBusGProxy **oProxy, const char *path,
 				       const char *iface)
@@ -132,9 +132,9 @@ errorCode_t neardal_tools_prv_create_proxy(DBusGConnection *conn,
 
 	return NEARDAL_SUCCESS;
 }
-/******************************************************************************
+/*****************************************************************************
  * neardal_tools_prv_free_gerror: freeing gerror in neardal context
- *****************************************************************************/
+ ****************************************************************************/
 void neardal_tools_prv_free_gerror(GError **gerror)
 {
 	if ((*gerror) != NULL)
@@ -142,10 +142,10 @@ void neardal_tools_prv_free_gerror(GError **gerror)
 	(*gerror) = NULL;
 }
 
-/******************************************************************************
+/*****************************************************************************
  * neardal_tools_prv_cmp_path: Compare dbus path.
  * return true (<>0) if path is same, 0 otherwise
- *****************************************************************************/
+ ****************************************************************************/
 int neardal_tools_prv_cmp_path(const char *neardalPath, const char *reqPath)
 {
 	const char	*shortest;
@@ -178,10 +178,10 @@ int neardal_tools_prv_cmp_path(const char *neardalPath, const char *reqPath)
 }
 
 
-/******************************************************************************
+/*****************************************************************************
  * neardal_tools_prv_hashtable_get: Parse a hashtable and get value of GType
  * 'type' with a specific key
- *****************************************************************************/
+ ****************************************************************************/
 errorCode_t neardal_tools_prv_hashtable_get(GHashTable *hashTable,
 					gconstpointer key, GType gtype,
 					void *value)
@@ -269,18 +269,18 @@ exit:
 	return err;
 }
 
-/******************************************************************************
- * neardal_tools_create_dict: Create a GHashTable for dict_entries.
- *****************************************************************************/
-GHashTable *neardal_tools_create_dict(void)
+/*****************************************************************************
+ * neardal_tools_prv_create_dict: Create a GHashTable for dict_entries.
+ ****************************************************************************/
+GHashTable *neardal_tools_prv_create_dict(void)
 {
 	return g_hash_table_new(g_str_hash, g_str_equal);
 }
 
-/******************************************************************************
- * neardal_tools_add_dict_entry: add an entry in a dictionnary
- *****************************************************************************/
-errorCode_t neardal_tools_add_dict_entry(GHashTable *hash, gchar *key,
+/*****************************************************************************
+ * neardal_tools_prv_add_dict_entry: add an entry in a dictionnary
+ ****************************************************************************/
+errorCode_t neardal_tools_prv_add_dict_entry(GHashTable *hash, gchar *key,
 					  gchar *value)
 {
 	errorCode_t	err = NEARDAL_ERROR_NO_MEMORY;
@@ -291,10 +291,10 @@ errorCode_t neardal_tools_add_dict_entry(GHashTable *hash, gchar *key,
 	gvalue = g_try_malloc0(sizeof(GValue));
 	if (gvalue == NULL)
 		goto error;
-	
-	g_value_init (gvalue, G_TYPE_STRING);
-	g_value_set_string (gvalue, value);
-	g_hash_table_insert (hash, (char *) key, gvalue);
+
+	g_value_init(gvalue, G_TYPE_STRING);
+	g_value_set_string(gvalue, value);
+	g_hash_table_insert(hash, (char *) key, gvalue);
 
 	err = NEARDAL_SUCCESS;
 

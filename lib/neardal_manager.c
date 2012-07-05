@@ -29,10 +29,10 @@
 #include "neardal.h"
 #include "neardal_prv.h"
 
-/******************************************************************************
+/*****************************************************************************
  * neardal_mgr_prv_cb_property_changed: Callback called when a NFC Manager
  * Property is changed
- *****************************************************************************/
+ ****************************************************************************/
 static void neardal_mgr_prv_cb_property_changed(DBusGProxy  *proxy,
 						const gchar *arg_unnamed_arg0,
 						GVariant *arg_unnamed_arg1,
@@ -51,10 +51,10 @@ static void neardal_mgr_prv_cb_property_changed(DBusGProxy  *proxy,
 	/* Adapters List ignored... */
 }
 
-/******************************************************************************
+/*****************************************************************************
  * neardal_mgr_prv_cb_adapter_added: Callback called when a NFC adapter is
  * added
- *****************************************************************************/
+ ****************************************************************************/
 static void neardal_mgr_prv_cb_adapter_added(DBusGProxy *proxy,
 					     const gchar *arg_unnamed_arg0,
 					     void        *user_data)
@@ -74,10 +74,10 @@ static void neardal_mgr_prv_cb_adapter_added(DBusGProxy *proxy,
 		      g_list_length(neardalMgr.prop.adpList));
 }
 
-/******************************************************************************
+/*****************************************************************************
  * neardal_mgr_prv_cb_adapter_removed: Callback called when a NFC adapter
  * is removed
- *****************************************************************************/
+ ****************************************************************************/
 static void neardal_mgr_prv_cb_adapter_removed(DBusGProxy *proxy,
 					       const gchar *arg_unnamed_arg0,
 					       void *user_data)
@@ -107,9 +107,9 @@ static void neardal_mgr_prv_cb_adapter_removed(DBusGProxy *proxy,
 		      g_list_length(neardalMgr.prop.adpList));
 }
 
-/******************************************************************************
+/*****************************************************************************
  * neardal_mgr_prv_get_all_adapters: Check if neard has an adapter
- *****************************************************************************/
+ ****************************************************************************/
 static errorCode_t neardal_mgr_prv_get_all_adapters(GPtrArray **adpArray,
 						    gsize *len)
 {
@@ -132,9 +132,8 @@ static errorCode_t neardal_mgr_prv_get_all_adapters(GPtrArray **adpArray,
 					&pathsGpa);
 		if (err != NEARDAL_SUCCESS || pathsGpa == NULL)
 			err = NEARDAL_ERROR_NO_ADAPTER;
-		else {
+		else
 			neardal_tools_prv_g_ptr_array_copy(adpArray, pathsGpa);
-		}
 		if (len != NULL)
 			*len = pathsGpa->len;
 
@@ -150,9 +149,9 @@ static errorCode_t neardal_mgr_prv_get_all_adapters(GPtrArray **adpArray,
 }
 
 
-/******************************************************************************
+/*****************************************************************************
  * neardal_mgr_prv_get_adapter: Get NFC Adapter from name
- *****************************************************************************/
+ ****************************************************************************/
 errorCode_t neardal_mgr_prv_get_adapter(gchar *adpName, AdpProp **adpProp)
 {
 	errorCode_t	err	= NEARDAL_ERROR_NO_ADAPTER;
@@ -179,9 +178,9 @@ errorCode_t neardal_mgr_prv_get_adapter(gchar *adpName, AdpProp **adpProp)
 	return err;
 }
 
-/******************************************************************************
+/*****************************************************************************
  * neardal_mgr_prv_get_adapter_from_proxy: Get NFC Adapter from proxy
- *****************************************************************************/
+ ****************************************************************************/
 errorCode_t neardal_mgr_prv_get_adapter_from_proxy(DBusGProxy *adpProxy,
 						   AdpProp **adpProp)
 {
@@ -208,9 +207,9 @@ errorCode_t neardal_mgr_prv_get_adapter_from_proxy(DBusGProxy *adpProxy,
 	return err;
 }
 
-/******************************************************************************
+/*****************************************************************************
  * neardal_mgr_prv_get_tag: Get specific tag from adapter
- *****************************************************************************/
+ ****************************************************************************/
 errorCode_t neardal_mgr_prv_get_tag(AdpProp *adpProp, gchar *tagName,
 				       TagProp **tagProp)
 {
@@ -239,9 +238,9 @@ errorCode_t neardal_mgr_prv_get_tag(AdpProp *adpProp, gchar *tagName,
 	return err;
 }
 
-/******************************************************************************
+/*****************************************************************************
  * neardal_mgr_prv_get_record: Get specific record from tag
- *****************************************************************************/
+ ****************************************************************************/
 errorCode_t neardal_mgr_prv_get_record(TagProp *tagProp, gchar *rcdName,
 				       RcdProp **rcdProp)
 {
@@ -268,11 +267,11 @@ errorCode_t neardal_mgr_prv_get_record(TagProp *tagProp, gchar *rcdName,
 }
 
 
-/******************************************************************************
+/*****************************************************************************
  * neardal_mgr_create: Get Neard Manager Properties = NFC Adapters list.
  * Create a DBus proxy for the first one NFC adapter if present
  * Register Neard Manager signals ('PropertyChanged')
- *****************************************************************************/
+ ****************************************************************************/
 errorCode_t neardal_mgr_create(void)
 {
 	errorCode_t	err;
@@ -346,9 +345,9 @@ errorCode_t neardal_mgr_create(void)
 	return err;
 }
 
-/******************************************************************************
+/*****************************************************************************
  * neardal_mgr_destroy: unref DBus proxy, disconnect Neard Manager signals
- *****************************************************************************/
+ ****************************************************************************/
 void neardal_mgr_destroy(void)
 {
 	GList	*node;

@@ -109,7 +109,7 @@ static errorCode_t neardal_rcd_prv_read_properties(RcdProp *rcd)
 static errorCode_t neardal_rcd_prv_init(RcdProp *rcd)
 {
 	errorCode_t err;
-	
+
 	NEARDAL_TRACEIN();
 	g_assert(rcd != NULL);
 
@@ -156,98 +156,56 @@ static void neardal_rcd_prv_free(RcdProp **rcd)
 /******************************************************************************
  * neardal_rcd_prv_format: Insert key/value in a GHashTable
  *****************************************************************************/
-errorCode_t neardal_rcd_prv_format(GHashTable ** hash, RcdProp *rcd)
+errorCode_t neardal_rcd_prv_format(GHashTable **hash, RcdProp *rcd)
 {
-	errorCode_t	err		= NEARDAL_SUCCESS;
+	errorCode_t	err = NEARDAL_SUCCESS;
 
 
 	NEARDAL_TRACEIN();
 	g_assert(rcd != NULL);
 
-	// Type
+	/* Type */
 	if (rcd->type != NULL)
-		neardal_tools_add_dict_entry(*hash, "Type", rcd->type);
+		neardal_tools_prv_add_dict_entry(*hash, "Type", rcd->type);
 
-	// Encoding
+	/* Encoding */
 	if (rcd->encoding != NULL)
-		neardal_tools_add_dict_entry(*hash, "Encoding", rcd->encoding);
+		neardal_tools_prv_add_dict_entry(*hash, "Encoding",
+						 rcd->encoding);
 
+	/* Language */
 	if (rcd->language != NULL)
-		neardal_tools_add_dict_entry(*hash, "Language", rcd->language);
+		neardal_tools_prv_add_dict_entry(*hash, "Language",
+						 rcd->language);
 
+	/* Representation */
 	if (rcd->representation != NULL)
-		neardal_tools_add_dict_entry(*hash, "Representation",
+		neardal_tools_prv_add_dict_entry(*hash, "Representation",
 					      rcd->representation);
 
+	/* URI */
 	if (rcd->uri != NULL) {
-		neardal_tools_add_dict_entry(*hash, "URI", rcd->uri);
-//		neardal_tools_add_dict_entry(*hash, "Size", rcd->uriObjSize);
+		neardal_tools_prv_add_dict_entry(*hash, "URI", rcd->uri);
+/*		neardal_tools_prv_add_dict_entry(*hash, "Size",
+						 rcd->uriObjSize);
+*/
 
 	}
+	/* MIME */
 	if (rcd->mime != NULL)
-		neardal_tools_add_dict_entry(*hash, "MIME", rcd->mime);
+		neardal_tools_prv_add_dict_entry(*hash, "MIME", rcd->mime);
 
+	/* Action */
 	if (rcd->action != NULL)
-		neardal_tools_add_dict_entry(*hash, "Action", rcd->action);
+		neardal_tools_prv_add_dict_entry(*hash, "Action", rcd->action);
 
-// 	neardal_tools_add_dict_entry(*hash, "SmartPoster", rcd->smartPoster);
-
-	return err;
-}
-
-
-/******************************************************************************
- * neardal_get_records: get an array of tag records
- *****************************************************************************/
-errorCode_t neardal_get_records(char *tagName, char ***array, int *len)
-{
-	errorCode_t	err		= NEARDAL_SUCCESS;
-	AdpProp		*adpProp	= NULL;
-	TagProp		*tagProp	= NULL;
-	int		rcdLen		= 0;
-	int		ct		= 0;	/* counter */
-	char		**rcds		= NULL;
-	RcdProp		*rcd		= NULL;
-
-
-	if (neardalMgr.proxy == NULL)
-		neardal_prv_construct(&err);
-
-	if (err != NEARDAL_SUCCESS || tagName == NULL || array == NULL)
-		return NEARDAL_ERROR_INVALID_PARAMETER;
-
-	err = neardal_mgr_prv_get_adapter(tagName, &adpProp);
-	if (err != NEARDAL_SUCCESS)
-		goto exit;
-
-	err = neardal_adp_prv_get_tag(adpProp, tagName, &tagProp);
-	if (err != NEARDAL_SUCCESS)
-		goto exit;
-
-	err		= NEARDAL_ERROR_NO_RECORD;
-	rcdLen = g_list_length(tagProp->rcdList);
-	if (rcdLen <= 0)
-		goto exit;
-
-	err = NEARDAL_ERROR_NO_MEMORY;
-	rcds = g_try_malloc0((rcdLen + 1) * sizeof(char *));
-	if (rcds == NULL)
-		goto exit;
-
-	while (ct < rcdLen) {
-		rcd = g_list_nth_data(tagProp->rcdList, ct);
-		if (rcd != NULL)
-			rcds[ct++] = g_strdup(rcd->name);
-	}
-	err = NEARDAL_SUCCESS;
-
-exit:
-	if (len != NULL)
-		*len = rcdLen;
-	*array	= rcds;
+/*	neardal_tools_prv_add_dict_entry(*hash, "SmartPoster",
+					 rcd->smartPoster);
+*/
 
 	return err;
 }
+
 
 /******************************************************************************
  * neardal_rcd_add: add new NFC record, initialize DBus Proxy connection,
