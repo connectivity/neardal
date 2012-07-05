@@ -32,6 +32,15 @@
 #include "neardal.h"
 #include "neardal_prv.h"
 
+
+#define NEARDAL_SET_STRING_VALUE(gValue, value) \
+		g_value_init(gValue, G_TYPE_STRING); \
+		g_value_set_string(gValue, (gchar *) value);
+
+#define NEARDAL_SET_BOOL_VALUE(gValue, value) \
+		g_value_init(gValue, G_TYPE_BOOLEAN); \
+		g_value_set_boolean(gValue, (gboolean) value);
+
 neardalCtx neardalMgr = {NULL, NULL, {NULL}, NULL, NULL, NULL, NULL, NULL, NULL,
 NULL, NULL, NULL, NULL, NULL, NULL, 0, NULL};
 
@@ -203,6 +212,9 @@ errorCode_t neardal_free_array(char ***array)
 	return err;
 }
 
+/*****************************************************************************
+ * neardal_error_get_text: return string error form error code
+ ****************************************************************************/
 char *neardal_error_get_text(errorCode_t ec)
 {
 	switch (ec) {
@@ -368,7 +380,8 @@ errorCode_t neardal_set_adapter_property(const char *adpName,
 {
 	errorCode_t	err		= NEARDAL_SUCCESS;
 	AdpProp		*adpProp	= NULL;
-	GValue		*gProperty	= NULL;
+	const gchar	*propKey	= NULL;
+	GValue	 	*propValue	= NULL;
 
 	if (neardalMgr.proxy == NULL)
 		neardal_prv_construct(&err);
@@ -381,33 +394,41 @@ errorCode_t neardal_set_adapter_property(const char *adpName,
 		goto exit;
 
 
-	gProperty = g_try_malloc0(sizeof(GValue));
+	propValue = g_try_malloc0(sizeof(GValue));
+	if (propValue == NULL)
+		return NEARDAL_ERROR_NO_MEMORY;
+
 	switch (adpPropId) {
 	case NEARD_ADP_PROP_POWERED:
-		g_value_init(gProperty, G_TYPE_BOOLEAN);
-		g_value_set_boolean(gProperty, (gboolean) value);
-		org_neard_Adapter_set_property(adpProp->proxy, "Powered",
-					       gProperty, &neardalMgr.gerror);
+		propKey = "Powered";
+		NEARDAL_SET_BOOL_VALUE(propValue, value);
 		break;
 	case NEARD_ADP_PROP_MODE:
-		g_value_init(gProperty, G_TYPE_STRING);
-		g_value_set_string(gProperty, (gchar *) value);
-		org_neard_Adapter_set_property(adpProp->proxy, "Mode",
-					       gProperty, &neardalMgr.gerror);
+		propKey = "Mode";
+		NEARDAL_SET_STRING_VALUE(propValue, value);
 		break;
 	default:
 		break;
 	}
+	NEARDAL_TRACE_LOG("Sending:\n%s\n", propKey);
+	org_neard_Adapter_set_property(adpProp->proxy, propKey,
+				       propValue, &neardalMgr.gerror);
 
 
 	if (neardalMgr.gerror == NULL)
 		err = NEARDAL_SUCCESS;
-	else
+	else {
+		NEARDAL_TRACE_ERR(
+			"DBUS Error (%d): %s\n",
+				 neardalMgr.gerror->code,
+				neardalMgr.gerror->message);
 		err = NEARDAL_ERROR_DBUS_INVOKE_METHOD_ERROR;
+	}
 
 exit:
 	neardal_tools_prv_free_gerror(&neardalMgr.gerror);
 	neardalMgr.gerror = NULL;
+	g_free(propValue);
 	return err;
 }
 

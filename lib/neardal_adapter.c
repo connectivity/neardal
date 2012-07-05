@@ -152,15 +152,15 @@ static void neardal_adp_prv_cb_property_changed(DBusGProxy *proxy,
 		if (pathsGpa == NULL)
 			goto exit;
 
-		NEARDAL_TRACE("pathsGpa->len=%d\n", pathsGpa->len);
-		if (pathsGpa->len <= 0) {	/* Remove all tags */
+		adpProp->tagNb = pathsGpa->len;
+		if (adpProp->tagNb <= 0) {	/* Remove all tags */
 			GList *node = NULL;
 			NEARDAL_TRACEF(
 				"Tag array empty! Removing all tags\n");
 			while (g_list_length(adpProp->tagList)) {
 				node = g_list_first(adpProp->tagList);
 				tagProp = (TagProp *) node->data;
-				neardal_adp_prv_cb_tag_lost(proxy,
+				neardal_adp_prv_cb_tag_lost(tagProp->proxy,
 							       tagProp->name,
 							       tagProp->parent);
 			}
@@ -173,7 +173,7 @@ static void neardal_adp_prv_cb_property_changed(DBusGProxy *proxy,
 		/* Extract the tags arrays List from the GValue */
 		err = NEARDAL_ERROR_NO_ADAPTER;
 		tmpLen = 0;
-		while (tmpLen < pathsGpa->len) {
+		while (tmpLen < adpProp->tagNb) {
 			/* Getting last tag (tags list not updated with
 			 * tags lost */
 			gvalue = g_ptr_array_index(pathsGpa, tmpLen++);
@@ -245,20 +245,22 @@ static errorCode_t neardal_adp_prv_read_properties(AdpProp *adpProp)
 					DBUS_TYPE_G_ARRAY_OF_OBJECT_PATH,
 					&tagArray);
 	if (err == NEARDAL_SUCCESS && tagArray != NULL && tagArray->len > 0) {
-		neardal_tools_prv_g_ptr_array_copy(&adpProp->tagArray,
-						tagArray);
-			{
-				guint len = 0;
-				char *tagName;
+		adpProp->tagNb = tagArray->len;
+		if (adpProp->tagNb == 0) {
+			g_ptr_array_unref(tagArray);
+			tagArray = NULL;
+		} else {
+			len = 0;
+			char *tagName;
 
-				while (len < tagArray->len &&
-				err == NEARDAL_SUCCESS) {
-					tagName = g_ptr_array_index(tagArray,
-								    len++);
-					err = neardal_tag_prv_add(tagName,
-								  adpProp);
-					adpProp->tagNb++;
-				}
+			while (len < adpProp->tagNb &&
+			err == NEARDAL_SUCCESS) {
+				tagName = g_ptr_array_index(tagArray,
+							    len++);
+				err = neardal_tag_prv_add(tagName,
+							  adpProp);
+				adpProp->tagNb++;
+			}
 		}
 	}
 
@@ -419,8 +421,6 @@ static void neardal_adp_prv_free(AdpProp **adpProp)
 	g_free((*adpProp)->name);
 	if ((*adpProp)->protocols != NULL)
 		g_boxed_free(G_TYPE_STRV, (*adpProp)->protocols);
-	if ((*adpProp)->tagArray != NULL)
-		neardal_tools_prv_g_ptr_array_free((*adpProp)->tagArray);
 	g_free((*adpProp));
 	(*adpProp) = NULL;
 

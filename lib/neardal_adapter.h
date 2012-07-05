@@ -43,7 +43,6 @@ typedef struct {
 	gboolean		polling;	/* adapter polling active ? */
 	gboolean		powered;	/* adapter powered ? */
 	gchar			**protocols;	/* protocols list */
-	GPtrArray		*tagArray;	/* temporary storage */
 	gsize			lenProtocols;
 	gsize			tagNb;
 	GList			*tagList;	/* Neard adapter tags list

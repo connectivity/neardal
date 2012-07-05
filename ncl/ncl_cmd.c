@@ -927,7 +927,7 @@ static GOptionEntry options[] = {
  *
  ****************************************************************************/
 /* Exiting from command line interpretor */
-static NCLError ncl_cmd_quit(int argc, char *argv[])
+static NCLError ncl_cmd_exit(int argc, char *argv[])
 {
 	NCLError	err		= NCLERR_NOERROR;
 	NCLContext	*nclCtxP	= NULL;
@@ -987,8 +987,8 @@ static NCLCmdInterpretor itFunc[] = {
 	ncl_cmd_write,
 	"Creates a NDEF record from parametersto be written to an NFC tag"},
 
-	{ "quit",
-	ncl_cmd_quit,
+	{ "exit",
+	ncl_cmd_exit,
 	"Exit from command line interpretor" },
 
 	{ "set_adp_property",
