@@ -702,17 +702,12 @@ static NCLError ncl_cmd_set_adapter_property(int argc, char *argv[])
 	errorCode_t	ec		= NEARDAL_SUCCESS;
 	NCLError	nclErr;
 	static int	powered		= -1;
-	static char	*strMode	= NULL;
 	char		*adapterName	= NULL;
 
 static GOptionEntry options[] = {
 		{ "powered", 's', 0, G_OPTION_ARG_INT , &powered
 				, "Set Adapter power ON/OFF", "<>0 or =0" },
 				
-		{ "mode", 's', 0, G_OPTION_ARG_STRING , &strMode
-				, "Set Adapter mode initiator/target",
-				"'initiator' or 'target'" },
-
 		{ NULL, 0, 0, 0, NULL, NULL, NULL} /* End of List */
 	};
 
@@ -740,20 +735,11 @@ static GOptionEntry options[] = {
 		ec = neardal_set_adapter_property(adapterName,
 						  NEARD_ADP_PROP_POWERED,
 						  (void*) powered);
-
-	if (strMode != NULL)
-		ec = neardal_set_adapter_property(adapterName,
-						  NEARD_ADP_PROP_MODE,
-						  strMode);
-
 	
 exit:
 	NCL_CMD_PRINT("\nExit with error code %d:%s\n", ec,
 		      neardal_error_get_text(ec));
 	
-	if (strMode != NULL)
-		g_free(strMode);
-
 	return nclErr;
 }
 /*****************************************************************************
@@ -767,18 +753,46 @@ exit:
 static NCLError ncl_cmd_start_poll(int argc, char *argv[])
 {
 	errorCode_t	ec		= NEARDAL_SUCCESS;
+	NCLError	nclErr;
 	char		*adpName	= NULL;
+	static char	*strMode	= NULL;
 
-	if (argc <= 1)
-		return NCLERR_PARSING_PARAMETERS;
+static GOptionEntry options[] = {
+		{ "mode", 's', 0, G_OPTION_ARG_STRING , &strMode
+				, "Set Adapter mode initiator/target/both",
+				"'initiator, target, both'" },
+
+		{ NULL, 0, 0, 0, NULL, NULL, NULL} /* End of List */
+	};
 
 	/* Install Neardal Callback*/
 	if (sNclCmdCtx.cb_initialized == false)
 		ncl_cmd_install_callback();
 
+	if (argc > 1)
+		/* Parse options */
+		nclErr = ncl_cmd_prv_parseOptions(&argc, &argv, options);
+	else
+		nclErr = NCLERR_PARSING_PARAMETERS;
+
+	if (nclErr != NCLERR_NOERROR)
+		goto exit;
+
 	/* Start polling if adapter present */
 	adpName = argv[1];
-	ec = neardal_start_poll(adpName);
+	if (strMode != NULL) {
+		if (!strcmp(strMode, "initiator"))
+			ec = neardal_start_poll_loop(adpName,
+						     NEARD_ADP_MODE_INITIATOR);
+		else if (!strcmp(strMode, "target"))
+			ec = neardal_start_poll_loop(adpName,
+						     NEARD_ADP_MODE_TARGET);
+		else
+			ec = neardal_start_poll_loop(adpName,
+						     NEARD_ADP_MODE_BOTH);
+	} else
+		ec = neardal_start_poll(adpName);
+	
 	if (ec != NEARDAL_SUCCESS) {
 		NCL_CMD_PRINTF("NFC polling activation error:%d='%s'\n",
 				ec, neardal_error_get_text(ec));
@@ -788,7 +802,14 @@ static NCLError ncl_cmd_start_poll(int argc, char *argv[])
 	NCL_CMD_PRINT("\nExit with error code %d:%s\n", ec,
 		      neardal_error_get_text(ec));
 
-	return NCLERR_NOERROR;
+exit:
+	if (strMode != NULL)
+		g_free(strMode);
+	
+	if (ec != NEARDAL_SUCCESS)
+		nclErr = NCLERR_LIB_ERROR;
+
+	return nclErr;
 }
 /*****************************************************************************
  * ncl_cmd_start_poll : END

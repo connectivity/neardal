@@ -170,12 +170,34 @@ typedef void (*record_cb) (const char *rcdName, void *user_data);
 */
 void neardal_destroy();
 
+/*! @brief NEARDAL Properties identifiers
+ * @addtogroup NEARDAL_CALLBACK Defines
+ * @{ */
+#define NEARD_ADP_MODE_INITIATOR		0
+#define NEARD_ADP_MODE_TARGET			1
+#define NEARD_ADP_MODE_BOTH			2
+
+
+/* @}*/
+
+
+/*! \fn errorCode_t neardal_start_poll_loop(char *adpName, int mode)
+*  \brief Request Neard to start polling on specific NEARDAL adapter with
+*  specific mode
+*  \param adpName : DBus interface adapter name (as identifier)
+*  \param mode : Polling mode (see NEARD_ADP_MODE_...)
+*  @return errorCode_t error code
+*/
+errorCode_t neardal_start_poll_loop(char *adpName, int mode);
+
 /*! \fn errorCode_t neardal_start_poll(char *adpName)
-*  \brief Request Neard to start polling on specific NEARDAL adapter
+*  \brief Request Neard to start polling on specific NEARDAL adapter in
+* Initiator mode
 *  \param adpName : DBus interface adapter name (as identifier)
 *  @return errorCode_t error code
 */
-errorCode_t neardal_start_poll(char *adpName);
+#define neardal_start_poll(adpName)	 neardal_start_poll_loop(adpName, \
+						NEARD_ADP_MODE_INITIATOR);
 
 /*! \fn errorCode_t neardal_stop_poll(char *adpName)
 *  \brief Request Neard to stop polling on specific NEARDAL adapter
@@ -232,7 +254,6 @@ errorCode_t neardal_free_array(char ***array);
  * @addtogroup NEARDAL_CALLBACK Defines
  * @{ */
 #define NEARD_ADP_PROP_POWERED			0
-#define NEARD_ADP_PROP_MODE			1
 
 
 /* @}*/
@@ -366,8 +387,6 @@ errorCode_t neardal_write(neardal_record *record);
  **/
 errorCode_t neardal_set_cb_record_found(record_cb cb_rcd_found,
 					 void *user_data);
-
-/* @}*/
 
 
 #ifdef __cplusplus

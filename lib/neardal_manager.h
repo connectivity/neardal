@@ -32,7 +32,7 @@ extern "C" {
 #define NEARD_MGR_IF_NAME			"org.neard.Manager"
 #define NEARD_MGR_SECTION_ADAPTERS		"Adapters"
 #define NEARD_MGR_SIG_PROPCHANGED		"property-changed"
-#define NEARD_MGR_SIG_ADP_ADDED			"adapter-added"
+#define NEARD_MGR_SIG_ADP_ADDED		"adapter-added"
 #define NEARD_MGR_SIG_ADP_RM			"adapter-removed"
 
 /* NEARDAL Manager Properties */

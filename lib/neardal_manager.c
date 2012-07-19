@@ -154,15 +154,14 @@ errorCode_t neardal_mgr_prv_get_adapter(gchar *adpName, AdpProp **adpProp)
 	AdpProp		*adapter;
 	GList		*tmpList;
 
-	g_assert(adpProp != NULL);
-
 	tmpList = neardalMgr.prop.adpList;
 	while (len < g_list_length(tmpList)) {
 		adapter = g_list_nth_data(tmpList, len);
 		if (adapter != NULL) {
 			if (neardal_tools_prv_cmp_path(adapter->name,
 							adpName)) {
-				*adpProp = adapter;
+				if (adpProp != NULL)
+					*adpProp = adapter;
 				err = NEARDAL_SUCCESS;
 				break;
 			}
