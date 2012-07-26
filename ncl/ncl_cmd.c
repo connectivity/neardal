@@ -648,13 +648,13 @@ static GOptionEntry options[] = {
 	if (nclErr != NCLERR_NOERROR) {
 		ncl_cmd_print(stdout, "Sample (Type 'Text'):");
 		ncl_cmd_print(stdout, "e.g. < write --type Text --lang en-US \
---encoding UTF-8 --rep \"Simple text\" --adp /org/neard/nfc0 >\n");
+--encoding UTF-8 --rep \"Simple text\" --tag /org/neard/nfc0/tag0 >\n");
 		ncl_cmd_print(stdout, "Sample (Type 'URI'):");
 		ncl_cmd_print(stdout, "e.g. < write --type URI \
---uri=http://www.nfc-forum.com  --adp /org/neard/nfc0 >\n");
+--uri=http://www.nfc-forum.com  --tag /org/neard/nfc0/tag0 >\n");
 		ncl_cmd_print(stdout, "Sample (Type 'SmartPoster'):");
 		ncl_cmd_print(stdout, "e.g. < write --type=SmartPoster \
---uri=http://www.nfc-forum.com > --adp /org/neard/nfc0 >\n");
+--uri=http://www.nfc-forum.com > --tag /org/neard/nfc0/tag0 >\n");
 	}
 
 	if (nclErr != NCLERR_NOERROR)
