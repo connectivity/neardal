@@ -260,15 +260,23 @@ errorCode_t neardal_free_array(char ***array);
 
 
 /*! \fn errorCode_t neardal_get_adapter_properties(const char* adpName,
- * neardal_adapter *adapter)
+ * neardal_adapter **adapter)
  * @brief Get properties of a specific NEARDAL adapter
  *
  * @param adpName DBus interface adapter name (as identifier)
- * @param adapter Pointer on client adapter struct to store datas
+ * @param adapter Pointer on pointer of client adapter struct to store datas
  * @return errorCode_t error code
  **/
 errorCode_t neardal_get_adapter_properties(const char *adpName,
-					   neardal_adapter * adapter);
+					   neardal_adapter **adapter);
+
+/*! \fn void neardal_free_adapter(neardal_adapter * adapter)
+ * @brief Release memory allocated for properties of an adapter
+ *
+ * @param adapter Pointer on client adapter struct where datas are stored
+ * @return nothing
+ **/
+void neardal_free_adapter(neardal_adapter *adapter);
 
 /*! \fn errorCode_t neardal_set_adapter_properties(const char* adpName,
  * int adpPropId, void * value)
@@ -321,15 +329,23 @@ errorCode_t neardal_set_cb_adapter_property_changed(
 						void *user_data);
 
 /*! \fn errorCode_t neardal_get_tag_properties(const char* tagName,
- * neardal_tag *tag)
+ * neardal_tag **tag)
  * @brief Get properties of a specific NEARDAL tag
  *
  * @param tagName tag name (identifier) on which properties must be retrieve
- * @param tag Pointer on client tag struct to store datas
+ * @param tag Pointer on pointer of client tag struct to store datas
  * @return errorCode_t error code
  **/
 errorCode_t neardal_get_tag_properties(const char *tagName,
-					   neardal_tag * tag);
+					   neardal_tag **tag);
+
+/*! \fn void neardal_free_tag(neardal_tag *tag)
+ * @brief Release memory allocated for properties of a tag
+ *
+ * @param tag Pointer on client tag struct where datas are stored
+ * @return nothing
+ **/
+void neardal_free_tag(neardal_tag *tag);
 
 /*! \fn errorCode_t neardal_set_cb_tag_found(tag_cb cb_tag_found,
  * void * user_data)
@@ -357,15 +373,23 @@ errorCode_t neardal_set_cb_tag_lost(tag_cb cb_tag_lost,
 
 
 /*! \fn errorCode_t neardal_get_record_properties(const char *recordName,
- *					      neardal_record *record)
+ *					      neardal_record **record)
  * @brief Get properties of a specific NEARDAL tag record
  *
  * @param recordName DBus interface record name (as identifier)
- * @param record Pointer on client record struct to store datas
+ * @param record Pointer on pointer of client record struct to store datas
  * @return errorCode_t error code
  **/
 errorCode_t neardal_get_record_properties(const char *recordName,
-					  neardal_record * record);
+					  neardal_record **record);
+
+/*! \fn void neardal_free_record(neardal_record *record)
+ * @brief Release memory allocated for properties of a record
+ *
+ * @param record Pointer on client tag struct where datas are stored
+ * @return nothing
+ **/
+void neardal_free_record(neardal_record *record);
 
 /*! \fn errorCode_t neardal_write(neardal_record *record)
  * @brief Write NDEF record to an NFC tag

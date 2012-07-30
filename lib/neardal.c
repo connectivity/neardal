@@ -327,14 +327,46 @@ errorCode_t neardal_get_adapters(char ***array, int *len)
 }
 
 /*****************************************************************************
+ * neardal_free_adapter: Release memory allocated for properties of an adapter
+ ****************************************************************************/
+void neardal_free_adapter(neardal_adapter *adapter)
+{
+	int ct		= 0;	/* counter */
+	
+	if (adapter == NULL) {
+		NEARDAL_TRACE_ERR("Adapter provided is NULL!\n");
+		return;
+	}
+
+	// Freeing adapter name
+	g_free(adapter->name);
+	
+	// Freeing protocols list
+	ct = 0;
+	while (ct < adapter->nbProtocols) {
+		g_free(adapter->protocols[ct++]);
+	}
+	g_free(adapter->protocols);
+	// Freeing tags list
+	ct = 0;
+	while (ct < adapter->nbTags) {
+		g_free(adapter->tags[ct++]);
+	}
+	g_free(adapter->tags);
+	// Freeing adapter struct
+	g_free(adapter);
+}
+
+/*****************************************************************************
  * neardal_get_adapter_properties: Get properties of a specific NEARDAL adapter
  ****************************************************************************/
 errorCode_t neardal_get_adapter_properties(const char *adpName,
-					   neardal_adapter *adapter)
+					   neardal_adapter **adapter)
 {
 	errorCode_t	err		= NEARDAL_SUCCESS;
 	AdpProp		*adpProp	= NULL;
 	TagProp		*tag		= NULL;
+	neardal_adapter	*adpClient	= NULL;
 	int		ct		= 0;	/* counter */
 	gsize		size;
 
@@ -348,50 +380,64 @@ errorCode_t neardal_get_adapter_properties(const char *adpName,
 	if (err != NEARDAL_SUCCESS)
 		goto exit;
 
-	adapter->name		= (char *) adpProp->name;
-	adapter->polling	= (short) adpProp->polling;
-	adapter->powered	= (short) adpProp->powered;
-
-	adapter->nbProtocols	= adpProp->lenProtocols;
-	adapter->protocols	= NULL;
-
-
-	if (adapter->nbProtocols > 0) {
+	adpClient = g_try_malloc0(sizeof(neardal_adapter));
+	if (adpClient == NULL) {
 		err = NEARDAL_ERROR_NO_MEMORY;
-		size = (adapter->nbProtocols + 1) * sizeof(char *);
-		adapter->protocols = g_try_malloc0(size);
-		if (adapter->protocols != NULL) {
+		goto exit;
+	}
+	*adapter = adpClient;
+
+	adpClient->name		= g_strdup(adpProp->name);
+	adpClient->polling	= (short) adpProp->polling;
+	adpClient->powered	= (short) adpProp->powered;
+
+	adpClient->nbProtocols	= adpProp->lenProtocols;
+	adpClient->protocols	= NULL;
+
+
+	if (adpClient->nbProtocols > 0) {
+		err = NEARDAL_ERROR_NO_MEMORY;
+		size = (adpClient->nbProtocols + 1) * sizeof(char *);
+		adpClient->protocols = g_try_malloc0(size);
+		if (adpClient->protocols != NULL) {
 			ct = 0;
-			while (ct < adapter->nbProtocols) {
+			while (ct < adpClient->nbProtocols) {
 				gchar *tmp = g_strdup(adpProp->protocols[ct]);
-				adapter->protocols[ct++] = (char *) tmp;
+				adpClient->protocols[ct++] = (char *) tmp;
 			}
 			err = NEARDAL_SUCCESS;
 		}
 	}
 
-	adapter->nbTags	= (int) adpProp->tagNb;
-	adapter->tags	= NULL;
-	if (adapter->nbTags <= 0)
+	adpClient->nbTags	= (int) adpProp->tagNb;
+	adpClient->tags	= NULL;
+	if (adpClient->nbTags <= 0)
 		goto exit;
 
 	err = NEARDAL_ERROR_NO_MEMORY;
-	size = (adapter->nbTags + 1) * sizeof(char *);
-	adapter->tags = g_try_malloc0(size);
-	if (adapter->tags == NULL)
+	size = (adpClient->nbTags + 1) * sizeof(char *);
+	adpClient->tags = g_try_malloc0(size);
+	if (adpClient->tags == NULL)
 		goto exit;
 
 	ct = 0;
-	while (ct < adapter->nbTags) {
+	while (ct < adpClient->nbTags) {
 		tag = g_list_nth_data(adpProp->tagList, ct);
 		if (tag != NULL)
-			adapter->tags[ct++] = g_strdup(tag->name);
+			adpClient->tags[ct++] = g_strdup(tag->name);
 	}
 	err = NEARDAL_SUCCESS;
 
 exit:
+	if (err != NEARDAL_SUCCESS) {
+		neardal_free_adapter(adpClient);
+		if (adapter != NULL)
+			*adapter = NULL;
+	}
+	
 	return err;
 }
+
 
 /*****************************************************************************
  * neardal_set_adapter_property: Set a property on a specific NEARDAL adapter
@@ -597,15 +643,50 @@ errorCode_t neardal_get_tags(char *adpName, char ***array, int *len)
 }
 
 /*****************************************************************************
+ * neardal_free_tag: Release memory allocated for properties of a tag
+ ****************************************************************************/
+void neardal_free_tag(neardal_tag *tag)
+{
+	int	ct	= 0;	/* counter */
+	
+	if (tag == NULL) {
+		NEARDAL_TRACE_ERR("Tag provided is NULL!\n");
+		return;
+	}
+
+	// Freeing tag name/type
+	g_free((gpointer) tag->name);
+	g_free((gpointer) tag->type);
+
+	// Freeing records list
+	ct = 0;
+	while (ct < tag->nbRecords) {
+		g_free(tag->records[ct++]);
+	}
+	g_free(tag->records);
+
+	// Freeing tag type list
+	ct = 0;
+	while (ct < tag->nbTagTypes) {
+		g_free(tag->tagType[ct++]);
+	}
+	g_free(tag->tagType);
+
+	// Freeing adapter struct
+	g_free(tag);
+}
+
+/*****************************************************************************
  * neardal_get_tag_properties: Get properties of a specific NEARDAL
  * tag
  ****************************************************************************/
 errorCode_t neardal_get_tag_properties(const char *tagName,
-					  neardal_tag *tag)
+					  neardal_tag **tag)
 {
 	errorCode_t	err		= NEARDAL_SUCCESS;
 	AdpProp		*adpProp	= NULL;
 	TagProp		*tagProp	= NULL;
+	neardal_tag	*tagClient	= NULL;
 	int		ct		= 0;	/* counter */
 	RcdProp		*record		= NULL;
 	gsize		size;
@@ -616,8 +697,15 @@ errorCode_t neardal_get_tag_properties(const char *tagName,
 	if (err != NEARDAL_SUCCESS || tagName == NULL || tag == NULL)
 		goto exit;
 
-	tag->records	= NULL;
-	tag->tagType	= NULL;
+	tagClient = g_try_malloc0(sizeof(neardal_tag));
+	if (tagClient == NULL) {
+		err = NEARDAL_ERROR_NO_MEMORY;
+		goto exit;
+	}
+	*tag = tagClient;
+	
+	tagClient->records	= NULL;
+	tagClient->tagType	= NULL;
 	err = neardal_mgr_prv_get_adapter((gchar *) tagName, &adpProp);
 	if (err != NEARDAL_SUCCESS)
 		goto exit;
@@ -626,48 +714,54 @@ errorCode_t neardal_get_tag_properties(const char *tagName,
 	if (err != NEARDAL_SUCCESS)
 		goto exit;
 
-	tag->name		= (const char *) tagProp->name;
-	tag->type		= (const char *) tagProp->type;
-	tag->readOnly	= (short) tagProp->readOnly;
-	tag->nbRecords	= (int) tagProp->rcdLen;
-	if (tag->nbRecords > 0) {
+	tagClient->name		= g_strdup(tagProp->name);
+	tagClient->type		= g_strdup(tagProp->type);
+	tagClient->readOnly	= (short) tagProp->readOnly;
+	tagClient->nbRecords	= (int) tagProp->rcdLen;
+	if (tagClient->nbRecords > 0) {
 		err = NEARDAL_ERROR_NO_MEMORY;
-		size = (tag->nbRecords + 1) * sizeof(char *);
-		tag->records = g_try_malloc0(size);
-		if (tag->records == NULL)
+		size = (tagClient->nbRecords + 1) * sizeof(char *);
+		tagClient->records = g_try_malloc0(size);
+		if (tagClient->records == NULL)
 			goto exit;
 
 		ct = 0;
-		while (ct < tag->nbRecords) {
+		while (ct < tagClient->nbRecords) {
 			record = g_list_nth_data(tagProp->rcdList, ct);
 			if (record != NULL)
-				tag->records[ct++] = g_strdup(record->name);
+				tagClient->records[ct++] = g_strdup(record->name);
 		}
 		err = NEARDAL_SUCCESS;
 	}
 
-	tag->nbTagTypes = 0;
-	tag->tagType = NULL;
+	tagClient->nbTagTypes = 0;
+	tagClient->tagType = NULL;
 	/* Count TagTypes */
-	tag->nbTagTypes = (int) tagProp->tagTypeLen;
+	tagClient->nbTagTypes = (int) tagProp->tagTypeLen;
 
-	if (tag->nbTagTypes <= 0)
+	if (tagClient->nbTagTypes <= 0)
 		goto exit;
 
 	err = NEARDAL_ERROR_NO_MEMORY;
-	size = (tag->nbTagTypes + 1) * sizeof(char *);
-	tag->tagType = g_try_malloc0(size);
-	if (tag->tagType == NULL)
+	size = (tagClient->nbTagTypes + 1) * sizeof(char *);
+	tagClient->tagType = g_try_malloc0(size);
+	if (tagClient->tagType == NULL)
 		goto exit;
 
 	ct = 0;
-	while (ct < tag->nbTagTypes) {
-		tag->tagType[ct] = g_strdup(tagProp->tagType[ct]);
+	while (ct < tagClient->nbTagTypes) {
+		tagClient->tagType[ct] = g_strdup(tagProp->tagType[ct]);
 		ct++;
 	}
 	err = NEARDAL_SUCCESS;
 
 exit:
+	if (err != NEARDAL_SUCCESS) {
+		neardal_free_tag(tagClient);
+		if (tag != NULL)
+			*tag = NULL;
+	}
+	
 	return err;
 }
 
@@ -768,15 +862,40 @@ exit:
 }
 
 /*****************************************************************************
+ * neardal_free_record: Release memory allocated for properties of a record
+ ****************************************************************************/
+void neardal_free_record(neardal_record *record)
+{
+	if (record == NULL) {
+		NEARDAL_TRACE_ERR("Record provided is NULL!\n");
+		return;
+	}
+
+	// Freeing record properties
+	g_free((gpointer) record->name);
+	g_free((gpointer) record->encoding);
+	g_free((gpointer) record->language);
+	g_free((gpointer) record->action);
+	g_free((gpointer) record->type);
+	g_free((gpointer) record->representation);
+	g_free((gpointer) record->uri);
+	g_free((gpointer) record->mime);
+	
+	// Freeing record struct
+	g_free(record);
+}
+	
+/*****************************************************************************
  * neardal_get_record_properties: Get values of a specific tag record
  ****************************************************************************/
 errorCode_t neardal_get_record_properties(const char *recordName,
-					  neardal_record *record)
+					  neardal_record **record)
 {
 	errorCode_t	err		= NEARDAL_SUCCESS;
 	AdpProp		*adpProp	= NULL;
 	TagProp		*tagProp	= NULL;
 	RcdProp		*rcdProp	= NULL;
+	neardal_record *rcdClient	= NULL;
 
 	if (recordName == NULL || record == NULL)
 		goto exit;
@@ -801,18 +920,31 @@ errorCode_t neardal_get_record_properties(const char *recordName,
 	if (err != NEARDAL_SUCCESS)
 		goto exit;
 
-	record->name		= (const char *) rcdProp->name;
-	record->encoding	= (const char *) rcdProp->encoding;
-	record->language	= (const char *) rcdProp->language;
-	record->action		= (const char *) rcdProp->action;
+	rcdClient = g_try_malloc0(sizeof(neardal_record));
+	if (rcdClient == NULL) {
+		err = NEARDAL_ERROR_NO_MEMORY;
+		goto exit;
+	}
+	*record = rcdClient;
+	
+	rcdClient->name			= g_strdup(rcdProp->name);
+	rcdClient->encoding		= g_strdup(rcdProp->encoding);
+	rcdClient->language		= g_strdup(rcdProp->language);
+	rcdClient->action		= g_strdup(rcdProp->action);
 
-	record->type		= (const char *) rcdProp->type;
-	record->representation	= (const char *) rcdProp->representation;
-	record->uri		= (const char *) rcdProp->uri;
-	record->uriObjSize	= (unsigned int) rcdProp->uriObjSize;
-	record->mime		= (const char *) rcdProp->mime;
+	rcdClient->type			= g_strdup(rcdProp->type);
+	rcdClient->representation	= g_strdup(rcdProp->representation);
+	rcdClient->uri			= g_strdup(rcdProp->uri);
+	rcdClient->uriObjSize		= (unsigned int) rcdProp->uriObjSize;
+	rcdClient->mime			= g_strdup(rcdProp->mime);
 
 exit:
+	if (err != NEARDAL_SUCCESS) {
+		neardal_free_record(rcdClient);
+		if (record != NULL)
+			*record = NULL;
+	}
+	
 	return err;
 }
 
