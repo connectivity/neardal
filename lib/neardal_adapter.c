@@ -218,7 +218,7 @@ static errorCode_t neardal_adp_prv_read_properties(AdpProp *adpProp)
 		goto exit;
 	}
 
-	NEARDAL_TRACE_LOG("Reading:\n%s\n", g_variant_print(tmp, TRUE));
+	NEARDAL_TRACEF("Reading:\n%s\n", g_variant_print(tmp, TRUE));
 	tmpOut = g_variant_lookup_value(tmp, "Tags", G_VARIANT_TYPE_ARRAY);
 	if (tmpOut != NULL) {
 		tagArray = g_variant_dup_objv(tmpOut, &len);

@@ -86,7 +86,7 @@ static errorCode_t neardal_tag_prv_read_properties(TagProp *tagProp)
 		g_error_free(gerror);
 		goto exit;
 	}
-	NEARDAL_TRACE_LOG("Reading:\n%s\n", g_variant_print(tmp, TRUE));
+	NEARDAL_TRACEF("Reading:\n%s\n", g_variant_print(tmp, TRUE));
 	tmpOut = g_variant_lookup_value(tmp, "Records", G_VARIANT_TYPE_ARRAY);
 	if (tmpOut != NULL) {
 		rcdArray = g_variant_dup_objv(tmpOut, &len);

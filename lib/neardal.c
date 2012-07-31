@@ -222,6 +222,9 @@ errorCode_t neardal_free_array(char ***array)
 	if (array == NULL)
 		return NEARDAL_ERROR_INVALID_PARAMETER;
 
+	if (*array == NULL)
+		return NEARDAL_ERROR_GENERAL_ERROR;
+
 	adps = *array;
 	while ((*adps) != NULL) {
 		g_free(*adps);

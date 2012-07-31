@@ -53,7 +53,7 @@ static errorCode_t neardal_rcd_prv_read_properties(RcdProp *rcd)
 		g_error_free(gerror);
 		return err;
 	}
-	NEARDAL_TRACE_LOG("Reading:\n%s\n", g_variant_print(tmp, TRUE));
+	NEARDAL_TRACEF("Reading:\n%s\n", g_variant_print(tmp, TRUE));
 
 	tmpOut = g_variant_lookup_value(tmp, "Type", G_VARIANT_TYPE_STRING);
 	if (tmpOut != NULL)
