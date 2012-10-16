@@ -35,21 +35,23 @@ else
 fi
 
 ## Traces ?
-AC_ARG_ENABLE(traces, AC_HELP_STRING([--disable-traces],
-			[remove traces while compiling]), [
- 	if (test "${enableval}" = "no"); then
- 		traces=no
- 		echo 'NEARDAL will be compiled without traces... ('NEARDAL_TRACES' will not be defined)'
+AC_ARG_ENABLE(traces, AC_HELP_STRING([--enable-traces],
+			[add debugging traces while compiling]), [
+ 	if (test "${enableval}" = "yes"); then
+ 		traces=yes
  	fi
 ])
 if (test "${traces}" = "yes"); then
 	CFLAGS="$CFLAGS -DNEARDAL_TRACES"
- 	echo 'NEARDAL will be compiled with traces...('NEARDAL_TRACES' will be defined)'
+ 	echo 'NEARDAL will be compiled with debugging traces...('NEARDAL_TRACES' will be defined)'
+else
+	echo 'NEARDAL will be compiled without debugging traces... ('NEARDAL_TRACES' will not be defined)'
 fi
 
 ## Check dependances
-PKG_CHECK_MODULES(GLIB, glib-2.0 >= 2.22, dummy=yes,
-				AC_MSG_ERROR(GLib >= 2.22 is required))
+GLIB_REQUIRED=2.22.0
+PKG_CHECK_MODULES(GLIB, glib-2.0 >= $GLIB_REQUIRED, dummy=yes,
+				AC_MSG_ERROR(GLib >= $GLIB_REQUIRED is required))
 AC_SUBST(GLIB_CFLAGS)
 AC_SUBST(GLIB_LIBS)
 
