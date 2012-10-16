@@ -35,16 +35,17 @@ else
 fi
 
 ## Traces ?
-AC_ARG_ENABLE(traces, AC_HELP_STRING([--disable-traces],
-			[remove traces while compiling]), [
- 	if (test "${enableval}" = "no"); then
- 		traces=no
- 		echo 'NEARDAL will be compiled without traces... ('NEARDAL_TRACES' will not be defined)'
+AC_ARG_ENABLE(traces, AC_HELP_STRING([--enable-traces],
+			[add debugging traces while compiling]), [
+ 	if (test "${enableval}" = "yes"); then
+ 		traces=yes
  	fi
 ])
 if (test "${traces}" = "yes"); then
 	CFLAGS="$CFLAGS -DNEARDAL_TRACES"
- 	echo 'NEARDAL will be compiled with traces...('NEARDAL_TRACES' will be defined)'
+ 	echo 'NEARDAL will be compiled with debugging traces...('NEARDAL_TRACES' will be defined)'
+else
+	echo 'NEARDAL will be compiled without debugging traces... ('NEARDAL_TRACES' will not be defined)'
 fi
 
 ## Check dependances
