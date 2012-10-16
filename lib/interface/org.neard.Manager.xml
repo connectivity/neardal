@@ -3,22 +3,28 @@
 <node>
 	<interface name="org.neard.Manager">
 		<method name="GetProperties">
-			<arg type="a{sv}" direction="out"/>
+			<arg name="properties" type="a{sv}" direction="out"/>
 		</method>
 		<method name="SetProperty">
-			<arg type="s" direction="in"/>
-			<arg type="v" direction="in"/>
+			<arg name="name" type="s" direction="in"/>
+			<arg name="value" type="v" direction="in"/>
+		</method>
+		<method name="RegisterHandoverAgent">
+			<arg name="path" type="o" direction="in"/>
+		</method>
+		<method name="UnregisterHandoverAgent">
+			<arg name="path" type="o" direction="in"/>
 		</method>
 		<signal name="PropertyChanged">
-			<arg type="s"/>
-			<arg type="v"/>
+			<arg name="name" type="s"/>
+			<arg name="value" type="v"/>
 		</signal>
 		<signal name="AdapterAdded">
-			<arg type="o"/>
+			<arg name="adapter" type="o"/>
 		</signal>
 		<signal name="AdapterRemoved">
-			<arg type="o"/>
+			<arg name="adapter" type="o"/>
 		</signal>
 	</interface>
+	<node name="org"/>
 </node>
-

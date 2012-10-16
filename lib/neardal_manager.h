@@ -40,39 +40,39 @@ typedef struct {
 	GList	*adpList;	/* List of available adapter (AdpProp*) */
 } MgrProp;
 
-/******************************************************************************
+/*****************************************************************************
  * neardal_mgr_prv_get_adapter: Get NEARDAL Adapter from name
- *****************************************************************************/
+ ****************************************************************************/
 errorCode_t neardal_mgr_prv_get_adapter(gchar *adpName, AdpProp **adpProp);
 
-/******************************************************************************
+/*****************************************************************************
  * neardal_mgr_prv_get_adapter_from_proxy: Get NEARDAL Adapter from proxy
  *****************************************************************************/
-errorCode_t neardal_mgr_prv_get_adapter_from_proxy(DBusGProxy * adpProxy,
+errorCode_t neardal_mgr_prv_get_adapter_from_proxy(DBusGProxy *adpProxy,
 							AdpProp **adpProp);
 
-/******************************************************************************
+/*****************************************************************************
  * neardal_mgr_prv_get_tag: Get specific tag from adapter
- *****************************************************************************/
+ ****************************************************************************/
 errorCode_t neardal_mgr_prv_get_tag(AdpProp *adpProp, gchar *tagName,
-				       TagProp * *tagProp);
+				       TagProp **tagProp);
 
-/******************************************************************************
+/*****************************************************************************
  * neardal_mgr_prv_get_record: Get specific record from tag
  *****************************************************************************/
-errorCode_t neardal_mgr_prv_get_record(TagProp * tagProp, gchar *rcdName,
-				       RcdProp * *rcdProp);
+errorCode_t neardal_mgr_prv_get_record(TagProp *tagProp, gchar *rcdName,
+				       RcdProp **rcdProp);
 
-/******************************************************************************
+/*****************************************************************************
  * neardal_mgr_create: Get Neard Manager Properties = NEARDAL Adapters list.
  * Create a DBus proxy for the first one NEARDAL adapter if present
  * Register Neard Manager signals ('PropertyChanged')
- *****************************************************************************/
+ ****************************************************************************/
 errorCode_t neardal_mgr_create(void);
 
-/******************************************************************************
+/*****************************************************************************
  * neardal_mgr_destroy: unref DBus proxy, disconnect Neard Manager signals
- *****************************************************************************/
+ ****************************************************************************/
 void neardal_mgr_destroy(void);
 
 #ifdef __cplusplus

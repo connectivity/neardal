@@ -26,12 +26,12 @@ extern "C" {
 #endif	/* __cplusplus */
 
 
-/******************************************************************************
+/*****************************************************************************
  * neardal_tools_prv_free_gerror: freeing gerror in neardal context
  *****************************************************************************/
 void neardal_tools_prv_free_gerror(GError **gerror);
 
-/******************************************************************************
+/*****************************************************************************
  * neardal_tools_prv_cmp_path: Compare dbus path.
  * return true (<>0) if path is same, 0 otherwise
  *****************************************************************************/
@@ -41,15 +41,15 @@ int neardal_tools_prv_cmp_path(const char *neardalPath, const char *reqPath);
  * neardal_tools_prv_hashtable_get: Parse a hashtable and get value of GType
  * 'type' with a specific key
  *****************************************************************************/
-errorCode_t neardal_tools_prv_hashtable_get(GHashTable * hashTable,
+errorCode_t neardal_tools_prv_hashtable_get(GHashTable *hashTable,
 					     gconstpointer key, GType gtype,
 					     void *value);
 
 /******************************************************************************
  * neardal_tools_prv_create_proxy: create dbus proxy to Neard daemon
  *****************************************************************************/
-errorCode_t neardal_tools_prv_create_proxy(DBusGConnection * conn,
-					    DBusGProxy * *oProxy,
+errorCode_t neardal_tools_prv_create_proxy(DBusGConnection *conn,
+					    DBusGProxy **oProxy,
 					    const char *path,
 					    const char *iface);
 
@@ -57,10 +57,10 @@ errorCode_t neardal_tools_prv_create_proxy(DBusGConnection * conn,
  * neardal_marshal_VOID__STRING_BOXED: marshaller function for signal
  * invocations
  *****************************************************************************/
-void neardal_marshal_VOID__STRING_BOXED(GClosure	* closure,
-					 GValue		* return_value,
+void neardal_marshal_VOID__STRING_BOXED(GClosure	*closure,
+					 GValue		*return_value,
 					 guint		n_param_values,
-					 const GValue	* param_values,
+					 const GValue	*param_values,
 					 gpointer	invocation_hint,
 					 gpointer	marshal_data);
 
@@ -82,8 +82,8 @@ GHashTable *neardal_tools_prv_create_dict(void);
 /******************************************************************************
  * neardal_tools_prv_add_dict_entry: add an entry in a dictionnary
  *****************************************************************************/
-errorCode_t neardal_tools_prv_add_dict_entry(GHashTable *hash, gchar * key,
-					      gchar * value);
+errorCode_t neardal_tools_prv_add_dict_entry(GHashTable *hash, gchar *key,
+					      gchar *value);
 
 #ifdef __cplusplus
 }

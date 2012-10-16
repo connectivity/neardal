@@ -35,14 +35,15 @@
  ****************************************************************************/
 static void neardal_tag_prv_cb_property_changed(DBusGProxy *proxy,
 					     const char	*arg_unnamed_arg0,
-					     GValue	*gvalue,
+					     GValue	*arg_unnamed_arg1,
 					     void	*user_data)
 {
 	GPtrArray	*pathsGpa	= NULL;
-	errorCode_t	err		= NEARDAL_ERROR_NO_TAG;
+	errorCode_t	err		= NEARDAL_SUCCESS;
 	TagProp		*tagProp	= user_data;
 
 	(void) proxy; /* remove warning */
+	(void) arg_unnamed_arg1; /* remove warning */
 
 	NEARDAL_TRACEIN();
 
@@ -50,34 +51,35 @@ static void neardal_tag_prv_cb_property_changed(DBusGProxy *proxy,
 		return;
 
 	NEARDAL_TRACEF("arg_unnamed_arg0='%s'\n", arg_unnamed_arg0);
-	if (!strcmp(arg_unnamed_arg0, "Tags")) {
-		if (!G_VALUE_HOLDS(gvalue, DBUS_TYPE_G_ARRAY_OF_OBJECT_PATH)) {
-			NEARDAL_TRACE_ERR("Unexpected type: %s",
-					  G_VALUE_TYPE_NAME(&gvalue));
-			err = NEARDAL_ERROR_DBUS;
-			return;
-		}
-
-		/* Extract the tags arrays List from the GValue */
-		err = NEARDAL_ERROR_NO_TAG;
-		pathsGpa = g_value_get_boxed(gvalue);
-		if (pathsGpa == NULL)
-			goto error;
-
-		if (pathsGpa->len <= 0)
-			goto error;
-
-		/* Getting last tag */
-		gvalue = g_ptr_array_index(pathsGpa, pathsGpa->len - 1);
-		if (gvalue != NULL)
-			err = NEARDAL_SUCCESS;
-		else
-			err = NEARDAL_ERROR_NO_TAG;
-	}
+// 	if (!strcmp(arg_unnamed_arg0, "Tags")) {
+// 		if (!G_VALUE_HOLDS(arg_unnamed_arg1,
+// 				  DBUS_TYPE_G_ARRAY_OF_OBJECT_PATH)) {
+// 			NEARDAL_TRACE_ERR("Unexpected type: %s",
+// 					G_VALUE_TYPE_NAME(&arg_unnamed_arg1));
+// 			err = NEARDAL_ERROR_DBUS;
+// 			return;
+// 		}
+// 
+// 		/* Extract the tags arrays List from the GValue */
+// 		err = NEARDAL_ERROR_NO_TAG;
+// 		pathsGpa = g_value_get_boxed(arg_unnamed_arg1);
+// 		if (pathsGpa == NULL)
+// 			goto error;
+// 
+// 		if (pathsGpa->len <= 0)
+// 			goto error;
+// 
+// 		/* Getting last tag */
+// 		gvalue = g_ptr_array_index(pathsGpa, pathsGpa->len - 1);
+// 		if (gvalue != NULL)
+// 			err = NEARDAL_SUCCESS;
+// 		else
+// 			err = NEARDAL_ERROR_NO_TAG;
+// 	}
 
 	return;
 
-error:
+// error:
 	if (err != NEARDAL_SUCCESS) {
 		NEARDAL_TRACE_ERR("Exit with error code %d:%s\n", err,
 				neardal_error_get_text(err));

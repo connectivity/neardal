@@ -48,22 +48,22 @@ typedef struct {
 	gchar		*mime;
 } RcdProp;
 
-/******************************************************************************
+/*****************************************************************************
  * neardal_rcd_add: add new NFC record, initialize DBus Proxy connection,
  * register record signal
  *****************************************************************************/
 errorCode_t neardal_rcd_add(char *rcdName, void *parent);
 
-/******************************************************************************
+/*****************************************************************************
  * neardal_rcd_remove: remove NFC record, unref DBus Proxy connection,
  * unregister record signal
  *****************************************************************************/
 void neardal_rcd_remove(RcdProp *rcdProp);
 
-/******************************************************************************
+/*****************************************************************************
  * neardal_rcd_prv_format: Insert key/value in a GHashTable
  *****************************************************************************/
-errorCode_t neardal_rcd_prv_format(GHashTable * *hash, RcdProp *rcd);
+errorCode_t neardal_rcd_prv_format(GHashTable **hash, RcdProp *rcd);
 
 #ifdef __cplusplus
 }

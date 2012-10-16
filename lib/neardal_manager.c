@@ -46,8 +46,6 @@ static void neardal_mgr_prv_cb_property_changed(DBusGProxy  *proxy,
 	(void) user_data; /* remove warning */
 
 	NEARDAL_TRACEF("arg_unnamed_arg0='%s'\n", arg_unnamed_arg0);
-	NEARDAL_TRACEF("arg_unnamed_arg1=%s\n",
-		       g_variant_print (arg_unnamed_arg1, TRUE));
 	/* Adapters List ignored... */
 }
 
@@ -123,7 +121,7 @@ static errorCode_t neardal_mgr_prv_get_all_adapters(GPtrArray **adpArray,
 	if (org_neard_Manager_get_properties(neardalMgr.proxy,
 					     &neardAdapterHash,
 					     &neardalMgr.gerror)) {
-		/* Receiving a GPtrArray of GList */
+		/* Receiving a GPtrArray of object path */
 		NEARDAL_TRACEF("Parsing neard adapters...\n");
 
 		err = neardal_tools_prv_hashtable_get(neardAdapterHash,
@@ -159,15 +157,14 @@ errorCode_t neardal_mgr_prv_get_adapter(gchar *adpName, AdpProp **adpProp)
 	AdpProp		*adapter;
 	GList		*tmpList;
 
-	g_assert(adpProp != NULL);
-
 	tmpList = neardalMgr.prop.adpList;
 	while (len < g_list_length(tmpList)) {
 		adapter = g_list_nth_data(tmpList, len);
 		if (adapter != NULL) {
 			if (neardal_tools_prv_cmp_path(adapter->name,
 							adpName)) {
-				*adpProp = adapter;
+				if (adpProp != NULL)
+					*adpProp = adapter;
 				err = NEARDAL_SUCCESS;
 				break;
 			}
@@ -226,7 +223,6 @@ errorCode_t neardal_mgr_prv_get_tag(AdpProp *adpProp, gchar *tagName,
 	tmpList = adpProp->tagList;
 	while (len < g_list_length(tmpList)) {
 		tag = g_list_nth_data(tmpList, len);
-
 		if (neardal_tools_prv_cmp_path(tag->name, tagName)) {
 			*tagProp = tag;
 			err = NEARDAL_SUCCESS;

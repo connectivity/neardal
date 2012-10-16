@@ -259,7 +259,6 @@ static errorCode_t neardal_adp_prv_read_properties(AdpProp *adpProp)
 							    len++);
 				err = neardal_tag_prv_add(tagName,
 							  adpProp);
-				adpProp->tagNb++;
 			}
 		}
 	}
@@ -279,9 +278,8 @@ static errorCode_t neardal_adp_prv_read_properties(AdpProp *adpProp)
 	if (err == NEARDAL_SUCCESS) {
 		adpProp->protocols = g_boxed_copy(G_TYPE_STRV, tmp);
 		len = 0;
-		while (adpProp->protocols[len] != NULL) {
+		while (adpProp->protocols[len] != NULL) 
 			len++;
-		};
 		adpProp->lenProtocols = len - 1;
 		if (adpProp->lenProtocols == 0) {
 			g_strfreev(adpProp->protocols);
@@ -295,7 +293,7 @@ exit:
 }
 
 /*****************************************************************************
- * neardal_adp_prv_get_current_tag: Get current NFC tag
+ * neardal_adp_prv_get_tag: Get current NFC tag
  ****************************************************************************/
 errorCode_t neardal_adp_prv_get_tag(AdpProp *adpProp, gchar *tagName,
 				       TagProp **tagProp)
@@ -423,7 +421,6 @@ static void neardal_adp_prv_free(AdpProp **adpProp)
 		g_boxed_free(G_TYPE_STRV, (*adpProp)->protocols);
 	g_free((*adpProp));
 	(*adpProp) = NULL;
-
 }
 
 /*****************************************************************************
@@ -438,34 +435,40 @@ errorCode_t neardal_adp_add(gchar *adapterName)
 	TagProp		*tagProp;
 	gsize		len;
 
-	NEARDAL_TRACEF("Adding adapter:%s\n", adapterName);
+	// Check if adapter already exist in list...
+	err = neardal_mgr_prv_get_adapter(adapterName, NULL);
+	if (err != NEARDAL_SUCCESS) {
+		NEARDAL_TRACEF("Adding adapter:%s\n", adapterName);
 
-	adpProp = g_try_malloc0(sizeof(AdpProp));
-	if (adpProp == NULL)
-		return NEARDAL_ERROR_NO_MEMORY;
+		adpProp = g_try_malloc0(sizeof(AdpProp));
+		if (adpProp == NULL)
+			return NEARDAL_ERROR_NO_MEMORY;
 
-	adpProp->name = g_strdup(adapterName);
-	adpProp->parent = &neardalMgr;
+		adpProp->name = g_strdup(adapterName);
+		adpProp->parent = &neardalMgr;
 
 	adpList = &neardalMgr.prop.adpList;
 	*adpList = g_list_prepend(*adpList, (gpointer) adpProp);
 	err = neardal_adp_prv_init(adpProp);
 
-	NEARDAL_TRACEF("NEARDAL LIB adapterList contains %d elements\n",
-		      g_list_length(*adpList));
+		NEARDAL_TRACEF("NEARDAL LIB adapterList contains %d elements\n",
+			g_list_length(*adpList));
 
-	/* Invoke client cb 'adapter added' */
-	if (neardalMgr.cb_adp_added != NULL)
-			(neardalMgr.cb_adp_added)((char *) adapterName,
-					       neardalMgr.cb_adp_added_ud);
+		/* Invoke client cb 'adapter added' */
+		if (neardalMgr.cb_adp_added != NULL)
+				(neardalMgr.cb_adp_added)((char *) adapterName,
+						neardalMgr.cb_adp_added_ud);
 
-	/* Notify 'Tag Found' */
-	len = 0;
-	while (len < g_list_length(adpProp->tagList)) {
-		tagProp = g_list_nth_data(adpProp->tagList, len++);
-		neardal_tag_notify_tag_found(tagProp);
-		len++;
-	}
+		/* Notify 'Tag Found' */
+		len = 0;
+		while (len < g_list_length(adpProp->tagList)) {
+			tagProp = g_list_nth_data(adpProp->tagList, len++);
+			neardal_tag_notify_tag_found(tagProp);
+			len++;
+		}
+	} else
+		NEARDAL_TRACEF("Adapter '%s' already added\n", adapterName);
+		
 	return err;
 }
 

@@ -29,9 +29,9 @@
 #include "neardal_prv.h"
 
 
-/******************************************************************************
+/*****************************************************************************
  * neardal_rcd_prv_read_properties: Get Neard Record Properties
- *****************************************************************************/
+ ****************************************************************************/
 static errorCode_t neardal_rcd_prv_read_properties(RcdProp *rcd)
 {
 	errorCode_t	err		= NEARDAL_SUCCESS;
@@ -101,11 +101,11 @@ static errorCode_t neardal_rcd_prv_read_properties(RcdProp *rcd)
 	return NEARDAL_SUCCESS;
 }
 
-/******************************************************************************
+/*****************************************************************************
  * neardal_rcd_init: Get Neard Manager Properties = NFC Records list.
  * Create a DBus proxy for the first one NFC record if present
  * Register Neard Manager signals ('PropertyChanged')
- *****************************************************************************/
+ ****************************************************************************/
 static errorCode_t neardal_rcd_prv_init(RcdProp *rcd)
 {
 	errorCode_t err;
@@ -133,9 +133,9 @@ static errorCode_t neardal_rcd_prv_init(RcdProp *rcd)
 	return neardal_rcd_prv_read_properties(rcd);
 }
 
-/******************************************************************************
+/*****************************************************************************
  * neardal_rcd_prv_free: unref DBus proxy, disconnect Neard Record signals
- *****************************************************************************/
+ ****************************************************************************/
 static void neardal_rcd_prv_free(RcdProp **rcd)
 {
 	NEARDAL_TRACEIN();
@@ -153,7 +153,7 @@ static void neardal_rcd_prv_free(RcdProp **rcd)
 	(*rcd) = NULL;
 }
 
-/******************************************************************************
+/*****************************************************************************
  * neardal_rcd_prv_format: Insert key/value in a GHashTable
  *****************************************************************************/
 errorCode_t neardal_rcd_prv_format(GHashTable **hash, RcdProp *rcd)
@@ -251,10 +251,10 @@ exit:
 	return err;
 }
 
-/******************************************************************************
+/*****************************************************************************
  * neardal_rcd_remove: remove NFC record, unref DBus Proxy connection,
  * unregister record signal
- *****************************************************************************/
+ ****************************************************************************/
 void neardal_rcd_remove(RcdProp *rcd)
 {
 	TagProp		*tagProp;

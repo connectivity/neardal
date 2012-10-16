@@ -29,7 +29,6 @@
 #include "neardal.h"
 #include "ncl.h"
 #include "ncl_cmd.h"
-#include <lib/neardal.h>
 
 
 static NCLCmdContext  sNclCmdCtx;
@@ -145,103 +144,112 @@ NCLError ncl_cmd_list(int argc, char *argv[])
 /*****************************************************************************
  * Dump properties of an adapter
  ****************************************************************************/
-static void ncl_cmd_prv_dump_adapter(neardal_adapter adapter)
+static void ncl_cmd_prv_dump_adapter(neardal_adapter *adapter)
 {
 	char **protocols;
 	char **tags;
 
 	NCL_CMD_PRINT("Adapter\n");
-	NCL_CMD_PRINT(".. Name:\t\t'%s'\n", adapter.name);
+	NCL_CMD_PRINT(".. Name:\t\t'%s'\n", adapter->name);
 
 	NCL_CMD_PRINT(".. Polling:\t\t'%s'\n",
-		      adapter.polling ? "TRUE" : "FALSE");
+		      adapter->polling ? "TRUE" : "FALSE");
 	NCL_CMD_PRINT(".. Powered:\t\t'%s'\n",
-		      adapter.powered ? "TRUE" : "FALSE");
+		      adapter->powered ? "TRUE" : "FALSE");
 
-	tags = adapter.tags;
-	NCL_CMD_PRINT(".. Number of tags:\t%d\n", adapter.nbTags);
+	tags = adapter->tags;
+	NCL_CMD_PRINT(".. Number of tags:\t%d\n", adapter->nbTags);
 	NCL_CMD_PRINT(".. Tags[]:\t\t");
-	if (adapter.nbTags > 0) {
+	if (adapter->nbTags > 0) {
 		while ((*tags) != NULL) {
 			NCL_CMD_PRINT("'%s', ", *tags);
 			tags++;
 		}
-		neardal_free_array(&adapter.tags);
 	} else
 		NCL_CMD_PRINT("No tags!");
 	NCL_CMD_PRINT("\n");
 
-	protocols = adapter.protocols;
-	NCL_CMD_PRINT(".. Number of protocols:\t%d\n", adapter.nbProtocols);
+	protocols = adapter->protocols;
+	NCL_CMD_PRINT(".. Number of protocols:\t%d\n", adapter->nbProtocols);
 	NCL_CMD_PRINT(".. Protocols[]:\t\t");
-	if (adapter.nbProtocols > 0) {
+	if (adapter->nbProtocols > 0) {
 		while ((*protocols) != NULL) {
 			NCL_CMD_PRINT("'%s', ", *protocols);
 			protocols++;
 		}
-		neardal_free_array(&adapter.protocols);
 	} else
 		NCL_CMD_PRINT("No protocols!");
 	NCL_CMD_PRINT("\n");
+	neardal_free_adapter(adapter);
 }
 
 /*****************************************************************************
  * Dump properties of a tag
  ****************************************************************************/
-static void ncl_cmd_prv_dump_tag(neardal_tag tag)
+static void ncl_cmd_prv_dump_tag(neardal_tag *tag)
 {
 	char **records;
 	char **tagTypes;
 
 	NCL_CMD_PRINT("Tag:\n");
-	NCL_CMD_PRINT(".. Name:\t\t'%s'\n", tag.name);
+	NCL_CMD_PRINT(".. Name:\t\t'%s'\n", tag->name);
 
-	NCL_CMD_PRINT(".. Type:\t\t'%s'\n", tag.type);
+	NCL_CMD_PRINT(".. Type:\t\t'%s'\n", tag->type);
 
-	NCL_CMD_PRINT(".. Number of 'Tag Type':%d\n", tag.nbTagTypes);
-	tagTypes = tag.tagType;
-	if (tag.nbTagTypes > 0) {
+	NCL_CMD_PRINT(".. Number of 'Tag Type':%d\n", tag->nbTagTypes);
+	tagTypes = tag->tagType;
+	if (tag->nbTagTypes > 0) {
 		NCL_CMD_PRINT(".. Tags type[]:\t\t");
 		while ((*tagTypes) != NULL) {
 			NCL_CMD_PRINT("'%s', ", *tagTypes);
 			tagTypes++;
 		}
 		NCL_CMD_PRINT("\n");
-		neardal_free_array(&tag.tagType);
 	}
 
-	records = tag.records;
-	NCL_CMD_PRINT(".. Number of records:\t%d\n", tag.nbRecords);
+	records = tag->records;
+	NCL_CMD_PRINT(".. Number of records:\t%d\n", tag->nbRecords);
 	NCL_CMD_PRINT(".. Records[]:\t\t");
 	if (records != NULL) {
 		while ((*records) != NULL) {
 			NCL_CMD_PRINT("'%s', ", *records);
 			records++;
 		}
-		neardal_free_array(&tag.records);
 	} else
 		NCL_CMD_PRINT("No records!");
 
 	NCL_CMD_PRINT("\n");
 	NCL_CMD_PRINT(".. ReadOnly:\t\t%s\n"	,
-		      tag.readOnly ? "TRUE" : "FALSE");
+		      tag->readOnly ? "TRUE" : "FALSE");
+	neardal_free_tag(tag);
 }
 
 /*****************************************************************************
  * Dump properties of a record
  ****************************************************************************/
-static void ncl_cmd_prv_dump_record(neardal_record record)
+static void ncl_cmd_prv_dump_record(neardal_record *record)
 {
 	NCL_CMD_PRINT("Record\n");
-	NCL_CMD_PRINT(".. Name:\t\t%s\n"	, record.name);
-	NCL_CMD_PRINT(".. Encoding:\t\t%s\n"	, record.encoding);
-	NCL_CMD_PRINT(".. Language:\t\t%s\n"	, record.language);
-	NCL_CMD_PRINT(".. Action:\t\t%s\n"	, record.action);
-	NCL_CMD_PRINT(".. Type:\t\t%s\n"	, record.type);
-	NCL_CMD_PRINT(".. Representation:\t%s\n", record.representation);
-	NCL_CMD_PRINT(".. URI:\t\t\t%s\n"	, record.uri);
-	NCL_CMD_PRINT(".. URI size:\t\t%d\n"	, record.uriObjSize);
-	NCL_CMD_PRINT(".. MIME:\t\t%s\n"	, record.mime);
+	if (record->name)
+		NCL_CMD_PRINT(".. Name:\t\t%s\n"	, record->name);
+	if (record->encoding)
+		NCL_CMD_PRINT(".. Encoding:\t\t%s\n"	, record->encoding);
+	if (record->language)
+		NCL_CMD_PRINT(".. Language:\t\t%s\n"	, record->language);
+	if (record->action)
+		NCL_CMD_PRINT(".. Action:\t\t%s\n"	, record->action);
+	if (record->type)
+		NCL_CMD_PRINT(".. Type:\t\t%s\n"	, record->type);
+	if (record->representation)
+		NCL_CMD_PRINT(".. Representation:\t%s\n",
+			      record->representation);
+	if (record->uri) {
+		NCL_CMD_PRINT(".. URI:\t\t\t%s\n"	, record->uri);
+		NCL_CMD_PRINT(".. URI size:\t\t%d\n"	, record->uriObjSize);
+	}
+	if (record->mime)
+		NCL_CMD_PRINT(".. MIME:\t\t%s\n"	, record->mime);
+	neardal_free_record(record);
 }
 
 /*****************************************************************************
@@ -250,7 +258,7 @@ static void ncl_cmd_prv_dump_record(neardal_record record)
 static void ncl_cmd_cb_adapter_added(const char *adpName, void *user_data)
 {
 	errorCode_t	ec;
-	neardal_adapter	adapter;
+	neardal_adapter	*adapter;
 
 	(void) user_data; /* Remove warning */
 
@@ -292,7 +300,7 @@ static void ncl_cmd_cb_adapter_prop_changed(char *adpName, char *propName,
 
 static void ncl_cmd_cb_tag_found(const char *tagName, void *user_data)
 {
-	neardal_tag	tag;
+	neardal_tag	*tag;
 	errorCode_t	ec;
 
 	(void) user_data; /* remove warning */
@@ -318,7 +326,7 @@ static void ncl_cmd_cb_tag_lost(const char *tagName, void *user_data)
 static void ncl_cmd_cb_record_found(const char *rcdName, void *user_data)
 {
 	errorCode_t	ec;
-	neardal_record	record;
+	neardal_record	*record;
 
 	(void) user_data; /* remove warning */
 
@@ -326,9 +334,6 @@ static void ncl_cmd_cb_record_found(const char *rcdName, void *user_data)
 	ec = neardal_get_record_properties(rcdName, &record);
 	if (ec == NEARDAL_SUCCESS) {
 		ncl_cmd_prv_dump_record(record);
-/*		NCL_CMD_PRINTF("(Re)Start Poll\n");
-		sleep(1);
-		neardal_start_poll(neardalMgr, (char *) rcdName, NULL); */
 	} else
 		NCL_CMD_PRINTF("Read record error. (error:%d='%s').\n", ec,
 			       neardal_error_get_text(ec));
@@ -350,7 +355,7 @@ static void ncl_cmd_install_callback(void)
 	neardal_set_cb_tag_lost(ncl_cmd_cb_tag_lost, NULL);
 	NCL_CMD_PRINTF("NFC tag registered\n");
 	neardal_set_cb_record_found(ncl_cmd_cb_record_found, NULL);
-	NCL_CMD_PRINTF("NFC record callback registered\n");
+	NCL_CMD_PRINTF("NFC record callback registered\n\n");
 	sNclCmdCtx.cb_initialized = true;
 }
 
@@ -407,7 +412,7 @@ static NCLError ncl_cmd_get_adapter_properties(int argc, char *argv[])
 {
 	errorCode_t	ec;
 	char		*adapterName	= NULL;
-	neardal_adapter	adapter;
+	neardal_adapter	*adapter;
 
 	if (argc <= 1)
 		return NCLERR_PARSING_PARAMETERS;
@@ -488,7 +493,7 @@ static NCLError ncl_cmd_get_tag_properties(int argc, char *argv[])
 {
 	errorCode_t	ec;
 	char		*tagName	= NULL;
-	neardal_tag	tag;
+	neardal_tag	*tag;
 
 	if (argc <= 1)
 		return NCLERR_PARSING_PARAMETERS;
@@ -569,7 +574,7 @@ static NCLError ncl_cmd_get_record_properties(int argc, char *argv[])
 {
 	errorCode_t ec;
 	char		*recordName	= NULL;
-	neardal_record	record;
+	neardal_record	*record;
 
 	if (argc <= 1)
 		return NCLERR_PARSING_PARAMETERS;
@@ -648,13 +653,13 @@ static GOptionEntry options[] = {
 	if (nclErr != NCLERR_NOERROR) {
 		ncl_cmd_print(stdout, "Sample (Type 'Text'):");
 		ncl_cmd_print(stdout, "e.g. < write --type Text --lang en-US \
---encoding UTF-8 --rep \"Simple text\" --adp /org/neard/nfc0 >\n");
+--encoding UTF-8 --rep \"Simple text\" --tag /org/neard/nfc0/tag0 >\n");
 		ncl_cmd_print(stdout, "Sample (Type 'URI'):");
 		ncl_cmd_print(stdout, "e.g. < write --type URI \
---uri=http://www.nfc-forum.com  --adp /org/neard/nfc0 >\n");
+--uri=http://www.nfc-forum.com  --tag /org/neard/nfc0/tag0 >\n");
 		ncl_cmd_print(stdout, "Sample (Type 'SmartPoster'):");
 		ncl_cmd_print(stdout, "e.g. < write --type=SmartPoster \
---uri=http://www.nfc-forum.com > --adp /org/neard/nfc0 >\n");
+--uri=http://www.nfc-forum.com > --tag /org/neard/nfc0/tag0 >\n");
 	}
 
 	if (nclErr != NCLERR_NOERROR)
@@ -702,17 +707,12 @@ static NCLError ncl_cmd_set_adapter_property(int argc, char *argv[])
 	errorCode_t	ec		= NEARDAL_SUCCESS;
 	NCLError	nclErr;
 	static int	powered		= -1;
-	static char	*strMode	= NULL;
 	char		*adapterName	= NULL;
 
 static GOptionEntry options[] = {
 		{ "powered", 's', 0, G_OPTION_ARG_INT , &powered
 				, "Set Adapter power ON/OFF", "<>0 or =0" },
 				
-		{ "mode", 's', 0, G_OPTION_ARG_STRING , &strMode
-				, "Set Adapter mode initiator/target",
-				"'initiator' or 'target'" },
-
 		{ NULL, 0, 0, 0, NULL, NULL, NULL} /* End of List */
 	};
 
@@ -740,20 +740,11 @@ static GOptionEntry options[] = {
 		ec = neardal_set_adapter_property(adapterName,
 						  NEARD_ADP_PROP_POWERED,
 						  (void*) powered);
-
-	if (strMode != NULL)
-		ec = neardal_set_adapter_property(adapterName,
-						  NEARD_ADP_PROP_MODE,
-						  strMode);
-
 	
 exit:
 	NCL_CMD_PRINT("\nExit with error code %d:%s\n", ec,
 		      neardal_error_get_text(ec));
 	
-	if (strMode != NULL)
-		g_free(strMode);
-
 	return nclErr;
 }
 /*****************************************************************************
@@ -767,18 +758,49 @@ exit:
 static NCLError ncl_cmd_start_poll(int argc, char *argv[])
 {
 	errorCode_t	ec		= NEARDAL_SUCCESS;
+	NCLError	nclErr;
 	char		*adpName	= NULL;
+	static char	*strMode	= NULL;
 
-	if (argc <= 1)
-		return NCLERR_PARSING_PARAMETERS;
+static GOptionEntry options[] = {
+		{ "mode", 's', 0, G_OPTION_ARG_STRING , &strMode
+				, "Set Adapter mode initiator/target/dual",
+				"'initiator, target, dual'" },
+
+		{ NULL, 0, 0, 0, NULL, NULL, NULL} /* End of List */
+	};
 
 	/* Install Neardal Callback*/
 	if (sNclCmdCtx.cb_initialized == false)
 		ncl_cmd_install_callback();
 
+	if (argc > 1)
+		/* Parse options */
+		nclErr = ncl_cmd_prv_parseOptions(&argc, &argv, options);
+	else
+		nclErr = NCLERR_PARSING_PARAMETERS;
+
+	if (nclErr != NCLERR_NOERROR)
+		goto exit;
+
 	/* Start polling if adapter present */
 	adpName = argv[1];
-	ec = neardal_start_poll(adpName);
+	if (strMode != NULL) {
+		if (!strcmp(strMode, "initiator"))
+			ec = neardal_start_poll_loop(adpName,
+						     NEARD_ADP_MODE_INITIATOR);
+		else if (!strcmp(strMode, "target"))
+			ec = neardal_start_poll_loop(adpName,
+						     NEARD_ADP_MODE_TARGET);
+		else if (!strcmp(strMode, "dual"))
+			ec = neardal_start_poll_loop(adpName,
+						     NEARD_ADP_MODE_DUAL);
+		else
+			ec = neardal_start_poll_loop(adpName,
+						     NEARD_ADP_MODE_INITIATOR);
+	} else
+		ec = neardal_start_poll(adpName);
+	
 	if (ec != NEARDAL_SUCCESS) {
 		NCL_CMD_PRINTF("NFC polling activation error:%d='%s'\n",
 				ec, neardal_error_get_text(ec));
@@ -788,7 +810,14 @@ static NCLError ncl_cmd_start_poll(int argc, char *argv[])
 	NCL_CMD_PRINT("\nExit with error code %d:%s\n", ec,
 		      neardal_error_get_text(ec));
 
-	return NCLERR_NOERROR;
+exit:
+	if (strMode != NULL)
+		g_free(strMode);
+	
+	if (ec != NEARDAL_SUCCESS)
+		nclErr = NCLERR_LIB_ERROR;
+
+	return nclErr;
 }
 /*****************************************************************************
  * ncl_cmd_start_poll : END

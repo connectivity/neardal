@@ -73,7 +73,7 @@ static NCLError ncl_prv_split_cmdLine(gchar  *cmdLine, int *iArgc,
 	char		*argStart;
 	bool		inQuotes;
 	gssize		argSize;
-	gssize		cmdSize;
+	int		endParsing = FALSE;
 
 	/* Test input parameters */
 	if (!cmdLine || !iArgc || !iArgv)
@@ -84,11 +84,10 @@ static NCLError ncl_prv_split_cmdLine(gchar  *cmdLine, int *iArgc,
 	argc = iArgc;
 	*argc = 0;
 	inQuotes = false;
-	cmdSize = strlen(cmdLine);
 
 	argStart = argEnd = cmdLine;
 	while ((*argc) < NB_MAX_PARAMETERS && *argEnd != '\0' &&
-		(argEnd - cmdLine) < cmdSize ) {
+		endParsing == FALSE) {
 		while (*argEnd != ' ' && *argEnd != '"' && *argEnd != '\0')
 			argEnd++;
 		if (*argEnd == '"') {
@@ -98,6 +97,8 @@ static NCLError ncl_prv_split_cmdLine(gchar  *cmdLine, int *iArgc,
 		}
 
 		if (inQuotes == false) {
+			if (*argEnd == '\0')
+				endParsing = TRUE;
 			*argEnd = '\0';
 			argSize = argEnd - argStart;
 			if (argSize > 0)
@@ -209,6 +210,7 @@ static gboolean ncl_prv_kbinput_cb(GIOChannel *source, GIOCondition condition,
 							nclCmdCtx->clBuf->str);
 			}
 			g_string_erase(nclCmdCtx->clBuf, 0, -1);
+			g_string_append_c(nclCmdCtx->clBuf, '\0');
 		} else
 			NCL_CMD_PRINTERR("buf is NULL!!!\n");
 	}

@@ -49,17 +49,17 @@ typedef struct {
 	gboolean	readOnly;	/* Read-Only flag */
 } TagProp;
 
-/******************************************************************************
+/*****************************************************************************
  * neardal_tag_notify_tag_found: Invoke client callback for 'record found'
  * if present, and 'tag found' (if not already nofied)
- *****************************************************************************/
+ ****************************************************************************/
 void neardal_tag_notify_tag_found(TagProp *tagProp);
 
 /******************************************************************************
  * neardal_tag_prv_add: add new NEARDAL tag, initialize DBus Proxy connection,
  * register tag signal
  *****************************************************************************/
-errorCode_t neardal_tag_prv_add(gchar *tagName, void * parent);
+errorCode_t neardal_tag_prv_add(gchar *tagName, void *parent);
 
 /******************************************************************************
  * neardal_tag_prv_remove: remove NEARDAL tag, unref DBus Proxy connection,
