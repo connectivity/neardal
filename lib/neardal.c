@@ -39,10 +39,9 @@
 		gValue = g_variant_new_boolean((gboolean) value); \
 		 } while (0);
 
-#define	ADP_INITIATOR_MODE		"Initiator"
-#define	ADP_TARGET_MODE			"Target"
-#define	ADP_BOTH_MODE			"Both"
-
+#define	ADP_MODE_INITIATOR		"Initiator"
+#define	ADP_MODE_TARGET			"Target"
+#define	ADP_MODE_DUAL			"Dual"
 
 neardalCtx neardalMgr = {NULL, NULL, {NULL}, NULL, NULL, NULL, NULL, NULL, NULL,
 NULL, NULL, NULL, NULL, NULL, NULL, 0, NULL};
@@ -114,11 +113,11 @@ void neardal_destroy(void)
 errorCode_t neardal_set_cb_adapter_added(adapter_cb cb_adp_added,
 					 void *user_data)
 {
-	if (neardalMgr.proxy == NULL)
-		neardal_prv_construct(NULL);
-
 	neardalMgr.cb_adp_added		= cb_adp_added;
 	neardalMgr.cb_adp_added_ud	= user_data;
+
+	if (neardalMgr.proxy == NULL)
+		neardal_prv_construct(NULL);
 
 	return NEARDAL_SUCCESS;
 }
@@ -132,11 +131,11 @@ errorCode_t neardal_set_cb_adapter_removed(adapter_cb cb_adp_removed,
 					   void *user_data)
 {
 
-	if (neardalMgr.proxy == NULL)
-		neardal_prv_construct(NULL);
-
 	neardalMgr.cb_adp_removed	= cb_adp_removed;
 	neardalMgr.cb_adp_removed_ud	= user_data;
+
+	if (neardalMgr.proxy == NULL)
+		neardal_prv_construct(NULL);
 
 	return NEARDAL_SUCCESS;
 }
@@ -150,11 +149,11 @@ errorCode_t neardal_set_cb_adapter_property_changed(
 					adapter_prop_cb cb_adp_property_changed,
 					void *user_data)
 {
-	if (neardalMgr.proxy == NULL)
-		neardal_prv_construct(NULL);
-
 	neardalMgr.cb_adp_prop_changed		= cb_adp_property_changed;
 	neardalMgr.cb_adp_prop_changed_ud	= user_data;
+
+	if (neardalMgr.proxy == NULL)
+		neardal_prv_construct(NULL);
 
 	return NEARDAL_SUCCESS;
 }
@@ -167,11 +166,11 @@ errorCode_t neardal_set_cb_adapter_property_changed(
 errorCode_t neardal_set_cb_tag_found(tag_cb cb_tag_found,
 					void *user_data)
 {
-	if (neardalMgr.proxy == NULL)
-		neardal_prv_construct(NULL);
-
 	neardalMgr.cb_tag_found		= cb_tag_found;
 	neardalMgr.cb_tag_found_ud	= user_data;
+
+	if (neardalMgr.proxy == NULL)
+		neardal_prv_construct(NULL);
 
 	return NEARDAL_SUCCESS;
 }
@@ -184,11 +183,11 @@ errorCode_t neardal_set_cb_tag_found(tag_cb cb_tag_found,
 errorCode_t neardal_set_cb_tag_lost(tag_cb cb_tag_lost,
 				       void *user_data)
 {
-	if (neardalMgr.proxy == NULL)
-		neardal_prv_construct(NULL);
-
 	neardalMgr.cb_tag_lost		= cb_tag_lost;
 	neardalMgr.cb_tag_lost_ud	= user_data;
+
+	if (neardalMgr.proxy == NULL)
+		neardal_prv_construct(NULL);
 
 	return NEARDAL_SUCCESS;
 }
@@ -202,11 +201,11 @@ errorCode_t neardal_set_cb_tag_lost(tag_cb cb_tag_lost,
 errorCode_t neardal_set_cb_record_found(record_cb cb_rcd_found,
 					void *user_data)
 {
-	if (neardalMgr.proxy == NULL)
-		neardal_prv_construct(NULL);
-
 	neardalMgr.cb_rcd_found		= cb_rcd_found;
 	neardalMgr.cb_rcd_found_ud	= user_data;
+
+	if (neardalMgr.proxy == NULL)
+		neardal_prv_construct(NULL);
 
 	return NEARDAL_SUCCESS;
 }
@@ -441,7 +440,6 @@ exit:
 	return err;
 }
 
-
 /*****************************************************************************
  * neardal_set_adapter_property: Set a property on a specific NEARDAL adapter
  ****************************************************************************/
@@ -527,19 +525,22 @@ errorCode_t neardal_start_poll_loop(char *adpName, int mode)
 	
 	if (mode == NEARD_ADP_MODE_INITIATOR)
 		org_neard_adp__call_start_poll_loop_sync(adpProp->proxy,
-							ADP_INITIATOR_MODE,
+							ADP_MODE_INITIATOR,
 							NULL,
 							&neardalMgr.gerror);
 	else if (mode == NEARD_ADP_MODE_TARGET)
 		org_neard_adp__call_start_poll_loop_sync(adpProp->proxy,
-							ADP_TARGET_MODE, NULL,
+							ADP_MODE_TARGET, NULL,
+							&neardalMgr.gerror);
+	else if (mode == NEARD_ADP_MODE_DUAL)
+		org_neard_adp__call_start_poll_loop_sync(adpProp->proxy,
+							ADP_MODE_DUAL, NULL,
 							&neardalMgr.gerror);
 	else
 		org_neard_adp__call_start_poll_loop_sync(adpProp->proxy,
-							ADP_BOTH_MODE, NULL,
+							ADP_MODE_INITIATOR, NULL,
 							&neardalMgr.gerror);
 	
-	err = NEARDAL_SUCCESS;
 	if (neardalMgr.gerror != NULL) {
 		NEARDAL_TRACE_ERR(
 			"Error with neard dbus method (err:%d:'%s')\n"

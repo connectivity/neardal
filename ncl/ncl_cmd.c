@@ -230,15 +230,25 @@ static void ncl_cmd_prv_dump_tag(neardal_tag *tag)
 static void ncl_cmd_prv_dump_record(neardal_record *record)
 {
 	NCL_CMD_PRINT("Record\n");
-	NCL_CMD_PRINT(".. Name:\t\t%s\n"	, record->name);
-	NCL_CMD_PRINT(".. Encoding:\t\t%s\n"	, record->encoding);
-	NCL_CMD_PRINT(".. Language:\t\t%s\n"	, record->language);
-	NCL_CMD_PRINT(".. Action:\t\t%s\n"	, record->action);
-	NCL_CMD_PRINT(".. Type:\t\t%s\n"	, record->type);
-	NCL_CMD_PRINT(".. Representation:\t%s\n", record->representation);
-	NCL_CMD_PRINT(".. URI:\t\t\t%s\n"	, record->uri);
-	NCL_CMD_PRINT(".. URI size:\t\t%d\n"	, record->uriObjSize);
-	NCL_CMD_PRINT(".. MIME:\t\t%s\n"	, record->mime);
+	if (record->name)
+		NCL_CMD_PRINT(".. Name:\t\t%s\n"	, record->name);
+	if (record->encoding)
+		NCL_CMD_PRINT(".. Encoding:\t\t%s\n"	, record->encoding);
+	if (record->language)
+		NCL_CMD_PRINT(".. Language:\t\t%s\n"	, record->language);
+	if (record->action)
+		NCL_CMD_PRINT(".. Action:\t\t%s\n"	, record->action);
+	if (record->type)
+		NCL_CMD_PRINT(".. Type:\t\t%s\n"	, record->type);
+	if (record->representation)
+		NCL_CMD_PRINT(".. Representation:\t%s\n",
+			      record->representation);
+	if (record->uri) {
+		NCL_CMD_PRINT(".. URI:\t\t\t%s\n"	, record->uri);
+		NCL_CMD_PRINT(".. URI size:\t\t%d\n"	, record->uriObjSize);
+	}
+	if (record->mime)
+		NCL_CMD_PRINT(".. MIME:\t\t%s\n"	, record->mime);
 	neardal_free_record(record);
 }
 
@@ -345,7 +355,7 @@ static void ncl_cmd_install_callback(void)
 	neardal_set_cb_tag_lost(ncl_cmd_cb_tag_lost, NULL);
 	NCL_CMD_PRINTF("NFC tag registered\n");
 	neardal_set_cb_record_found(ncl_cmd_cb_record_found, NULL);
-	NCL_CMD_PRINTF("NFC record callback registered\n");
+	NCL_CMD_PRINTF("NFC record callback registered\n\n");
 	sNclCmdCtx.cb_initialized = true;
 }
 
@@ -754,8 +764,8 @@ static NCLError ncl_cmd_start_poll(int argc, char *argv[])
 
 static GOptionEntry options[] = {
 		{ "mode", 's', 0, G_OPTION_ARG_STRING , &strMode
-				, "Set Adapter mode initiator/target/both",
-				"'initiator, target, both'" },
+				, "Set Adapter mode initiator/target/dual",
+				"'initiator, target, dual'" },
 
 		{ NULL, 0, 0, 0, NULL, NULL, NULL} /* End of List */
 	};
@@ -782,9 +792,12 @@ static GOptionEntry options[] = {
 		else if (!strcmp(strMode, "target"))
 			ec = neardal_start_poll_loop(adpName,
 						     NEARD_ADP_MODE_TARGET);
+		else if (!strcmp(strMode, "dual"))
+			ec = neardal_start_poll_loop(adpName,
+						     NEARD_ADP_MODE_DUAL);
 		else
 			ec = neardal_start_poll_loop(adpName,
-						     NEARD_ADP_MODE_BOTH);
+						     NEARD_ADP_MODE_INITIATOR);
 	} else
 		ec = neardal_start_poll(adpName);
 	

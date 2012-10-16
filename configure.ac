@@ -11,7 +11,7 @@ CFLAGS="-W -Wall"
 ## Compiled in debug mode
 debug=yes
 ## Compiled with traces
-traces=yes
+traces=no
 
 AC_PROG_CC
 AM_PROG_CC_C_O

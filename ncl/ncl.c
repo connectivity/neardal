@@ -352,6 +352,7 @@ static GOptionEntry	options[] = {
 	execCmdLineStr	= NULL;
 	scriptFileStr	= NULL;
 	NCL_CMD_PRINTIN();
+	NCL_CMD_PRINT("Compiled at %s : %s\n\n", __DATE__, __TIME__);
 
 	context = g_option_context_new("");
 	g_option_context_add_main_entries(context, options, "");

@@ -91,7 +91,7 @@ static void neardal_prv_dump_data_as_ascii_format(char *bufToReadP,
 }
 
 
-void neardal_trace_dump_mem(char *bufToReadP, int size)
+void neardal_trace_prv_dump_mem(char *bufToReadP, int size)
 {
 	char	*memP = bufToReadP;
 	int		len = size;

@@ -46,8 +46,6 @@ static void neardal_mgr_prv_cb_property_changed(orgNeardMgr *proxy,
 	(void) user_data; /* remove warning */
 
 	NEARDAL_TRACEF("arg_unnamed_arg0='%s'\n", arg_unnamed_arg0);
-	NEARDAL_TRACEF("arg_unnamed_arg1=%s\n",
-		       g_variant_print (arg_unnamed_arg1, TRUE));
 	/* Adapters List ignored... */
 }
 

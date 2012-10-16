@@ -10,14 +10,7 @@ Makefile.in
 lib/Makefile
 lib/Makefile.in
 lib/libneardal.la
-lib/neard_adapter_proxy.c
-lib/neard_adapter_proxy.h
-lib/neard_manager_proxy.c
-lib/neard_manager_proxy.h
-lib/neard_record_proxy.c
-lib/neard_record_proxy.h
-lib/neard_tag_proxy.c
-lib/neard_tag_proxy.h
+lib/neard_*
 neardal.pc
 libtool
 ltmain.sh

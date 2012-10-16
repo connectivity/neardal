@@ -78,17 +78,17 @@ int neardal_tools_prv_cmp_path(const char *neardalPath, const char *reqPath)
 }
 
 /*****************************************************************************
- * neardal_tools_create_dict: Create a GHashTable for dict_entries.
+ * neardal_tools_prv_create_dict: Create a GHashTable for dict_entries.
  ****************************************************************************/
-GHashTable *neardal_tools_create_dict(void)
+GHashTable *neardal_tools_prv_create_dict(void)
 {
 	return g_hash_table_new(g_str_hash, g_str_equal);
 }
 
 /*****************************************************************************
- * neardal_tools_add_dict_entry: add an entry in a dictionnary
+ * neardal_tools_prv_add_dict_entry: add an entry in a dictionnary
  ****************************************************************************/
-errorCode_t neardal_tools_add_dict_entry(GVariantBuilder *builder, gchar *key,
+errorCode_t neardal_tools_prv_add_dict_entry(GVariantBuilder *builder, gchar *key,
 					  void *value, int gVariantType)
 {
 	GVariant *tmp;

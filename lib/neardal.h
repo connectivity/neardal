@@ -175,7 +175,7 @@ void neardal_destroy();
  * @{ */
 #define NEARD_ADP_MODE_INITIATOR		0
 #define NEARD_ADP_MODE_TARGET			1
-#define NEARD_ADP_MODE_BOTH			2
+#define NEARD_ADP_MODE_DUAL			2
 
 
 /* @}*/

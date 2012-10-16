@@ -149,47 +149,54 @@ errorCode_t neardal_rcd_prv_format(GVariantBuilder *builder, RcdProp *rcd)
 	NEARDAL_TRACEIN();
 	g_assert(rcd != NULL);
 
+	/* Type */
 	if (rcd->type != NULL)
-		neardal_tools_add_dict_entry(builder, "Type", rcd->type,
+		neardal_tools_prv_add_dict_entry(builder, "Type", rcd->type,
 					    (int) G_TYPE_STRING);
 
+	/* Encoding */
 	if (rcd->encoding != NULL)
-		neardal_tools_add_dict_entry(builder, "Encoding", rcd->encoding,
+		neardal_tools_prv_add_dict_entry(builder, "Encoding", rcd->encoding,
 					    (int) G_TYPE_STRING);
 
+	/* Language */
 	if (rcd->language != NULL)
-		neardal_tools_add_dict_entry(builder, "Language", rcd->language,
+		neardal_tools_prv_add_dict_entry(builder, "Language", rcd->language,
 					    (int) G_TYPE_STRING);
 
+	/* Representation */
 	if (rcd->representation != NULL)
-		neardal_tools_add_dict_entry(builder, "Representation",
+		neardal_tools_prv_add_dict_entry(builder, "Representation",
 					     rcd->representation,
 					    (int) G_TYPE_STRING);
 
+	/* URI */
 	if (rcd->uri != NULL) {
-		neardal_tools_add_dict_entry(builder, "URI", rcd->uri,
+		neardal_tools_prv_add_dict_entry(builder, "URI", rcd->uri,
 					    (int) G_TYPE_STRING);
-		neardal_tools_add_dict_entry(builder, "Size",
+		neardal_tools_prv_add_dict_entry(builder, "Size",
 					    (void *) rcd->uriObjSize,
 					    (int) G_TYPE_UINT);
 
 	}
+	/* MIME */
 	if (rcd->mime != NULL)
-		neardal_tools_add_dict_entry(builder, "MIME", rcd->mime,
+		neardal_tools_prv_add_dict_entry(builder, "MIME", rcd->mime,
 						(int) G_TYPE_STRING);
 
+	/* Action */
 	if (rcd->action != NULL)
-		neardal_tools_add_dict_entry(builder, "Action", rcd->action,
+		neardal_tools_prv_add_dict_entry(builder, "Action", rcd->action,
 					    (int) G_TYPE_STRING);
 
 	return err;
 }
 
 
-/*****************************************************************************
+/******************************************************************************
  * neardal_rcd_add: add new NFC record, initialize DBus Proxy connection,
  * register record signal
- ****************************************************************************/
+ *****************************************************************************/
 errorCode_t neardal_rcd_add(char *rcdName, void *parent)
 {
 	errorCode_t	err		= NEARDAL_ERROR_NO_MEMORY;

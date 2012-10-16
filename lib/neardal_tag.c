@@ -38,7 +38,7 @@ static void neardal_tag_prv_cb_property_changed(orgNeardTag *proxy,
 						GVariant *arg_unnamed_arg1,
 						void		*user_data)
 {
-	errorCode_t	errCode		= NEARDAL_SUCCESS;
+	errorCode_t	err		= NEARDAL_SUCCESS;
 	TagProp		*tagProp	= user_data;
 
 	(void) proxy; /* remove warning */
@@ -54,8 +54,11 @@ static void neardal_tag_prv_cb_property_changed(orgNeardTag *proxy,
 		       g_variant_print (arg_unnamed_arg1, TRUE),
 		       g_variant_get_type_string(arg_unnamed_arg1));
 
-	NEARDAL_TRACE_ERR("Exit with error code %d:%s\n", errCode,
-			  neardal_error_get_text(errCode));
+
+	if (err != NEARDAL_SUCCESS) {
+		NEARDAL_TRACE_ERR("Exit with error code %d:%s\n", err,
+				neardal_error_get_text(err));
+	}
 
 	return;
 }
@@ -65,7 +68,7 @@ static void neardal_tag_prv_cb_property_changed(orgNeardTag *proxy,
  ****************************************************************************/
 static errorCode_t neardal_tag_prv_read_properties(TagProp *tagProp)
 {
-	errorCode_t	errCode		= NEARDAL_SUCCESS;
+	errorCode_t	err		= NEARDAL_SUCCESS;
 	GError		*gerror		= NULL;
 	GVariant	*tmp		= NULL;
 	GVariant	*tmpOut		= NULL;
@@ -79,7 +82,7 @@ static errorCode_t neardal_tag_prv_read_properties(TagProp *tagProp)
 	org_neard_tag__call_get_properties_sync(tagProp->proxy, &tmp, NULL,
 						&gerror);
 	if (gerror != NULL) {
-		errCode = NEARDAL_ERROR_DBUS_CANNOT_INVOKE_METHOD;
+		err = NEARDAL_ERROR_DBUS_CANNOT_INVOKE_METHOD;
 		NEARDAL_TRACE_ERR(
 			"Unable to read tag's properties (%d:%s)\n",
 				 gerror->code, gerror->message);
@@ -99,9 +102,9 @@ static errorCode_t neardal_tag_prv_read_properties(TagProp *tagProp)
 			char *rcdName;
 
 			while (len < tagProp->rcdLen &&
-				errCode == NEARDAL_SUCCESS) {
+				err == NEARDAL_SUCCESS) {
 				rcdName = rcdArray[len++];
-				errCode = neardal_rcd_add(rcdName, tagProp);
+				err = neardal_rcd_add(rcdName, tagProp);
 			}
 		}
 	}
@@ -126,7 +129,7 @@ static errorCode_t neardal_tag_prv_read_properties(TagProp *tagProp)
 		tagProp->readOnly = g_variant_get_boolean(tmpOut);
 
 exit:
-	return errCode;
+	return err;
 }
 
 /*****************************************************************************
@@ -136,7 +139,7 @@ exit:
  ****************************************************************************/
 static errorCode_t neardal_tag_prv_init(TagProp *tagProp)
 {
-	errorCode_t	errCode = NEARDAL_SUCCESS;
+	errorCode_t	err = NEARDAL_SUCCESS;
 
 	NEARDAL_TRACEIN();
 	g_assert(tagProp != NULL);
@@ -166,16 +169,16 @@ static errorCode_t neardal_tag_prv_init(TagProp *tagProp)
 	}
 
 	/* Populate Tag datas... */
-	errCode = neardal_tag_prv_read_properties(tagProp);
-	if (errCode != NEARDAL_SUCCESS)
-		return errCode;
+	err = neardal_tag_prv_read_properties(tagProp);
+	if (err != NEARDAL_SUCCESS)
+		return err;
 
 	NEARDAL_TRACEF("Register Neard-Tag Signal 'PropertyChanged'\n");
 	g_signal_connect(tagProp->proxy, NEARD_TAG_SIG_PROPCHANGED,
 			G_CALLBACK(neardal_tag_prv_cb_property_changed),
 			  tagProp);
 
-	return errCode;
+	return err;
 }
 
 /*****************************************************************************
@@ -272,7 +275,7 @@ exit:
  ****************************************************************************/
 errorCode_t neardal_tag_prv_add(gchar *tagName, void *parent)
 {
-	errorCode_t	errCode		= NEARDAL_ERROR_NO_MEMORY;
+	errorCode_t	err		= NEARDAL_ERROR_NO_MEMORY;
 	TagProp		*tagProp	= NULL;
 	AdpProp		*adpProp	= parent;
 
@@ -287,12 +290,12 @@ errorCode_t neardal_tag_prv_add(gchar *tagName, void *parent)
 	tagProp->parent	= adpProp;
 
 	adpProp->tagList = g_list_prepend(adpProp->tagList, tagProp);
-	errCode = neardal_tag_prv_init(tagProp);
+	err = neardal_tag_prv_init(tagProp);
 
 	NEARDAL_TRACEF("NEARDAL LIB tagList contains %d elements\n",
 		      g_list_length(adpProp->tagList));
 
-	return errCode;
+	return err;
 
 error:
 	if (tagProp->name != NULL)
@@ -300,7 +303,7 @@ error:
 	if (tagProp != NULL)
 		g_free(tagProp);
 
-	return errCode;
+	return err;
 }
 
 /*****************************************************************************
