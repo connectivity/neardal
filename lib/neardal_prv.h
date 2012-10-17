@@ -65,6 +65,17 @@ typedef struct neardalCtx {
 							client callback
 							'tag lost' */
 
+	dev_cb	cb_dev_found;		/* Client callback for
+							'device found' */
+	void		*cb_dev_found_ud;	/* User data for
+							client callback
+							'device found' */
+	dev_cb	cb_dev_lost;		/* Client callback for
+							'device lost' */
+	void		*cb_dev_lost_ud;	/* User data for
+							client callback
+							'device lost' */
+
 	record_cb	cb_rcd_found;		/* Client callback for
 						'	'tag record found'*/
 	void		*cb_rcd_found_ud;	/* User data for
@@ -84,6 +95,8 @@ extern neardalCtx neardalMgr;
 *  \return the NEARDAL context
 */
 void neardal_prv_construct(errorCode_t *ec);
+
+
 
 #ifdef __cplusplus
 }

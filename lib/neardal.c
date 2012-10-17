@@ -44,7 +44,7 @@
 #define	ADP_MODE_DUAL			"Dual"
 
 neardalCtx neardalMgr = {NULL, NULL, {NULL}, NULL, NULL, NULL, NULL, NULL, NULL,
-NULL, NULL, NULL, NULL, NULL, NULL, 0, NULL};
+NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, NULL};
 
 /*---------------------------------------------------------------------------
  * Context Management
@@ -159,9 +159,9 @@ errorCode_t neardal_set_cb_adapter_property_changed(
 }
 
 /*****************************************************************************
- * neardal_set_cb_adapter_added: setup a client callback for
- * 'NEARDAL adapter added'.
- * cb_adp_added = NULL to remove actual callback.
+ * neardal_set_cb_tag_found: setup a client callback for
+ * 'NEARDAL TAG FOUND'.
+ * cb_tag_found = NULL to remove actual callback.
  ****************************************************************************/
 errorCode_t neardal_set_cb_tag_found(tag_cb cb_tag_found,
 					void *user_data)
@@ -176,15 +176,49 @@ errorCode_t neardal_set_cb_tag_found(tag_cb cb_tag_found,
 }
 
 /*****************************************************************************
- * neardal_set_cb_adapter_removed: setup a client callback for
- * 'NEARDAL adapter added'.
- * cb_adp_removed = NULL to remove actual callback.
+ * neardal_set_cb_tag_lost: setup a client callback for
+ * 'NEARDAL TAG LOST'.
+ * cb_tag_lost = NULL to remove actual callback.
  ****************************************************************************/
 errorCode_t neardal_set_cb_tag_lost(tag_cb cb_tag_lost,
 				       void *user_data)
 {
 	neardalMgr.cb_tag_lost		= cb_tag_lost;
 	neardalMgr.cb_tag_lost_ud	= user_data;
+
+	if (neardalMgr.proxy == NULL)
+		neardal_prv_construct(NULL);
+
+	return NEARDAL_SUCCESS;
+}
+
+/*****************************************************************************
+ * neardal_set_cb_dev_found: setup a client callback for
+ * 'NEARDAL DEVICE FOUND'.
+ * cb_dev_found = NULL to remove actual callback.
+ ****************************************************************************/
+errorCode_t neardal_set_cb_dev_found(dev_cb cb_dev_found,
+					void *user_data)
+{
+	neardalMgr.cb_dev_found		= cb_dev_found;
+	neardalMgr.cb_dev_found_ud	= user_data;
+
+	if (neardalMgr.proxy == NULL)
+		neardal_prv_construct(NULL);
+
+	return NEARDAL_SUCCESS;
+}
+
+/*****************************************************************************
+ * neardal_set_cb_dev_lost: setup a client callback for
+ * 'NEARDAL DEVICE LOST'.
+ * cb_dev_lost = NULL to remove actual callback.
+ ****************************************************************************/
+errorCode_t neardal_set_cb_dev_lost(dev_cb cb_dev_lost,
+				       void *user_data)
+{
+	neardalMgr.cb_dev_lost		= cb_dev_lost;
+	neardalMgr.cb_dev_lost_ud	= user_data;
 
 	if (neardalMgr.proxy == NULL)
 		neardal_prv_construct(NULL);
@@ -267,6 +301,9 @@ char *neardal_error_get_text(errorCode_t ec)
 
 	case NEARDAL_ERROR_NO_TAG:
 		return "No NFC tag found...";
+
+	case NEARDAL_ERROR_NO_DEV:
+		return "No NFC device found...";
 
 	case NEARDAL_ERROR_NO_RECORD:
 		return "No tag record found...";
@@ -652,7 +689,7 @@ errorCode_t neardal_get_tags(char *adpName, char ***array, int *len)
 void neardal_free_tag(neardal_tag *tag)
 {
 	int	ct	= 0;	/* counter */
-	
+
 	if (tag == NULL) {
 		NEARDAL_TRACE_ERR("Tag provided is NULL!\n");
 		return;
@@ -707,14 +744,14 @@ errorCode_t neardal_get_tag_properties(const char *tagName,
 		goto exit;
 	}
 	*tag = tagClient;
-	
+
 	tagClient->records	= NULL;
 	tagClient->tagType	= NULL;
 	err = neardal_mgr_prv_get_adapter((gchar *) tagName, &adpProp);
 	if (err != NEARDAL_SUCCESS)
 		goto exit;
 
-	err = neardal_mgr_prv_get_tag(adpProp, (gchar *) tagName, &tagProp);
+	err = neardal_adp_prv_get_tag(adpProp, (gchar *) tagName, &tagProp);
 	if (err != NEARDAL_SUCCESS)
 		goto exit;
 
@@ -765,14 +802,14 @@ exit:
 		if (tag != NULL)
 			*tag = NULL;
 	}
-	
+
 	return err;
 }
 
 /*****************************************************************************
- * neardal_write: Write NDEF record to an NFC tag
+ * neardal_tag_write: Write NDEF record to an NFC tag
  ****************************************************************************/
-errorCode_t neardal_write(neardal_record *record)
+errorCode_t neardal_tag_write(neardal_record *record)
 {
 	errorCode_t	err	= NEARDAL_SUCCESS;
 	AdpProp		*adpProp;
@@ -789,7 +826,7 @@ errorCode_t neardal_write(neardal_record *record)
 	err = neardal_mgr_prv_get_adapter((gchar *) record->name, &adpProp);
 	if (err != NEARDAL_SUCCESS)
 		goto exit;
-	err = neardal_mgr_prv_get_tag(adpProp, (gchar *) record->name,
+	err = neardal_adp_prv_get_tag(adpProp, (gchar *) record->name,
 				      &tagProp);
 	if (err != NEARDAL_SUCCESS)
 		goto exit;
@@ -808,6 +845,193 @@ errorCode_t neardal_write(neardal_record *record)
 exit:
 	return err;
 }
+
+/*---------------------------------------------------------------------------
+ * NFC Dev Management
+ ---------------------------------------------------------------------------*/
+/*****************************************************************************
+ * neardal_get_devices: get an array of NFC devs present
+ ****************************************************************************/
+errorCode_t neardal_get_devices(char *adpName, char ***array, int *len)
+{
+	errorCode_t	err		= NEARDAL_SUCCESS;
+	AdpProp		*adpProp	= NULL;
+	int		devNb		= 0;
+	int		ct		= 0;	/* counter */
+	char		**devs		= NULL;
+	DevProp		*dev		= NULL;
+
+
+	if (neardalMgr.proxy == NULL)
+		neardal_prv_construct(&err);
+	else
+		err = NEARDAL_ERROR_NO_DEV;
+
+	if (adpName == NULL || array == NULL)
+		return NEARDAL_ERROR_INVALID_PARAMETER;
+
+	err = neardal_mgr_prv_get_adapter(adpName, &adpProp);
+	if (err != NEARDAL_SUCCESS)
+		return err;
+
+	devNb = g_list_length(adpProp->devList);
+	if (devNb <= 0)
+		return NEARDAL_ERROR_NO_DEV;
+
+	err = NEARDAL_ERROR_NO_MEMORY;
+	devs = g_try_malloc0((devNb + 1) * sizeof(char *));
+
+	if (devs == NULL)
+		return NEARDAL_ERROR_NO_MEMORY;
+
+	while (ct < devNb) {
+		dev = g_list_nth_data(adpProp->devList, ct);
+		if (dev != NULL)
+			devs[ct++] = g_strdup(dev->name);
+	}
+	err = NEARDAL_SUCCESS;
+
+	if (len != NULL)
+		*len = devNb;
+	*array	= devs;
+
+	return err;
+}
+
+/*****************************************************************************
+ * neardal_free_device: Release memory allocated for properties of a dev
+ ****************************************************************************/
+void neardal_free_device(neardal_dev *dev)
+{
+	int	ct	= 0;	/* counter */
+
+	if (dev == NULL) {
+		NEARDAL_TRACE_ERR("Dev provided is NULL!\n");
+		return;
+	}
+
+	// Freeing dev name/type
+	g_free((gpointer) dev->name);
+
+	// Freeing records list
+	ct = 0;
+	while (ct < dev->nbRecords) {
+		g_free(dev->records[ct++]);
+	}
+	g_free(dev->records);
+
+	// Freeing adapter struct
+	g_free(dev);
+}
+
+/*****************************************************************************
+ * neardal_get_dev_properties: Get properties of a specific NEARDAL
+ * dev
+ ****************************************************************************/
+errorCode_t neardal_get_dev_properties(const char *devName,
+					  neardal_dev **dev)
+{
+	errorCode_t	err		= NEARDAL_SUCCESS;
+	AdpProp		*adpProp	= NULL;
+	DevProp		*devProp	= NULL;
+	neardal_dev	*devClient	= NULL;
+	int		ct		= 0;	/* counter */
+	RcdProp		*record		= NULL;
+	gsize		size;
+
+	if (neardalMgr.proxy == NULL)
+		neardal_prv_construct(&err);
+
+	if (err != NEARDAL_SUCCESS || devName == NULL || dev == NULL)
+		goto exit;
+
+	devClient = g_try_malloc0(sizeof(neardal_dev));
+	if (devClient == NULL) {
+		err = NEARDAL_ERROR_NO_MEMORY;
+		goto exit;
+	}
+	*dev = devClient;
+
+	devClient->records	= NULL;
+	err = neardal_mgr_prv_get_adapter((gchar *) devName, &adpProp);
+	if (err != NEARDAL_SUCCESS)
+		goto exit;
+
+	err = neardal_adp_prv_get_dev(adpProp, (gchar *) devName, &devProp);
+	if (err != NEARDAL_SUCCESS)
+		goto exit;
+
+	devClient->name		= g_strdup(devProp->name);
+	devClient->nbRecords	= (int) devProp->rcdLen;
+	if (devClient->nbRecords > 0) {
+		err = NEARDAL_ERROR_NO_MEMORY;
+		size = (devClient->nbRecords + 1) * sizeof(char *);
+		devClient->records = g_try_malloc0(size);
+		if (devClient->records == NULL)
+			goto exit;
+
+		ct = 0;
+		while (ct < devClient->nbRecords) {
+			record = g_list_nth_data(devProp->rcdList, ct);
+			if (record != NULL)
+				devClient->records[ct++] = g_strdup(record->name);
+		}
+		err = NEARDAL_SUCCESS;
+	}
+
+	err = NEARDAL_SUCCESS;
+
+exit:
+	if (err != NEARDAL_SUCCESS) {
+		neardal_free_device(devClient);
+		if (dev != NULL)
+			*dev = NULL;
+	}
+
+	return err;
+}
+
+/*****************************************************************************
+ * neardal_tag_write: Write NDEF record to an NFC dev
+ ****************************************************************************/
+errorCode_t neardal_dev_push(neardal_record *record)
+{
+	errorCode_t	err	= NEARDAL_SUCCESS;
+	AdpProp		*adpProp;
+	DevProp		*devProp;
+	RcdProp		rcd;
+
+
+	if (neardalMgr.proxy == NULL)
+		neardal_prv_construct(&err);
+
+	if (err != NEARDAL_SUCCESS || record == NULL)
+		goto exit;
+
+	err = neardal_mgr_prv_get_adapter((gchar *) record->name, &adpProp);
+	if (err != NEARDAL_SUCCESS)
+		goto exit;
+	err = neardal_adp_prv_get_dev(adpProp, (gchar *) record->name,
+				      &devProp);
+	if (err != NEARDAL_SUCCESS)
+		goto exit;
+
+	rcd.name		= (gchar *) record->name;
+	rcd.action		= (gchar *) record->action;
+	rcd.encoding		= (gchar *) record->encoding;
+	rcd.language		= (gchar *) record->language;
+	rcd.type		= (gchar *) record->type;
+	rcd.representation	= (gchar *) record->representation;
+	rcd.uri			= (gchar *) record->uri;
+	rcd.uriObjSize		= record->uriObjSize;
+	rcd.mime		= (gchar *) record->mime;
+
+	neardal_dev_prv_push(devProp, &rcd);
+exit:
+	return err;
+}
+
+
 
 /*---------------------------------------------------------------------------
  * NFC Record Management
@@ -914,12 +1138,12 @@ errorCode_t neardal_get_record_properties(const char *recordName,
 	if (err != NEARDAL_SUCCESS)
 		goto exit;
 
-	err = neardal_mgr_prv_get_tag(adpProp, (gchar *) recordName,
+	err = neardal_adp_prv_get_tag(adpProp, (gchar *) recordName,
 					 &tagProp);
 	if (err != NEARDAL_SUCCESS)
 		goto exit;
 
-	err = neardal_mgr_prv_get_record(tagProp, (gchar *) recordName,
+	err = neardal_tag_prv_get_record(tagProp, (gchar *) recordName,
 					 &rcdProp);
 	if (err != NEARDAL_SUCCESS)
 		goto exit;

@@ -3,16 +3,22 @@ neardal_LT_REVISION = 1
 neardal_LT_AGE = 0
 
 #Rule to generate the binding headers
-neard_manager_proxy.h:  interface/org.neard.Manager.xml
-	gdbus-codegen --generate-c-code neard_manager_proxy \
-			--c-namespace orgNeardMgr \
-			--interface-prefix org.neard.Manager \
-			$<
-	
 neard_adapter_proxy.h:  interface/org.neard.Adapter.xml
 	gdbus-codegen --generate-c-code neard_adapter_proxy \
 			--c-namespace orgNeardAdp \
 			--interface-prefix org.neard.Adapter \
+			$<
+
+neard_device_proxy.h:  interface/org.neard.Device.xml
+	gdbus-codegen --generate-c-code neard_device_proxy \
+			--c-namespace orgNeardDev \
+			--interface-prefix org.neard.Device \
+			$<
+
+neard_manager_proxy.h:  interface/org.neard.Manager.xml
+	gdbus-codegen --generate-c-code neard_manager_proxy \
+			--c-namespace orgNeardMgr \
+			--interface-prefix org.neard.Manager \
 			$<
 
 neard_tag_proxy.h:  	interface/org.neard.Tag.xml
@@ -27,13 +33,15 @@ neard_record_proxy.h:  interface/org.neard.Record.xml
 			--interface-prefix org.neard.Record \
 			$<
 
-BUILT_SOURCES =	neard_manager_proxy.h \
-		neard_adapter_proxy.h \
+BUILT_SOURCES =	neard_adapter_proxy.h \
+		neard_device_proxy.h \
+		neard_manager_proxy.h \
 		neard_tag_proxy.h \
 		neard_record_proxy.h
 
 neardal_PRV_HDR = \
 		neardal_adapter.h \
+		neardal_device.h \
 		neardal_manager.h \
 		neardal_prv.h \
 		neardal_record.h \
@@ -49,12 +57,16 @@ dist_neardalheaders_HEADERS =	neardal.h \
 				neardal_errors.h
 
 CLEANFILES = $(BUILT_SOURCES)
-EXTRA_DIST = interface/org.neard.Manager.xml interface/org.neard.Adapter.xml interface/org.neard.Tag.xml interface/org.neard.Record.xml
+EXTRA_DIST = interface/org.neard.Manager.xml interface/org.neard.Adapter.xml \
+	     interface/org.neard.Tag.xml interface/org.neard.Device.xml \
+	     interface/org.neard.Record.xml
 
 lib_LTLIBRARIES =		libneardal.la
-libneardal_la_SOURCES =	neardal.c \
+libneardal_la_SOURCES =		neardal.c \
 				neardal_adapter.c \
 				neard_adapter_proxy.c \
+				neardal_device.c \
+				neard_device_proxy.c \
 				neardal_manager.c \
 				neard_manager_proxy.c \
 				neardal_record.c \

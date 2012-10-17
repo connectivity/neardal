@@ -41,7 +41,8 @@ extern "C" {
  * @{
   */
 /*!
- * @brief NEARDAL Adapter client properties.
+ * @brief NEARDAL Adapter client properties
+ * release with (@link neardal_free_adapter @endlink)
  **/
 typedef struct {
 /*! \brief DBus interface adapter name (as identifier) */
@@ -52,18 +53,21 @@ typedef struct {
 	short	powered;
 /*! \brief Number of supported protocols */
 	int	nbProtocols;
-/*! \brief Neard adapter supported protocols list (use  @link
- * neardal_free_array @endlink(& ) to free) */
+/*! \brief Neard adapter supported protocols list */
 	char	**protocols;
 /*! \brief Number of tags managed by this adapter */
 	int	nbTags;
-/*! \brief Neard adapter tags list (use @link neardal_free_array @endlink
- *(& ) to free) */
+/*! \brief Neard adapter tags list */
 	char	**tags;
+/*! \brief Number of devices managed by this adapter */
+	int	nbDevs;
+/*! \brief Neard adapter devices list */
+	char	**devs;
 } neardal_adapter;
 
 /*!
  * @brief NEARDAL Tag client properties.
+ * release with (@link neardal_free_tag @endlink)
 */
 typedef struct {
 /*! @brief DBus interface tag name (as identifier) */
@@ -71,12 +75,11 @@ typedef struct {
 
 /*! @brief Number of records in tag */
 	int		nbRecords;
-/*! @brief tag records list (use @link neardal_free_array @endlink (& ) to
- * free) */
+/*! @brief tag records list to free) */
 	char		**records;
 /*! @brief Number of supported 'types' in tag */
 	int		nbTagTypes;
-/*! @brief types list (use @link neardal_free_array @endlink(& ) to free) */
+/*! @brief types list */
 	char		**tagType;
 /*! @brief tag type */
 	const char	*type;
@@ -85,7 +88,22 @@ typedef struct {
 } neardal_tag;
 
 /*!
+ * @brief NEARDAL Device client properties.
+ * release with (@link neardal_free_device @endlink)
+*/
+typedef struct {
+/*! @brief DBus interface tag name (as identifier) */
+	const char	*name;
+
+/*! @brief Number of records in device */
+	int		nbRecords;
+/*! @brief device records list */
+	char		**records;
+} neardal_dev;
+
+/*!
  * @brief NEARDAL Record client properties.
+ * release with (@link neardal_free_record @endlink)
 */
 typedef struct {
 /*! @brief DBus interface name (as identifier) */
@@ -119,14 +137,14 @@ typedef struct {
 /**
  * @brief Callback prototype for 'NEARDAL adapter added/removed'
  *
- * @param adpName DBus interface adapter name (as identifier)
+ * @param adpName DBus interface adapter name (as identifier=dbus object path)
  * @param user_data Client user data
  **/
 typedef void (*adapter_cb) (const char *adpName, void *user_data);
 /**
  * @brief Callback prototype for 'NEARDAL adapter property changed'
  *
- * @param adpName DBus interface adapter name (as identifier)
+ * @param adpName DBus interface adapter name (as identifier=dbus object path)
  * @param propName Property name
  * @param value Property value
  * @param user_data Client user data
@@ -139,17 +157,27 @@ typedef void (*adapter_prop_cb) (char *adpName, char *propName, void *value,
 /**
  * @brief Callback prototype for 'NEARDAL tag found/lost'
  *
- * @param tagName DBus interface tag name (as identifier)
+ * @param tagName DBus interface tag name (as identifier=dbus object path)
  * @param user_data Client user data
  **/
 typedef void (*tag_cb) (const char *tagName, void *user_data);
+
+/** @brief NEARDAL Device Callbacks (Device Found/Lost)
+*/
+/**
+ * @brief Callback prototype for 'NEARDAL device found/lost'
+ *
+ * @param devName DBus interface dev name (as identifier=dbus object path)
+ * @param user_data Client user data
+ **/
+typedef void (*dev_cb) (const char *devName, void *user_data);
 
 /** @brief NEARDAL Record Callbacks ('RecordFound')
 */
 /**
  * @brief Callback prototype for 'NEARDAL record found'
  *
- * @param rcdName DBus interface record name (as identifier)
+ * @param rcdName DBus interface record name (as identifier=dbus object path)
  * @param user_data Client user data
  **/
 typedef void (*record_cb) (const char *rcdName, void *user_data);
@@ -184,7 +212,8 @@ void neardal_destroy();
 /*! \fn errorCode_t neardal_start_poll_loop(char *adpName, int mode)
 *  \brief Request Neard to start polling on specific NEARDAL adapter with
 *  specific mode
-*  \param adpName : DBus interface adapter name (as identifier)
+*  \param adpName : DBus interface adapter name (as identifier=dbus object
+* 		     path)
 *  \param mode : Polling mode (see NEARD_ADP_MODE_...)
 *  @return errorCode_t error code
 */
@@ -193,7 +222,7 @@ errorCode_t neardal_start_poll_loop(char *adpName, int mode);
 /*! \fn errorCode_t neardal_start_poll(char *adpName)
 *  \brief Request Neard to start polling on specific NEARDAL adapter in
 * Initiator mode
-*  \param adpName : DBus interface adapter name (as identifier)
+*  \param adpName : DBus interface adapter name (as identifier=dbus object path)
 *  @return errorCode_t error code
 */
 #define neardal_start_poll(adpName)	 neardal_start_poll_loop(adpName, \
@@ -201,28 +230,41 @@ errorCode_t neardal_start_poll_loop(char *adpName, int mode);
 
 /*! \fn errorCode_t neardal_stop_poll(char *adpName)
 *  \brief Request Neard to stop polling on specific NEARDAL adapter
-*  \param adpName : DBus interface adapter name (as identifier)
+*  \param adpName : DBus interface adapter name (as identifier=dbus object path)
 *  @return errorCode_t error code
 */
 errorCode_t neardal_stop_poll(char *adpName);
 
 /*! \fn errorCode_t neardal_get_adapters(char ***array, int *len)
  * @brief get an array of NEARDAL adapters present
- *
-* @param array array of DBus interface adapter name (as identifier), use @link
- * neardal_free_array @endlink(& ) to free
+ * 
+ * @param array array of DBus interface adapter name (as identifier=dbus
+ * object path).  use @link neardal_free_adapter @endlink(& ) to free
  * @param len (optional), number of adapters
  * @return errorCode_t error code
  **/
 errorCode_t neardal_get_adapters(char ***array, int *len);
+
+/*! \fn errorCode_t neardal_get_devices(char *adpName, char ***array, int *len)
+ * @brief get an array of NEARDAL devices present
+ *
+ * @param adpName adapter name (identifier) on which devices list must be
+ * retrieve
+ * @param array array of DBus interface device name (as identifier=dbus object
+ * path), use @link neardal_free_device @endlink(& ) to free
+ * @param len (optional), number of devs
+ * @return errorCode_t error code
+ **/
+errorCode_t neardal_get_devices(char *adpName, char ***array, int *len);
+
 
 /*! \fn errorCode_t neardal_get_tags(char *adpName, char ***array, int *len)
  * @brief get an array of NEARDAL tags present
  *
  * @param adpName adapter name (identifier) on which tags list must be
  * retrieve
- * @param array array of DBus interface tag name (as identifier), use @link
- * neardal_free_array @endlink(& ) to free
+ * @param array array of DBus interface tag name (as identifier=dbus object
+ * path), use @link neardal_free_tag @endlink(& ) to free
  * @param len (optional), number of tags
  * @return errorCode_t error code
  **/
@@ -233,22 +275,12 @@ errorCode_t neardal_get_tags(char *adpName, char ***array, int *len);
  *
  * @param tagName tag name (identifier) on which records list must be
  * retrieve
- * @param array array of DBus interface record name (as identifier), use @link
- * neardal_free_array @endlink(& ) to free
+ * @param array array of DBus interface record name (as identifier=dbus object
+ * path), use @link neardal_free_record @endlink(& ) to free
  * @param len (optional), number of records
  * @return errorCode_t error code
  **/
 errorCode_t neardal_get_records(char *tagName, char ***array, int *len);
-
-/*! @fn errorCode_t neardal_free_array(char ***array)
- *
- * @brief free memory used for adapters array, tags array or records array
- *
- * @param array adapters array, tags array or records array
- * @return errorCode_t error code
- *
- **/
-errorCode_t neardal_free_array(char ***array);
 
 /*! @brief NEARDAL Properties identifiers
  * @addtogroup NEARDAL_CALLBACK Defines
@@ -263,7 +295,7 @@ errorCode_t neardal_free_array(char ***array);
  * neardal_adapter **adapter)
  * @brief Get properties of a specific NEARDAL adapter
  *
- * @param adpName DBus interface adapter name (as identifier)
+ * @param adpName DBus interface adapter name (as identifier=dbus object path)
  * @param adapter Pointer on pointer of client adapter struct to store datas
  * @return errorCode_t error code
  **/
@@ -282,7 +314,7 @@ void neardal_free_adapter(neardal_adapter *adapter);
  * int adpPropId, void * value)
  * @brief Set a property on a specific NEARDAL adapter
  *
- * @param adpName DBus interface adapter name (as identifier)
+ * @param adpName DBus interface adapter name (as identifier=dbus object path)
  * @param adpPropId Adapter Property Identifier (see NEARD_ADP_PROP_ ...)
  * @param value Value
  * @return errorCode_t error code
@@ -339,6 +371,14 @@ errorCode_t neardal_set_cb_adapter_property_changed(
 errorCode_t neardal_get_tag_properties(const char *tagName,
 					   neardal_tag **tag);
 
+/*! \fn errorCode_t neardal_tag_write(neardal_record *record)
+ * @brief Write NDEF record to an NFC tag
+ *
+ * @param record Pointer on client record used to create NDEF record
+ * @return errorCode_t error code
+ **/
+errorCode_t neardal_tag_write(neardal_record *record);
+
 /*! \fn void neardal_free_tag(neardal_tag *tag)
  * @brief Release memory allocated for properties of a tag
  *
@@ -371,12 +411,63 @@ errorCode_t neardal_set_cb_tag_found(tag_cb cb_tag_found,
 errorCode_t neardal_set_cb_tag_lost(tag_cb cb_tag_lost,
 					void *user_data);
 
+/*! \fn errorCode_t neardal_get_dev_properties(const char* devName,
+ * neardal_dev **dev)
+ * @brief Get properties of a specific NEARDAL dev
+ *
+ * @param devName dev name (identifier) on which properties must be retrieve
+ * @param dev Pointer on pointer of client dev struct to store datas
+ * @return errorCode_t error code
+ **/
+errorCode_t neardal_get_dev_properties(const char *devName,
+					   neardal_dev **dev);
+
+/*! \fn errorCode_t neardal_dev_push(neardal_record *record)
+ * @brief Create and push NDEF record to an NFC device
+ *
+ * @param record Pointer on client record used to create NDEF record
+ * @return errorCode_t error code
+ **/
+errorCode_t neardal_dev_push(neardal_record *record);
+
+/*! \fn void neardal_free_device(neardal_dev *dev)
+ * @brief Release memory allocated for properties of a dev
+ *
+ * @param dev Pointer on client dev struct where datas are stored
+ * @return nothing
+ **/
+void neardal_free_device(neardal_dev *dev);
+
+/*! \fn errorCode_t neardal_set_cb_dev_found(dev_cb cb_dev_found,
+ * void * user_data)
+ * @brief setup a client callback for 'NEARDAL dev found'.
+ * cb_dev_found = NULL to remove actual callback.
+ *
+ * @param cb_dev_found Client callback 'dev found'
+ * @param user_data Client user data
+ * @return errorCode_t error code
+ **/
+errorCode_t neardal_set_cb_dev_found(dev_cb cb_dev_found,
+					 void *user_data);
+
+/*! \fn errorCode_t neardal_set_cb_dev_lost(dev_cb cb_dev_lost,
+ * void * user_data)
+ * @brief setup a client callback for 'NEARDAL dev lost'.
+ * cb_dev_lost = NULL to remove actual callback.
+ *
+ * @param cb_dev_lost Client callback 'dev lost'
+ * @param user_data Client user data
+ * @return errorCode_t error code
+ **/
+errorCode_t neardal_set_cb_dev_lost(dev_cb cb_dev_lost,
+					void *user_data);
+
 
 /*! \fn errorCode_t neardal_get_record_properties(const char *recordName,
  *					      neardal_record **record)
  * @brief Get properties of a specific NEARDAL tag record
  *
- * @param recordName DBus interface record name (as identifier)
+ * @param recordName DBus interface record name (as identifier=dbus object path)
  * @param record Pointer on pointer of client record struct to store datas
  * @return errorCode_t error code
  **/
@@ -391,14 +482,6 @@ errorCode_t neardal_get_record_properties(const char *recordName,
  **/
 void neardal_free_record(neardal_record *record);
 
-/*! \fn errorCode_t neardal_write(neardal_record *record)
- * @brief Write NDEF record to an NFC tag
- *
- * @param record Pointer on client record used to create NDEF record
- * @return errorCode_t error code
- **/
-errorCode_t neardal_write(neardal_record *record);
-
 
 /*! \fn errorCode_t neardal_set_cb_record_found( record_cb cb_rcd_found,
  * void * user_data)
@@ -412,6 +495,15 @@ errorCode_t neardal_write(neardal_record *record);
 errorCode_t neardal_set_cb_record_found(record_cb cb_rcd_found,
 					 void *user_data);
 
+/*! @fn errorCode_t neardal_free_array(char ***array)
+ *
+ * @brief free memory used by array of adapters/tags/device or records
+ *
+ * @param array array (of adapters/tags/devices or records)
+ * @return errorCode_t error code
+ *
+ **/
+errorCode_t neardal_free_array(char ***array);
 
 #ifdef __cplusplus
 }

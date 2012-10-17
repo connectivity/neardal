@@ -80,7 +80,7 @@ static void neardal_adp_prv_cb_tag_lost(orgNeardTag *proxy,
 	NEARDAL_TRACEF("Removing tag '%s'\n", arg_unnamed_arg0);
 	/* Invoking Callback 'Tag Found' before adding it (otherwise
 	 * callback 'Record Found' would be called before ) */
-	err = neardal_mgr_prv_get_tag(adpProp, (char *) arg_unnamed_arg0,
+	err = neardal_adp_prv_get_tag(adpProp, (char *) arg_unnamed_arg0,
 						  &tagProp);
 	if (err == NEARDAL_SUCCESS) {
 		if (neardalMgr.cb_tag_lost != NULL)
@@ -89,6 +89,69 @@ static void neardal_adp_prv_cb_tag_lost(orgNeardTag *proxy,
 		neardal_tag_prv_remove(tagProp);
 		NEARDAL_TRACEF("NEARDAL LIB tagList contains %d elements\n",
 			      g_list_length(adpProp->tagList));
+	}
+}
+
+/*****************************************************************************
+ * neardal_adp_prv_cb_dev_found: Callback called when a NFC dev is
+ * found
+ ****************************************************************************/
+static void  neardal_adp_prv_cb_dev_found(orgNeardDev *proxy,
+					     const gchar *arg_unnamed_arg0,
+					     void        *user_data)
+{
+	AdpProp		*adpProp	= user_data;
+	errorCode_t	err;
+	DevProp		*devProp;
+
+	NEARDAL_TRACEIN();
+	(void) proxy; /* remove warning */
+
+	g_assert(arg_unnamed_arg0 != NULL);
+	g_assert(adpProp != NULL);
+
+	NEARDAL_TRACEF("Adding device '%s'\n", arg_unnamed_arg0);
+	/* Invoking Callback 'Dev Found' before adding it (otherwise
+	 * callback 'Record Found' would be called before ) */
+	err = neardal_dev_prv_add((char *) arg_unnamed_arg0, adpProp);
+	if (err == NEARDAL_SUCCESS) {
+		devProp = g_list_nth_data(adpProp->devList, 0);
+		neardal_dev_notify_dev_found(devProp);
+	}
+	NEARDAL_TRACEF("NEARDAL LIB devList contains %d elements\n",
+		      g_list_length(adpProp->devList));
+}
+
+/*****************************************************************************
+ * neardal_adp_prv_cb_dev_lost: Callback called when a NFC dev is
+ * lost (removed)
+ ****************************************************************************/
+static void neardal_adp_prv_cb_dev_lost(orgNeardDev *proxy,
+					   const gchar *arg_unnamed_arg0,
+					   void *user_data)
+{
+	AdpProp		*adpProp	= user_data;
+	DevProp		*devProp	= NULL;
+	errorCode_t	err;
+
+	NEARDAL_TRACEIN();
+	g_assert(arg_unnamed_arg0 != NULL);
+	(void) proxy; /* remove warning */
+
+	neardal_mgr_prv_get_adapter((char *) arg_unnamed_arg0, &adpProp);
+
+	NEARDAL_TRACEF("Removing dev '%s'\n", arg_unnamed_arg0);
+	/* Invoking Callback 'Dev Found' before adding it (otherwise
+	 * callback 'Record Found' would be called before ) */
+	err = neardal_adp_prv_get_dev(adpProp, (char *) arg_unnamed_arg0,
+						  &devProp);
+	if (err == NEARDAL_SUCCESS) {
+		if (neardalMgr.cb_dev_lost != NULL)
+			(neardalMgr.cb_dev_lost)((char *) arg_unnamed_arg0,
+					      neardalMgr.cb_dev_lost_ud);
+		neardal_dev_prv_remove(devProp);
+		NEARDAL_TRACEF("NEARDAL LIB devList contains %d elements\n",
+			      g_list_length(adpProp->devList));
 	}
 }
 
@@ -103,10 +166,11 @@ static void neardal_adp_prv_cb_property_changed(orgNeardAdp *proxy,
 {
 	AdpProp		*adpProp	= NULL;
 	errorCode_t	err		= NEARDAL_ERROR_NO_TAG;
-	char		*tagName	= NULL;
+	char		*dbusObjPath	= NULL;
 	void		*clientValue	= NULL;
 	TagProp		*tagProp	= NULL;
-	gchar		**tagArray	= NULL;
+	DevProp		*devProp	= NULL;
+	gchar		**array		= NULL;
 	GVariant	*gvalue		= NULL;
 
 	(void) proxy; /* remove warning */
@@ -135,7 +199,7 @@ static void neardal_adp_prv_cb_property_changed(orgNeardAdp *proxy,
 	if (!strcmp(arg_unnamed_arg0, "Tags")) {
 		guint tmpLen;
 
-		tagArray = g_variant_dup_objv(gvalue, &tmpLen);
+		array = g_variant_dup_objv(gvalue, &tmpLen);
 		adpProp->tagNb = tmpLen;
 		if (adpProp->tagNb <= 0) {	/* Remove all tags */
 			GList *node = NULL;
@@ -148,7 +212,7 @@ static void neardal_adp_prv_cb_property_changed(orgNeardAdp *proxy,
 							       tagProp->name,
 							       tagProp->parent);
 			}
-			g_strfreev(tagArray);
+			g_strfreev(array);
 
 			err = NEARDAL_SUCCESS;
 			goto exit;
@@ -160,21 +224,68 @@ static void neardal_adp_prv_cb_property_changed(orgNeardAdp *proxy,
 		while (tmpLen < adpProp->tagNb) {
 			/* Getting last tag (tags list not updated with
 			 * tags lost */
-			tagName = g_strdup(tagArray[tmpLen++]);
+			dbusObjPath = g_strdup(array[tmpLen++]);
 
 			/* TODO : for Neard Workaround, emulate 'TagFound'
 			 * signals */
-			err = neardal_mgr_prv_get_tag(adpProp,
-							     tagName,
+			err = neardal_adp_prv_get_tag(adpProp,
+							     dbusObjPath,
 							     &tagProp);
 			if (err == NEARDAL_ERROR_NO_TAG) {
 				neardal_adp_prv_cb_tag_found(NULL,
-								tagName,
+								dbusObjPath,
 								adpProp);
 				err = NEARDAL_SUCCESS;
 			}
 		}
-		g_strfreev(tagArray);
+		g_strfreev(array);
+		array = NULL;
+	}
+
+	if (!strcmp(arg_unnamed_arg0, "Devices")) {
+		guint tmpLen;
+
+		array = g_variant_dup_objv(gvalue, &tmpLen);
+		adpProp->devNb = tmpLen;
+		if (adpProp->devNb <= 0) {	/* Remove all devs */
+			GList *node = NULL;
+			NEARDAL_TRACEF(
+				"Dev array empty! Removing all devs\n");
+			while (g_list_length(adpProp->devList)) {
+				node = g_list_first(adpProp->devList);
+				devProp = (DevProp *) node->data;
+				neardal_adp_prv_cb_dev_lost(devProp->proxy,
+							       devProp->name,
+							       devProp->parent);
+			}
+			g_strfreev(array);
+
+			err = NEARDAL_SUCCESS;
+			goto exit;
+		}
+
+		/* Extract the devs arrays List from the GValue */
+		err = NEARDAL_ERROR_NO_ADAPTER;
+		tmpLen = 0;
+		while (tmpLen < adpProp->devNb) {
+			/* Getting last dev (devs list not updated with
+			 * devs lost */
+			dbusObjPath = g_strdup(array[tmpLen++]);
+
+			/* TODO : for Neard Workaround, emulate 'DevFound'
+			 * signals */
+			err = neardal_adp_prv_get_dev(adpProp,
+						      dbusObjPath,
+						      &devProp);
+			if (err == NEARDAL_ERROR_NO_DEV) {
+				neardal_adp_prv_cb_dev_found(NULL,
+							     dbusObjPath,
+							     adpProp);
+				err = NEARDAL_SUCCESS;
+			}
+		}
+		g_strfreev(array);
+		array = NULL;
 	}
 
 	if (neardalMgr.cb_adp_prop_changed != NULL)
@@ -196,12 +307,12 @@ exit:
  ****************************************************************************/
 static errorCode_t neardal_adp_prv_read_properties(AdpProp *adpProp)
 {
-	errorCode_t	err			= NEARDAL_SUCCESS;
-	GError		*gerror			= NULL;
-	GVariant	*tmp			= NULL;
-	GVariant	*tmpOut			= NULL;
-	gchar		**tagArray		= NULL;
-	gsize		len;
+	errorCode_t	err	= NEARDAL_SUCCESS;
+	GError		*gerror	= NULL;
+	GVariant	*tmp	= NULL;
+	GVariant	*tmpOut	= NULL;
+	gchar		**array	= NULL;
+	gsize		len	= 0;
 
 	NEARDAL_TRACEIN();
 	g_assert(adpProp != NULL);
@@ -221,21 +332,45 @@ static errorCode_t neardal_adp_prv_read_properties(AdpProp *adpProp)
 	NEARDAL_TRACEF("Reading:\n%s\n", g_variant_print(tmp, TRUE));
 	tmpOut = g_variant_lookup_value(tmp, "Tags", G_VARIANT_TYPE_ARRAY);
 	if (tmpOut != NULL) {
-		tagArray = g_variant_dup_objv(tmpOut, &len);
+		array = g_variant_dup_objv(tmpOut, &len);
 		adpProp->tagNb = len;
 		if (adpProp->tagNb == 0) {
-			g_strfreev(tagArray);
-			tagArray = NULL;
+			g_strfreev(array);
+			array = NULL;
 		} else {
 			len = 0;
 			char *tagName;
 
 			while (len < adpProp->tagNb &&
 				err == NEARDAL_SUCCESS) {
-				tagName = tagArray[len++];
+				tagName = array[len++];
 				err = neardal_tag_prv_add(tagName,
 							  adpProp);
 			}
+			g_strfreev(array);
+			array = NULL;
+		}
+	}
+
+	tmpOut = g_variant_lookup_value(tmp, "Devices", G_VARIANT_TYPE_ARRAY);
+	if (tmpOut != NULL) {
+		array = g_variant_dup_objv(tmpOut, &len);
+		adpProp->devNb = len;
+		if (adpProp->devNb == 0) {
+			g_strfreev(array);
+			array = NULL;
+		} else {
+			len = 0;
+			char *devName;
+
+			while (len < adpProp->devNb &&
+				err == NEARDAL_SUCCESS) {
+				devName = array[len++];
+				err = neardal_dev_prv_add(devName,
+							  adpProp);
+			}
+			g_strfreev(array);
+			array = NULL;
 		}
 	}
 
@@ -265,7 +400,7 @@ exit:
 }
 
 /*****************************************************************************
- * neardal_adp_prv_get_tag: Get current NFC tag
+ * neardal_adp_prv_get_tag: Get NFC tag from adapter
  ****************************************************************************/
 errorCode_t neardal_adp_prv_get_tag(AdpProp *adpProp, gchar *tagName,
 				       TagProp **tagProp)
@@ -282,6 +417,34 @@ errorCode_t neardal_adp_prv_get_tag(AdpProp *adpProp, gchar *tagName,
 		if (tag != NULL) {
 			if (!strncmp(tag->name, tagName, strlen(tag->name))) {
 				*tagProp = tag;
+				err = NEARDAL_SUCCESS;
+				break;
+			}
+		}
+		len++;
+	}
+
+	return err;
+}
+
+/*****************************************************************************
+ * neardal_adp_prv_get_dev: Get NFC device from adapter
+ ****************************************************************************/
+errorCode_t neardal_adp_prv_get_dev(AdpProp *adpProp, gchar *devName,
+				       DevProp **devProp)
+{
+	errorCode_t	err	= NEARDAL_ERROR_NO_DEV;
+	guint		len = 0;
+	DevProp		*dev;
+
+	g_assert(adpProp != NULL);
+	g_assert(devProp != NULL);
+
+	while (len < g_list_length(adpProp->devList)) {
+		dev = g_list_nth_data(adpProp->devList, len);
+		if (dev != NULL) {
+			if (!strncmp(dev->name, devName, strlen(dev->name))) {
+				*devProp = dev;
 				err = NEARDAL_SUCCESS;
 				break;
 			}

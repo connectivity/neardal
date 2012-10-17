@@ -15,6 +15,14 @@
 		<method name="UnregisterHandoverAgent">
 			<arg name="path" type="o" direction="in"/>
 		</method>
+		<method name="RegisterNDEFAgent">
+			<arg name="path" type="o" direction="in"/>
+			<arg name="type" type="s" direction="in"/>
+		</method>
+		<method name="UnregisterNDEFAgent">
+			<arg name="path" type="o" direction="in"/>
+			<arg name="type" type="s" direction="in"/>
+		</method>
 		<signal name="PropertyChanged">
 			<arg name="name" type="s"/>
 			<arg name="value" type="v"/>
@@ -26,5 +34,4 @@
 			<arg name="adapter" type="o"/>
 		</signal>
 	</interface>
-	<node name="org"/>
 </node>

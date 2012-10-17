@@ -148,6 +148,7 @@ static void ncl_cmd_prv_dump_adapter(neardal_adapter *adapter)
 {
 	char **protocols;
 	char **tags;
+	char **devs;
 
 	NCL_CMD_PRINT("Adapter\n");
 	NCL_CMD_PRINT(".. Name:\t\t'%s'\n", adapter->name);
@@ -169,6 +170,18 @@ static void ncl_cmd_prv_dump_adapter(neardal_adapter *adapter)
 		NCL_CMD_PRINT("No tags!");
 	NCL_CMD_PRINT("\n");
 
+	devs = adapter->devs;
+	NCL_CMD_PRINT(".. Number of devices:\t%d\n", adapter->nbDevs);
+	NCL_CMD_PRINT(".. Devs[]:\t\t");
+	if (adapter->nbDevs > 0) {
+		while ((*devs) != NULL) {
+			NCL_CMD_PRINT("'%s', ", *devs);
+			devs++;
+		}
+	} else
+		NCL_CMD_PRINT("No devs!");
+	NCL_CMD_PRINT("\n");
+
 	protocols = adapter->protocols;
 	NCL_CMD_PRINT(".. Number of protocols:\t%d\n", adapter->nbProtocols);
 	NCL_CMD_PRINT(".. Protocols[]:\t\t");
@@ -180,7 +193,6 @@ static void ncl_cmd_prv_dump_adapter(neardal_adapter *adapter)
 	} else
 		NCL_CMD_PRINT("No protocols!");
 	NCL_CMD_PRINT("\n");
-	neardal_free_adapter(adapter);
 }
 
 /*****************************************************************************
@@ -221,7 +233,32 @@ static void ncl_cmd_prv_dump_tag(neardal_tag *tag)
 	NCL_CMD_PRINT("\n");
 	NCL_CMD_PRINT(".. ReadOnly:\t\t%s\n"	,
 		      tag->readOnly ? "TRUE" : "FALSE");
-	neardal_free_tag(tag);
+}
+
+/*****************************************************************************
+ * Dump properties of a device
+ ****************************************************************************/
+static void ncl_cmd_prv_dump_dev(neardal_dev *dev)
+{
+	char **records;
+
+	NCL_CMD_PRINT("Dev:\n");
+	NCL_CMD_PRINT(".. Name:\t\t'%s'\n", dev->name);
+
+
+	records = dev->records;
+	NCL_CMD_PRINT(".. Number of records:\t%d\n", dev->nbRecords);
+	NCL_CMD_PRINT(".. Records[]:\t\t");
+	if (records != NULL) {
+		while ((*records) != NULL) {
+			NCL_CMD_PRINT("'%s', ", *records);
+			records++;
+		}
+	} else
+		NCL_CMD_PRINT("No records!");
+
+	NCL_CMD_PRINT("\n");
+
 }
 
 /*****************************************************************************
@@ -249,7 +286,6 @@ static void ncl_cmd_prv_dump_record(neardal_record *record)
 	}
 	if (record->mime)
 		NCL_CMD_PRINT(".. MIME:\t\t%s\n"	, record->mime);
-	neardal_free_record(record);
 }
 
 /*****************************************************************************
@@ -264,9 +300,10 @@ static void ncl_cmd_cb_adapter_added(const char *adpName, void *user_data)
 
 	NCL_CMD_PRINTF("NFC Adapter added '%s'\n", adpName);
 	ec = neardal_get_adapter_properties(adpName, &adapter);
-	if (ec == NEARDAL_SUCCESS)
+	if (ec == NEARDAL_SUCCESS) {
 		ncl_cmd_prv_dump_adapter(adapter);
-	else
+		neardal_free_adapter(adapter);
+	} else
 		NCL_CMD_PRINTF(
 		"Unable to read adapter properties. (error:%d='%s'). exit...\n",
 			       ec, neardal_error_get_text(ec));
@@ -308,9 +345,10 @@ static void ncl_cmd_cb_tag_found(const char *tagName, void *user_data)
 	NCL_CMD_PRINTF("NFC Tag found (%s)\n", tagName);
 
 	ec = neardal_get_tag_properties(tagName, &tag);
-	if (ec == NEARDAL_SUCCESS)
+	if (ec == NEARDAL_SUCCESS) {
 		ncl_cmd_prv_dump_tag(tag);
-	else
+		neardal_free_tag(tag);
+	} else
 		NCL_CMD_PRINTF(
 		"Unable to read tag properties. (error:%d='%s'). exit...\n",
 			       ec, neardal_error_get_text(ec));
@@ -321,6 +359,32 @@ static void ncl_cmd_cb_tag_lost(const char *tagName, void *user_data)
 {
 	(void) user_data; /* remove warning */
 	NCL_CMD_PRINTF("NFC Tag lost (%s)\n", tagName);
+}
+
+static void ncl_cmd_cb_dev_found(const char *devName, void *user_data)
+{
+	neardal_dev	*dev;
+	errorCode_t	ec;
+
+	(void) user_data; /* remove warning */
+
+	NCL_CMD_PRINTF("NFC Device found (%s)\n", devName);
+
+	ec = neardal_get_dev_properties(devName, &dev);
+	if (ec == NEARDAL_SUCCESS) {
+		ncl_cmd_prv_dump_dev(dev);
+		neardal_free_device(dev);
+	} else
+		NCL_CMD_PRINTF(
+		"Unable to read device properties. (error:%d='%s'). exit...\n",
+			       ec, neardal_error_get_text(ec));
+	return;
+}
+
+static void ncl_cmd_cb_dev_lost(const char *devName, void *user_data)
+{
+	(void) user_data; /* remove warning */
+	NCL_CMD_PRINTF("NFC Dev lost (%s)\n", devName);
 }
 
 static void ncl_cmd_cb_record_found(const char *rcdName, void *user_data)
@@ -334,12 +398,14 @@ static void ncl_cmd_cb_record_found(const char *rcdName, void *user_data)
 	ec = neardal_get_record_properties(rcdName, &record);
 	if (ec == NEARDAL_SUCCESS) {
 		ncl_cmd_prv_dump_record(record);
+		neardal_free_record(record);
 	} else
 		NCL_CMD_PRINTF("Read record error. (error:%d='%s').\n", ec,
 			       neardal_error_get_text(ec));
 
 	return;
 }
+
 /*****************************************************************************
  * neardal callbacks : END
  ****************************************************************************/
@@ -354,6 +420,9 @@ static void ncl_cmd_install_callback(void)
 	neardal_set_cb_tag_found(ncl_cmd_cb_tag_found, NULL);
 	neardal_set_cb_tag_lost(ncl_cmd_cb_tag_lost, NULL);
 	NCL_CMD_PRINTF("NFC tag registered\n");
+	neardal_set_cb_dev_found(ncl_cmd_cb_dev_found, NULL);
+	neardal_set_cb_dev_lost(ncl_cmd_cb_dev_lost, NULL);
+	NCL_CMD_PRINTF("NFC dev registered\n");
 	neardal_set_cb_record_found(ncl_cmd_cb_record_found, NULL);
 	NCL_CMD_PRINTF("NFC record callback registered\n\n");
 	sNclCmdCtx.cb_initialized = true;
@@ -424,9 +493,10 @@ static NCLError ncl_cmd_get_adapter_properties(int argc, char *argv[])
 	adapterName = argv[1];
 	ec = neardal_get_adapter_properties(adapterName, &adapter);
 
-	if (ec == NEARDAL_SUCCESS)
+	if (ec == NEARDAL_SUCCESS) {
 		ncl_cmd_prv_dump_adapter(adapter);
-	else {
+		neardal_free_adapter(adapter);
+	} else {
 		NCL_CMD_PRINTF("Read adapter properties error:%d='%s'.\n", ec,
 			       neardal_error_get_text(ec));
 		return NCLERR_LIB_ERROR;
@@ -438,6 +508,88 @@ static NCLError ncl_cmd_get_adapter_properties(int argc, char *argv[])
 }
 /*****************************************************************************
  * ncl_cmd_get_adapter_properties : END
+ ****************************************************************************/
+
+/*****************************************************************************
+ * ncl_cmd_get_devices : BEGIN
+ * Get devices List
+ ****************************************************************************/
+static NCLError ncl_cmd_get_devices(int argc, char *argv[])
+{
+	errorCode_t	ec;
+	NCLError	nclErr;
+	char		**devArray = NULL;
+	int		devLen;
+	int		devOff;
+
+	if (argc <= 1)
+		return NCLERR_PARSING_PARAMETERS;
+
+	/* Install Neardal Callback*/
+	if (sNclCmdCtx.cb_initialized == false)
+		ncl_cmd_install_callback();
+
+	ec = neardal_get_devices (argv[1], &devArray, &devLen);
+	if (ec == NEARDAL_SUCCESS) {
+		devOff = 0;
+			/* For each dev */
+		while (devArray[devOff] != NULL)
+			NCL_CMD_PRINT(".. Dev '%s'\n",
+					devArray[devOff++]);
+
+		neardal_free_array(&devArray);
+	} else
+		NCL_CMD_PRINTF("No dev\n");
+
+	NCL_CMD_PRINT("\nExit with error code %d:%s\n", ec,
+		      neardal_error_get_text(ec));
+
+	if (ec == NEARDAL_SUCCESS)
+		nclErr =  NCLERR_NOERROR ;
+	else
+		nclErr = NCLERR_LIB_ERROR;
+
+	return nclErr;
+}
+/*****************************************************************************
+ * ncl_cmd_get_devices : END
+ ****************************************************************************/
+
+/*****************************************************************************
+ * ncl_cmd_get_device_properties : BEGIN
+ * Read device properties
+ ****************************************************************************/
+static NCLError ncl_cmd_get_device_properties(int argc, char *argv[])
+{
+	errorCode_t	ec;
+	char		*devName	= NULL;
+	neardal_dev	*dev;
+
+	if (argc <= 1)
+		return NCLERR_PARSING_PARAMETERS;
+
+	/* Install Neardal Callback*/
+	if (sNclCmdCtx.cb_initialized == false)
+		ncl_cmd_install_callback();
+
+	devName = argv[1];
+	ec = neardal_get_dev_properties(devName, &dev);
+
+	if (ec == NEARDAL_SUCCESS) {
+		ncl_cmd_prv_dump_dev(dev);
+		neardal_free_device(dev);
+	} else {
+		NCL_CMD_PRINTF("Read dev properties error:%d='%s'.\n", ec,
+			       neardal_error_get_text(ec));
+		return NCLERR_LIB_ERROR;
+	}
+	NCL_CMD_PRINT("\nExit with error code %d:%s\n", ec,
+		      neardal_error_get_text(ec));
+
+	return NCLERR_NOERROR;
+}
+/*****************************************************************************
+ * ncl_cmd_get_device_properties : END
  ****************************************************************************/
 
 /*****************************************************************************
@@ -505,9 +657,10 @@ static NCLError ncl_cmd_get_tag_properties(int argc, char *argv[])
 	tagName = argv[1];
 	ec = neardal_get_tag_properties(tagName, &tag);
 
-	if (ec == NEARDAL_SUCCESS)
+	if (ec == NEARDAL_SUCCESS) {
 		ncl_cmd_prv_dump_tag(tag);
-	else {
+		neardal_free_tag(tag);
+	} else {
 		NCL_CMD_PRINTF("Read tag properties error:%d='%s'.\n", ec,
 			       neardal_error_get_text(ec));
 		return NCLERR_LIB_ERROR;
@@ -585,9 +738,10 @@ static NCLError ncl_cmd_get_record_properties(int argc, char *argv[])
 
 	recordName = argv[1];
 	ec = neardal_get_record_properties(recordName, &record);
-	if (ec == NEARDAL_SUCCESS)
+	if (ec == NEARDAL_SUCCESS) {
 		ncl_cmd_prv_dump_record(record);
-	else {
+		neardal_free_record(record);
+	} else {
 		NCL_CMD_PRINTF("Read record error:%d='%s'.\n", ec,
 			       neardal_error_get_text(ec));
 		return NCLERR_LIB_ERROR;
@@ -599,6 +753,101 @@ static NCLError ncl_cmd_get_record_properties(int argc, char *argv[])
 }
 /*****************************************************************************
  * ncl_cmd_get_record_properties : END
+ ****************************************************************************/
+/*****************************************************************************
+ * ncl_cmd_write : BEGIN
+ * write NDEF record to tag
+ ****************************************************************************/
+static NCLError ncl_cmd_push(int argc, char *argv[])
+{
+	errorCode_t		ec = NEARDAL_SUCCESS;
+	NCLError		nclErr;
+	static neardal_record	rcd;
+	static int		smartPoster;
+
+static GOptionEntry options[] = {
+		{ "act", 'c', 0, G_OPTION_ARG_STRING, &rcd.action
+				  , "Action", "save"},
+
+		{ "dev", 'a', 0, G_OPTION_ARG_STRING, &rcd.name
+				  , "Device name", "/org/neard/nfc0/device0"},
+
+		{ "encoding", 'e', 0, G_OPTION_ARG_STRING, &rcd.encoding
+				, "Encoding", "UTF-8" },
+
+		{ "lang", 'l', 0, G_OPTION_ARG_STRING	, &rcd.language
+				, "Language", "en" },
+
+		{ "mime", 'm', 0, G_OPTION_ARG_STRING	, &rcd.mime
+				, "Mime-type", "audio/mp3"},
+
+		{ "rep"	, 'r', 0, G_OPTION_ARG_STRING , &rcd.representation
+				, "Representation", "sample text" },
+
+		{ "smt"	, 's', 0, G_OPTION_ARG_INT , &smartPoster
+				, "SmartPoster", "0 or <>0" },
+
+		{ "type", 't', 0, G_OPTION_ARG_STRING, &rcd.type
+				  , "Record type (Text, URI,...", "Text" },
+
+		{ "uri", 'u', 0, G_OPTION_ARG_STRING, &rcd.uri
+				  , "URI", "http://www.intel.com" },
+
+		{ NULL, 0, 0, 0, NULL, NULL, NULL} /* End of List */
+	};
+
+	if (argc > 1) {
+	/* Parse options */
+		memset(&rcd, 0, sizeof(neardal_record));
+		nclErr = ncl_cmd_prv_parseOptions(&argc, &argv, options);
+	} else
+		nclErr = NCLERR_PARSING_PARAMETERS;
+
+	if (nclErr != NCLERR_NOERROR) {
+		ncl_cmd_print(stdout, "Sample (Type 'Text'):");
+		ncl_cmd_print(stdout, "e.g. < push --type Text --lang en-US \
+--encoding UTF-8 --rep \"Simple text\" --dev /org/neard/nfc0/device0 >\n");
+		ncl_cmd_print(stdout, "Sample (Type 'URI'):");
+		ncl_cmd_print(stdout, "e.g. < push --type URI \
+--uri=http://www.nfc-forum.com  --dev /org/neard/nfc0/device0 >\n");
+		ncl_cmd_print(stdout, "Sample (Type 'SmartPoster'):");
+		ncl_cmd_print(stdout, "e.g. < push --type=SmartPoster \
+--uri=http://www.nfc-forum.com > --dev /org/neard/nfc0/device0 >\n");
+	}
+
+	if (nclErr != NCLERR_NOERROR)
+		goto exit;
+
+	/* Install Neardal Callback*/
+	if (sNclCmdCtx.cb_initialized == false)
+		ncl_cmd_install_callback();
+
+	ec = neardal_dev_push(&rcd);
+
+exit:
+	NCL_CMD_PRINT("\nExit with error code %d:%s\n", ec,
+		      neardal_error_get_text(ec));
+	if (rcd.action != NULL)
+		g_free((gchar *) rcd.action);
+	if (rcd.name != NULL)
+		g_free((gchar *) rcd.name);
+	if (rcd.encoding != NULL)
+		g_free((gchar *) rcd.encoding);
+	if (rcd.language != NULL)
+		g_free((gchar *) rcd.language);
+	if (rcd.mime != NULL)
+		g_free((gchar *) rcd.mime);
+	if (rcd.representation != NULL)
+		g_free((gchar *) rcd.representation);
+	if (rcd.type != NULL)
+		g_free((gchar *) rcd.type);
+	if (rcd.uri != NULL)
+		g_free((gchar *) rcd.uri);
+
+	return nclErr;
+}
+/*****************************************************************************
+ * ncl_cmd_write : END
  ****************************************************************************/
 
 /*****************************************************************************
@@ -669,7 +918,7 @@ static GOptionEntry options[] = {
 	if (sNclCmdCtx.cb_initialized == false)
 		ncl_cmd_install_callback();
 
-	ec = neardal_write(&rcd);
+	ec = neardal_tag_write(&rcd);
 
 exit:
 	NCL_CMD_PRINT("\nExit with error code %d:%s\n", ec,
@@ -992,6 +1241,14 @@ static NCLCmdInterpretor itFunc[] = {
 	ncl_cmd_get_adapter_properties,
 	"Get adapter properties (1st parameter is adapter name)"},
 
+	{ "get_devices",
+	ncl_cmd_get_devices,
+	"Get devices list (1st parameter is adapter name)"},
+
+	{ "get_device_properties",
+	ncl_cmd_get_device_properties,
+	"Get device properties (1st parameter is device name)"},
+
 	{ "get_records",
 	ncl_cmd_get_records,
 	"Get records list (1st parameter is tag name)"},
@@ -1012,9 +1269,13 @@ static NCLCmdInterpretor itFunc[] = {
 	ncl_cmd_list,
 	"List all available commands. 'cmd' --help -h /? for a specific help" },
 
+	{ "push",
+	ncl_cmd_push,
+	"Creates and push a NDEF record to a NFC device"},
+	
 	{ "write",
 	ncl_cmd_write,
-	"Creates a NDEF record from parametersto be written to an NFC tag"},
+	"Creates and write a NDEF record to a NFC tag"},
 
 	{ "exit",
 	ncl_cmd_exit,
