@@ -18,59 +18,52 @@
  *
  */
 
-#ifndef __NEARDAL_TAG_H
-#define __NEARDAL_TAG_H
+#ifndef __NEARDAL_DEV_H
+#define __NEARDAL_DEV_H
 
-#include "neard_tag_proxy.h"
+#include "neard_device_proxy.h"
 #include "neardal_record.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif	/* __cplusplus */
 
-#define NEARD_TAGS_IF_NAME		"org.neard.Tag"
-#define NEARD_TAG_SIG_PROPCHANGED	"PropertyChanged"
+#define NEARD_DEVS_IF_NAME		"org.neard.Dev"
+#define NEARD_DEV_SIG_PROPCHANGED	"PropertyChanged"
 
-/* NEARDAL Tag Properties */
+/* NEARDAL Dev Properties */
 typedef struct {
-	DBusGProxy	*proxy;	  /* proxy to Neard NEARDAL Tag interface */
+	DBusGProxy	*proxy;	  /* proxy to Neard NEARDAL Dev interface */
 	gchar		*name;	  /* DBus interface name (as identifier) */
 	void		*parent;  /* parent (adapter ) */
 	gboolean	notified; /* Already notified to client? */
 
-	gchar		*type;
-
 	gsize		rcdLen;
-	GList		*rcdList;	/* tag's records paths */
-
-	gchar		**tagType;	/* array of tag types */
-	gsize		tagTypeLen;
-	gboolean	readOnly;	/* Read-Only flag */
-} TagProp;
+	GList		*rcdList;	/* device's records paths */
+} DevProp;
 
 /*****************************************************************************
- * neardal_tag_notify_tag_found: Invoke client callback for 'record found'
- * if present, and 'tag found' (if not already nofied)
+ * neardal_dev_notify_dev_found: Invoke client callback for 'record found'
+ * if present, and 'dev found' (if not already nofied)
  ****************************************************************************/
-void neardal_tag_notify_tag_found(TagProp *tagProp);
+void neardal_dev_notify_dev_found(DevProp *devProp);
 
 /******************************************************************************
- * neardal_tag_prv_add: add new NEARDAL tag, initialize DBus Proxy connection,
- * register tag signal
+ * neardal_dev_prv_add: add new NEARDAL dev, initialize DBus Proxy connection,
+ * register dev signal
  *****************************************************************************/
-errorCode_t neardal_tag_prv_add(gchar *tagName, void *parent);
+errorCode_t neardal_dev_prv_add(gchar *devName, void *parent);
 
 /******************************************************************************
- * neardal_tag_prv_remove: remove NEARDAL tag, unref DBus Proxy connection,
- * unregister tag signal
+ * neardal_dev_prv_remove: remove NEARDAL dev, unref DBus Proxy connection,
+ * unregister dev signal
  *****************************************************************************/
-void neardal_tag_prv_remove(TagProp *tagProp);
+void neardal_dev_prv_remove(DevProp *devProp);
 
 /******************************************************************************
- * neardal_tag_prv_write: Creates and write NDEF record to be written to
- * an NFC tag
+ * neardal_dev_prv_push: Creates and push NDEF record to a NFC device
  *****************************************************************************/
-errorCode_t neardal_tag_prv_write(TagProp *tagProp, RcdProp *rcd);
+errorCode_t neardal_dev_prv_push(DevProp *devProp, RcdProp *rcd);
 
 
 
@@ -78,4 +71,4 @@ errorCode_t neardal_tag_prv_write(TagProp *tagProp, RcdProp *rcd);
 }
 #endif	/* __cplusplus */
 
-#endif /* __NEARDAL_TAG_H */
+#endif /* __NEARDAL_DEV_H */

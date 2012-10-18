@@ -38,8 +38,6 @@ static void neardal_tag_prv_cb_property_changed(DBusGProxy *proxy,
 					     GValue	*arg_unnamed_arg1,
 					     void	*user_data)
 {
-	GPtrArray	*pathsGpa	= NULL;
-	errorCode_t	err		= NEARDAL_SUCCESS;
 	TagProp		*tagProp	= user_data;
 
 	(void) proxy; /* remove warning */
@@ -51,41 +49,6 @@ static void neardal_tag_prv_cb_property_changed(DBusGProxy *proxy,
 		return;
 
 	NEARDAL_TRACEF("arg_unnamed_arg0='%s'\n", arg_unnamed_arg0);
-// 	if (!strcmp(arg_unnamed_arg0, "Tags")) {
-// 		if (!G_VALUE_HOLDS(arg_unnamed_arg1,
-// 				  DBUS_TYPE_G_ARRAY_OF_OBJECT_PATH)) {
-// 			NEARDAL_TRACE_ERR("Unexpected type: %s",
-// 					G_VALUE_TYPE_NAME(&arg_unnamed_arg1));
-// 			err = NEARDAL_ERROR_DBUS;
-// 			return;
-// 		}
-// 
-// 		/* Extract the tags arrays List from the GValue */
-// 		err = NEARDAL_ERROR_NO_TAG;
-// 		pathsGpa = g_value_get_boxed(arg_unnamed_arg1);
-// 		if (pathsGpa == NULL)
-// 			goto error;
-// 
-// 		if (pathsGpa->len <= 0)
-// 			goto error;
-// 
-// 		/* Getting last tag */
-// 		gvalue = g_ptr_array_index(pathsGpa, pathsGpa->len - 1);
-// 		if (gvalue != NULL)
-// 			err = NEARDAL_SUCCESS;
-// 		else
-// 			err = NEARDAL_ERROR_NO_TAG;
-// 	}
-
-	return;
-
-// error:
-	if (err != NEARDAL_SUCCESS) {
-		NEARDAL_TRACE_ERR("Exit with error code %d:%s\n", err,
-				neardal_error_get_text(err));
-		if (pathsGpa != NULL)
-			g_boxed_free(G_TYPE_STRV, pathsGpa);
-	}
 
 	return;
 }
@@ -123,9 +86,6 @@ static errorCode_t neardal_tag_prv_read_properties(TagProp *tagProp)
 					    &rcdArray);
 	if (err == NEARDAL_SUCCESS) {
 			char *rcdName;
-		neardal_tools_prv_g_ptr_array_copy(&tagProp->rcdArray,
-						   rcdArray);
-
 		tagProp->rcdLen = rcdArray->len;
 		while ((len < tagProp->rcdLen) && (err == NEARDAL_SUCCESS)) {
 			rcdName = g_ptr_array_index(rcdArray, len++);
@@ -207,6 +167,35 @@ static errorCode_t neardal_tag_prv_init(TagProp *tagProp)
 }
 
 /*****************************************************************************
+ * neardal_tag_prv_get_record: Get specific record from tag
+ ****************************************************************************/
+errorCode_t neardal_tag_prv_get_record(TagProp *tagProp, gchar *rcdName,
+				       RcdProp **rcdProp)
+{
+	errorCode_t	err	= NEARDAL_ERROR_NO_RECORD;
+	guint		len;
+	RcdProp	*rcd	= NULL;
+
+	g_assert(tagProp != NULL);
+	g_assert(rcdName != NULL);
+	g_assert(rcdProp != NULL);
+
+	len = 0;
+	while (len < g_list_length(tagProp->rcdList)) {
+		rcd = g_list_nth_data(tagProp->rcdList, len);
+		if (neardal_tools_prv_cmp_path(rcd->name, rcdName)) {
+			*rcdProp = rcd;
+			err = NEARDAL_SUCCESS;
+			break;
+		}
+		len++;
+	}
+
+	return err;
+}
+
+
+/*****************************************************************************
  * neardal_tag_prv_free: unref DBus proxy, disconnect Neard Tag signals
  ****************************************************************************/
 static void neardal_tag_prv_free(TagProp **tagProp)
@@ -222,7 +211,6 @@ static void neardal_tag_prv_free(TagProp **tagProp)
 	}
 	g_free((*tagProp)->name);
 	g_free((*tagProp)->type);
-	neardal_tools_prv_g_ptr_array_free((*tagProp)->rcdArray);
 	if ((*tagProp)->tagType != NULL)
 		g_boxed_free(G_TYPE_STRV, (*tagProp)->tagType);
 }

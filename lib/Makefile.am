@@ -3,11 +3,13 @@ neardal_LT_REVISION = 1
 neardal_LT_AGE = 0
 
 #Rule to generate the binding headers
-neard_manager_proxy.h:  interface/org.neard.Manager.xml
-	dbus-binding-tool --mode=glib-client $<> $@
-	
-	
 neard_adapter_proxy.h:  interface/org.neard.Adapter.xml
+	dbus-binding-tool --mode=glib-client $<> $@
+
+neard_device_proxy.h:  interface/org.neard.Device.xml
+	dbus-binding-tool --mode=glib-client $<> $@
+
+neard_manager_proxy.h:  interface/org.neard.Manager.xml
 	dbus-binding-tool --mode=glib-client $<> $@
 
 neard_tag_proxy.h:  	interface/org.neard.Tag.xml
@@ -16,13 +18,15 @@ neard_tag_proxy.h:  	interface/org.neard.Tag.xml
 neard_record_proxy.h:  interface/org.neard.Record.xml
 	dbus-binding-tool --mode=glib-client $<> $@
 
-BUILT_SOURCES =	neard_manager_proxy.h \
-		neard_adapter_proxy.h \
+BUILT_SOURCES =	neard_adapter_proxy.h \
+		neard_device_proxy.h \
+		neard_manager_proxy.h \
 		neard_tag_proxy.h \
 		neard_record_proxy.h
 
 neardal_PRV_HDR = \
 		neardal_adapter.h \
+		neardal_device.h \
 		neardal_manager.h \
 		neardal_prv.h \
 		neardal_record.h \
@@ -38,11 +42,14 @@ dist_neardalheaders_HEADERS =	neardal.h \
 				neardal_errors.h
 
 CLEANFILES = $(BUILT_SOURCES)
-EXTRA_DIST = interface/org.neard.Manager.xml interface/org.neard.Adapter.xml interface/org.neard.Tag.xml interface/org.neard.Record.xml
+EXTRA_DIST = interface/org.neard.Manager.xml interface/org.neard.Adapter.xml \
+	     interface/org.neard.Tag.xml interface/org.neard.Device.xml \
+	     interface/org.neard.Record.xml
 
 lib_LTLIBRARIES =		libneardal.la
-libneardal_la_SOURCES =	neardal.c \
+libneardal_la_SOURCES =		neardal.c \
 				neardal_adapter.c \
+				neardal_device.c \
 				neardal_manager.c \
 				neardal_record.c \
 				neardal_tag.c \

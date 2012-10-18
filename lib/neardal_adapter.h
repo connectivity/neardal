@@ -22,6 +22,7 @@
 #define __NEARDAL_ADAPTER_H
 
 #include "neard_adapter_proxy.h"
+#include "neardal_device.h"
 #include "neardal_tag.h"
 
 #ifdef __cplusplus
@@ -47,6 +48,9 @@ typedef struct {
 	gsize			tagNb;
 	GList			*tagList;	/* Neard adapter tags list
 						available */
+	gsize			devNb;
+	GList			*devList;	/* Neard adapter devices list
+						available */
 } AdpProp;
 
 /*****************************************************************************
@@ -54,6 +58,12 @@ typedef struct {
  ****************************************************************************/
 errorCode_t neardal_adp_prv_get_tag(AdpProp * adpProp, gchar *tagName,
 				       TagProp * *tagProp);
+
+/*****************************************************************************
+ * neardal_adp_prv_get_dev: Get NEARDAL device from name
+ ****************************************************************************/
+errorCode_t neardal_adp_prv_get_dev(AdpProp * adpProp, gchar *devName,
+				       DevProp * *devProp);
 
 /*****************************************************************************
  * neardal_adp_add: add new NEARDAL adapter, initialize DBus Proxy

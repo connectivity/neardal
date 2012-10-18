@@ -205,65 +205,6 @@ errorCode_t neardal_mgr_prv_get_adapter_from_proxy(DBusGProxy *adpProxy,
 }
 
 /*****************************************************************************
- * neardal_mgr_prv_get_tag: Get specific tag from adapter
- ****************************************************************************/
-errorCode_t neardal_mgr_prv_get_tag(AdpProp *adpProp, gchar *tagName,
-				       TagProp **tagProp)
-{
-	errorCode_t	err	= NEARDAL_ERROR_NO_TAG;
-	guint		len;
-	TagProp		*tag	= NULL;
-	GList		*tmpList;
-
-	g_assert(adpProp != NULL);
-	g_assert(tagName != NULL);
-	g_assert(tagProp != NULL);
-
-	len = 0;
-	tmpList = adpProp->tagList;
-	while (len < g_list_length(tmpList)) {
-		tag = g_list_nth_data(tmpList, len);
-		if (neardal_tools_prv_cmp_path(tag->name, tagName)) {
-			*tagProp = tag;
-			err = NEARDAL_SUCCESS;
-			break;
-		}
-		len++;
-	}
-
-	return err;
-}
-
-/*****************************************************************************
- * neardal_mgr_prv_get_record: Get specific record from tag
- ****************************************************************************/
-errorCode_t neardal_mgr_prv_get_record(TagProp *tagProp, gchar *rcdName,
-				       RcdProp **rcdProp)
-{
-	errorCode_t	err	= NEARDAL_ERROR_NO_RECORD;
-	guint		len;
-	RcdProp	*rcd	= NULL;
-
-	g_assert(tagProp != NULL);
-	g_assert(rcdName != NULL);
-	g_assert(rcdProp != NULL);
-
-	len = 0;
-	while (len < g_list_length(tagProp->rcdList)) {
-		rcd = g_list_nth_data(tagProp->rcdList, len);
-		if (neardal_tools_prv_cmp_path(rcd->name, rcdName)) {
-			*rcdProp = rcd;
-			err = NEARDAL_SUCCESS;
-			break;
-		}
-		len++;
-	}
-
-	return err;
-}
-
-
-/*****************************************************************************
  * neardal_mgr_create: Get Neard Manager Properties = NFC Adapters list.
  * Create a DBus proxy for the first one NFC adapter if present
  * Register Neard Manager signals ('PropertyChanged')

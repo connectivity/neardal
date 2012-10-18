@@ -199,9 +199,6 @@ errorCode_t neardal_rcd_prv_format(GHashTable **hash, RcdProp *rcd)
 	if (rcd->action != NULL)
 		neardal_tools_prv_add_dict_entry(*hash, "Action", rcd->action);
 
-/*	neardal_tools_prv_add_dict_entry(*hash, "SmartPoster",
-					 rcd->smartPoster);
-*/
 
 	return err;
 }

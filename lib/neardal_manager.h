@@ -52,15 +52,9 @@ errorCode_t neardal_mgr_prv_get_adapter_from_proxy(DBusGProxy *adpProxy,
 							AdpProp **adpProp);
 
 /*****************************************************************************
- * neardal_mgr_prv_get_tag: Get specific tag from adapter
- ****************************************************************************/
-errorCode_t neardal_mgr_prv_get_tag(AdpProp *adpProp, gchar *tagName,
-				       TagProp **tagProp);
-
-/*****************************************************************************
- * neardal_mgr_prv_get_record: Get specific record from tag
+ * neardal_tag_prv_get_record: Get specific record from tag
  *****************************************************************************/
-errorCode_t neardal_mgr_prv_get_record(TagProp *tagProp, gchar *rcdName,
+errorCode_t neardal_tag_prv_get_record(TagProp *tagProp, gchar *rcdName,
 				       RcdProp **rcdProp);
 
 /*****************************************************************************
