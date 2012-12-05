@@ -42,14 +42,14 @@ extern "C" {
 typedef		int	errorCode_t;
 
 /*! @brief Success! (It's not an error) */
-#define NEARDAL_SUCCESS				((errorCode_t) 1)
+#define NEARDAL_SUCCESS					((errorCode_t) 1)
 
 /*! @brief General error */
 #define NEARDAL_ERROR_GENERAL_ERROR			((errorCode_t) -1)
 /*! @brief Invalid parameter */
 #define NEARDAL_ERROR_INVALID_PARAMETER		((errorCode_t) -2)
 /*! @brief Memory allocation error */
-#define NEARDAL_ERROR_NO_MEMORY			((errorCode_t) -3)
+#define NEARDAL_ERROR_NO_MEMORY				((errorCode_t) -3)
 /*! @brief DBUS general error */
 #define NEARDAL_ERROR_DBUS				((errorCode_t) -4)
 /*! @brief DBUS error (Can not create a proxy to dbus interface) */
@@ -62,9 +62,9 @@ typedef		int	errorCode_t;
 /*! @brief Neard service, polling already active */
 #define NEARDAL_ERROR_POLLING_ALREADY_ACTIVE		((errorCode_t) -8)
 /*! @brief Neard service, no NEARDAL tag present */
-#define NEARDAL_ERROR_NO_TAG			((errorCode_t) -9)
+#define NEARDAL_ERROR_NO_TAG				((errorCode_t) -9)
 /*! @brief Neard service, no NEARDAL record present */
-#define NEARDAL_ERROR_NO_RECORD			((errorCode_t) -10)
+#define NEARDAL_ERROR_NO_RECORD				((errorCode_t) -10)
 /*! @brief Invalid record format */
 #define NEARDAL_ERROR_INVALID_RECORD			((errorCode_t) -11)
 /*! @brief Neard service, no NEARDAL device present */

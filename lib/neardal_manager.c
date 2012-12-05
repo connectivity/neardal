@@ -40,10 +40,10 @@ static void neardal_mgr_prv_cb_property_changed(orgNeardMgr *proxy,
 {
 	NEARDAL_TRACEIN();
 
-	g_assert(arg_unnamed_arg0 != NULL);
 	(void) proxy; /* remove warning */
 	(void) arg_unnamed_arg1; /* remove warning */
 	(void) user_data; /* remove warning */
+	NEARDAL_ASSERT(arg_unnamed_arg0 != NULL);
 
 	NEARDAL_TRACEF("arg_unnamed_arg0='%s'\n", arg_unnamed_arg0);
 	/* Adapters List ignored... */
@@ -60,10 +60,11 @@ static void neardal_mgr_prv_cb_adapter_added(orgNeardMgr *proxy,
 	errorCode_t	err = NEARDAL_SUCCESS;
 
 	NEARDAL_TRACEIN();
-	g_assert(arg_unnamed_arg0 != NULL);
 	(void) proxy; /* remove warning */
 	(void) user_data; /* remove warning */
 
+	NEARDAL_ASSERT(arg_unnamed_arg0 != NULL);
+	
 	err = neardal_adp_add((char *) arg_unnamed_arg0);
 	if (err != NEARDAL_SUCCESS)
 		return;
@@ -83,9 +84,10 @@ static void neardal_mgr_prv_cb_adapter_removed(orgNeardMgr *proxy,
 	GList	*node	= NULL;
 
 	NEARDAL_TRACEIN();
-	g_assert(arg_unnamed_arg0 != NULL);
 	(void) proxy; /* remove warning */
 	(void) user_data; /* remove warning */
+
+	NEARDAL_ASSERT(arg_unnamed_arg0 != NULL);
 
 	node = g_list_first(neardalMgr.prop.adpList);
 	if (node == NULL) {
@@ -111,11 +113,11 @@ static void neardal_mgr_prv_cb_adapter_removed(orgNeardMgr *proxy,
 static errorCode_t neardal_mgr_prv_get_all_adapters(gchar ***adpArray,
 						    gsize *len)
 {
-	errorCode_t	err			= NEARDAL_ERROR_NO_ADAPTER;
+	errorCode_t	err		= NEARDAL_ERROR_NO_ADAPTER;
 	GVariant	*tmp		= NULL;
 	GVariant	*tmpOut		= NULL;
 
-	g_assert(adpArray != NULL);
+	NEARDAL_ASSERT_RET(adpArray != NULL, NEARDAL_ERROR_INVALID_PARAMETER);
 
 	/* Invoking method 'GetProperties' on Neard Manager */
 	if (org_neard_mgr__call_get_properties_sync(neardalMgr.proxy, &tmp,
@@ -181,7 +183,7 @@ errorCode_t neardal_mgr_prv_get_adapter_from_proxy(orgNeardAdp *adpProxy,
 	AdpProp		*adapter;
 	GList		*tmpList;
 
-	g_assert(adpProp != NULL);
+	NEARDAL_ASSERT_RET(adpProp != NULL, NEARDAL_ERROR_INVALID_PARAMETER);
 
 	tmpList = neardalMgr.prop.adpList;
 	while (len < g_list_length(tmpList)) {

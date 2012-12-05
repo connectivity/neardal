@@ -76,8 +76,9 @@ static errorCode_t neardal_dev_prv_read_properties(DevProp *devProp)
 	gchar		**rcdArray	= NULL;
 
 	NEARDAL_TRACEIN();
-	g_assert(devProp != NULL);
-	g_assert(devProp->proxy != NULL);
+	NEARDAL_ASSERT_RET(devProp != NULL, NEARDAL_ERROR_INVALID_PARAMETER);
+	NEARDAL_ASSERT_RET(devProp->proxy != NULL
+			  , NEARDAL_ERROR_GENERAL_ERROR);
 
 	org_neard_dev__call_get_properties_sync(devProp->proxy, &tmp, NULL,
 						&gerror);
@@ -123,7 +124,7 @@ static errorCode_t neardal_dev_prv_init(DevProp *devProp)
 	errorCode_t	err = NEARDAL_SUCCESS;
 
 	NEARDAL_TRACEIN();
-	g_assert(devProp != NULL);
+	NEARDAL_ASSERT_RET(devProp != NULL, NEARDAL_ERROR_INVALID_PARAMETER);
 
 	if (devProp->proxy != NULL) {
 		g_signal_handlers_disconnect_by_func(devProp->proxy,
@@ -189,7 +190,7 @@ void neardal_dev_notify_dev_found(DevProp *devProp)
 	RcdProp *rcdProp;
 	gsize	len;
 
-	g_assert(devProp != NULL);
+	NEARDAL_ASSERT(devProp != NULL);
 
 	if (devProp->notified == FALSE && neardalMgr.cb.dev_found != NULL) {
 		(neardalMgr.cb.dev_found)(devProp->name,
@@ -220,7 +221,7 @@ errorCode_t neardal_dev_prv_push(DevProp *devProp, RcdProp *rcd)
 	errorCode_t	err;
 	GError		*gerror	= NULL;
 
-	g_assert(devProp != NULL);
+	NEARDAL_ASSERT_RET(devProp != NULL, NEARDAL_ERROR_INVALID_PARAMETER);
 
 	builder = g_variant_builder_new(G_VARIANT_TYPE_ARRAY);
 	if (builder == NULL)
@@ -258,7 +259,8 @@ errorCode_t neardal_dev_prv_add(gchar *devName, void *parent)
 	DevProp		*devProp	= NULL;
 	AdpProp		*adpProp	= parent;
 
-	g_assert(devName != NULL);
+	NEARDAL_ASSERT_RET( ((adpProp != NULL) && (devName != NULL))
+			  , NEARDAL_ERROR_INVALID_PARAMETER);
 
 	NEARDAL_TRACEF("Adding dev:%s\n", devName);
 	devProp = g_try_malloc0(sizeof(DevProp));
@@ -295,7 +297,7 @@ void neardal_dev_prv_remove(DevProp *devProp)
 	GList		*node;
 	AdpProp		*adpProp;
 
-	g_assert(devProp != NULL);
+	NEARDAL_ASSERT(devProp != NULL);
 
 	NEARDAL_TRACEF("Removing dev:%s\n", devProp->name);
 	/* Remove all devs */

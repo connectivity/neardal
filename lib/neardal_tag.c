@@ -76,8 +76,9 @@ static errorCode_t neardal_tag_prv_read_properties(TagProp *tagProp)
 	gchar		**rcdArray	= NULL;
 
 	NEARDAL_TRACEIN();
-	g_assert(tagProp != NULL);
-	g_assert(tagProp->proxy != NULL);
+	NEARDAL_ASSERT_RET(tagProp != NULL, NEARDAL_ERROR_INVALID_PARAMETER);
+	NEARDAL_ASSERT_RET(tagProp->proxy != NULL
+			  , NEARDAL_ERROR_GENERAL_ERROR);
 
 	org_neard_tag__call_get_properties_sync(tagProp->proxy, &tmp, NULL,
 						&gerror);
@@ -142,7 +143,7 @@ static errorCode_t neardal_tag_prv_init(TagProp *tagProp)
 	errorCode_t	err = NEARDAL_SUCCESS;
 
 	NEARDAL_TRACEIN();
-	g_assert(tagProp != NULL);
+	NEARDAL_ASSERT_RET(tagProp != NULL, NEARDAL_ERROR_INVALID_PARAMETER);
 
 	if (tagProp->proxy != NULL) {
 		g_signal_handlers_disconnect_by_func(tagProp->proxy,
@@ -191,10 +192,10 @@ errorCode_t neardal_tag_prv_get_record(TagProp *tagProp, gchar *rcdName,
 	guint		len;
 	RcdProp	*rcd	= NULL;
 
-	g_assert(tagProp != NULL);
-	g_assert(rcdName != NULL);
-	g_assert(rcdProp != NULL);
-
+	NEARDAL_ASSERT_RET((tagProp != NULL) && (rcdName != NULL)
+			   && (rcdProp != NULL)
+			   , NEARDAL_ERROR_INVALID_PARAMETER);
+	
 	len = 0;
 	while (len < g_list_length(tagProp->rcdList)) {
 		rcd = g_list_nth_data(tagProp->rcdList, len);
@@ -240,7 +241,7 @@ void neardal_tag_notify_tag_found(TagProp *tagProp)
 	RcdProp *rcdProp;
 	gsize	len;
 
-	g_assert(tagProp != NULL);
+	NEARDAL_ASSERT(tagProp != NULL);
 
 	if (tagProp->notified == FALSE && neardalMgr.cb.tag_found != NULL) {
 		(neardalMgr.cb.tag_found)(tagProp->name,
@@ -271,7 +272,7 @@ errorCode_t neardal_tag_prv_write(TagProp *tagProp, RcdProp *rcd)
 	errorCode_t	err;
 	GError		*gerror	= NULL;
 
-	g_assert(tagProp != NULL);
+	NEARDAL_ASSERT_RET(tagProp != NULL, NEARDAL_ERROR_INVALID_PARAMETER);
 
 	builder = g_variant_builder_new(G_VARIANT_TYPE_ARRAY);
 	if (builder == NULL)
@@ -309,7 +310,8 @@ errorCode_t neardal_tag_prv_add(gchar *tagName, void *parent)
 	TagProp		*tagProp	= NULL;
 	AdpProp		*adpProp	= parent;
 
-	g_assert(tagName != NULL);
+	NEARDAL_ASSERT_RET((tagName != NULL) && (parent != NULL)
+			   , NEARDAL_ERROR_INVALID_PARAMETER);
 
 	NEARDAL_TRACEF("Adding tag:%s\n", tagName);
 	tagProp = g_try_malloc0(sizeof(TagProp));
@@ -346,7 +348,7 @@ void neardal_tag_prv_remove(TagProp *tagProp)
 	GList		*node;
 	AdpProp		*adpProp;
 
-	g_assert(tagProp != NULL);
+	NEARDAL_ASSERT(tagProp != NULL);
 
 	NEARDAL_TRACEF("Removing tag:%s\n", tagProp->name);
 	/* Remove all tags */

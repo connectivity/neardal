@@ -318,6 +318,9 @@ char *neardal_error_get_text(errorCode_t ec)
 	case NEARDAL_ERROR_NO_RECORD:
 		return "No tag record found...";
 
+	case NEARDAL_ERROR_INVALID_RECORD:
+		return "Tag record has an invalid format...";
+
 	case NEARDAL_ERROR_POLLING_ALREADY_ACTIVE:
 		return "Polling already active";
 

@@ -35,7 +35,7 @@
  ****************************************************************************/
 void neardal_tools_prv_free_gerror(GError **gerror)
 {
-	g_assert(gerror != NULL);
+	NEARDAL_ASSERT(gerror != NULL);
 
 	if (*gerror != NULL)
 		g_error_free(*gerror);
@@ -53,8 +53,8 @@ int neardal_tools_prv_cmp_path(const char *neardalPath, const char *reqPath)
 	int		len, lenNfcPath, lenReqPath;
 	int		ret = FALSE;
 
-	g_assert(neardalPath != NULL);
-	g_assert(reqPath != NULL);
+	NEARDAL_ASSERT_RET((neardalPath != NULL) && (reqPath != NULL)
+			  , FALSE);
 
 	lenNfcPath = strlen(neardalPath);
 	lenReqPath = strlen(reqPath);
@@ -94,7 +94,7 @@ errorCode_t neardal_tools_prv_add_dict_entry(GVariantBuilder *builder
 {
 	GVariant *tmp = NULL;
 
-	g_assert(builder != NULL);
+	NEARDAL_ASSERT_RET(builder != NULL, NEARDAL_ERROR_INVALID_PARAMETER);
 
 	switch (gVariantType) {
 	case G_TYPE_STRING:

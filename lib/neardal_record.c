@@ -40,8 +40,9 @@ static errorCode_t neardal_rcd_prv_read_properties(RcdProp *rcd)
 	GVariant	*tmpOut		= NULL;
 
 	NEARDAL_TRACEIN();
-	g_assert(rcd != NULL);
-	g_assert(rcd->proxy != NULL);
+	NEARDAL_ASSERT_RET(rcd != NULL, NEARDAL_ERROR_INVALID_PARAMETER);
+	NEARDAL_ASSERT_RET(rcd->proxy != NULL
+			   , NEARDAL_ERROR_INVALID_PARAMETER);
 
 	org_neard_rcd__call_get_properties_sync(rcd->proxy, &tmp, NULL,
 						&gerror);
@@ -99,7 +100,7 @@ error:
 static errorCode_t neardal_rcd_prv_init(RcdProp *rcd)
 {
 	NEARDAL_TRACEIN();
-	g_assert(rcd != NULL);
+	NEARDAL_ASSERT_RET(rcd != NULL, NEARDAL_ERROR_INVALID_PARAMETER);
 
 	if (rcd->proxy != NULL)
 		g_object_unref(rcd->proxy);
@@ -152,7 +153,7 @@ errorCode_t neardal_rcd_prv_format(GVariantBuilder *builder, RcdProp *rcd)
 
 
 	NEARDAL_TRACEIN();
-	g_assert(rcd != NULL);
+	NEARDAL_ASSERT_RET(rcd != NULL, NEARDAL_ERROR_INVALID_PARAMETER);
 
 	/* Type */
 	if (rcd->type != NULL)
@@ -210,8 +211,8 @@ errorCode_t neardal_rcd_add(char *rcdName, void *parent)
 	RcdProp		*rcd	= NULL;
 	TagProp		*tagProp = parent;
 
-	g_assert(rcdName != NULL);
-	g_assert(parent != NULL);
+	NEARDAL_ASSERT_RET((rcdName != NULL) && (parent != NULL)
+			  , NEARDAL_ERROR_INVALID_PARAMETER);
 
 	NEARDAL_TRACEF("Adding record:%s\n", rcdName);
 	rcd = g_try_malloc0(sizeof(RcdProp));
@@ -253,7 +254,7 @@ void neardal_rcd_remove(RcdProp *rcd)
 	TagProp		*tagProp;
 
 	NEARDAL_TRACEIN();
-	g_assert(rcd != NULL);
+	NEARDAL_ASSERT(rcd != NULL);
 
 	tagProp = rcd->parent;
 	NEARDAL_TRACEF("Removing record:%s\n", rcd->name);

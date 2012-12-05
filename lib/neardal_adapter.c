@@ -44,8 +44,8 @@ static void  neardal_adp_prv_cb_tag_found(orgNeardTag *proxy,
 	NEARDAL_TRACEIN();
 	(void) proxy; /* remove warning */
 
-	g_assert(arg_unnamed_arg0 != NULL);
-	g_assert(adpProp != NULL);
+	NEARDAL_ASSERT(arg_unnamed_arg0 != NULL);
+	NEARDAL_ASSERT(adpProp != NULL);
 
 	NEARDAL_TRACEF("Adding tag '%s'\n", arg_unnamed_arg0);
 	/* Invoking Callback 'Tag Found' before adding it (otherwise
@@ -72,8 +72,8 @@ static void neardal_adp_prv_cb_tag_lost(orgNeardTag *proxy,
 	errorCode_t	err;
 
 	NEARDAL_TRACEIN();
-	g_assert(arg_unnamed_arg0 != NULL);
 	(void) proxy; /* remove warning */
+	NEARDAL_ASSERT(arg_unnamed_arg0 != NULL);
 
 	neardal_mgr_prv_get_adapter((char *) arg_unnamed_arg0, &adpProp);
 
@@ -107,8 +107,8 @@ static void  neardal_adp_prv_cb_dev_found(orgNeardDev *proxy,
 	NEARDAL_TRACEIN();
 	(void) proxy; /* remove warning */
 
-	g_assert(arg_unnamed_arg0 != NULL);
-	g_assert(adpProp != NULL);
+	NEARDAL_ASSERT(arg_unnamed_arg0 != NULL);
+	NEARDAL_ASSERT(adpProp != NULL);
 
 	NEARDAL_TRACEF("Adding device '%s'\n", arg_unnamed_arg0);
 	/* Invoking Callback 'Dev Found' before adding it (otherwise
@@ -135,8 +135,8 @@ static void neardal_adp_prv_cb_dev_lost(orgNeardDev *proxy,
 	errorCode_t	err;
 
 	NEARDAL_TRACEIN();
-	g_assert(arg_unnamed_arg0 != NULL);
 	(void) proxy; /* remove warning */
+	NEARDAL_ASSERT(arg_unnamed_arg0 != NULL);
 
 	neardal_mgr_prv_get_adapter((char *) arg_unnamed_arg0, &adpProp);
 
@@ -176,7 +176,7 @@ static void neardal_adp_prv_cb_property_changed(orgNeardAdp *proxy,
 	(void) proxy; /* remove warning */
 	(void) user_data; /* remove warning */
 	NEARDAL_TRACEIN();
-	g_assert(arg_unnamed_arg0 != NULL);
+	NEARDAL_ASSERT(arg_unnamed_arg0 != NULL);
 
 	neardal_mgr_prv_get_adapter_from_proxy(proxy, &adpProp);
 	if (adpProp == NULL) {
@@ -315,8 +315,9 @@ static errorCode_t neardal_adp_prv_read_properties(AdpProp *adpProp)
 	gsize		len	= 0;
 
 	NEARDAL_TRACEIN();
-	g_assert(adpProp != NULL);
-	g_assert(adpProp->proxy != NULL);
+	NEARDAL_ASSERT_RET(adpProp != NULL, NEARDAL_ERROR_INVALID_PARAMETER);
+	NEARDAL_ASSERT_RET(adpProp->proxy != NULL
+			  , NEARDAL_ERROR_INVALID_PARAMETER);
 
 	org_neard_adp__call_get_properties_sync(adpProp->proxy, &tmp,
 						NULL, &gerror);
@@ -409,8 +410,8 @@ errorCode_t neardal_adp_prv_get_tag(AdpProp *adpProp, gchar *tagName,
 	guint		len = 0;
 	TagProp		*tag;
 
-	g_assert(adpProp != NULL);
-	g_assert(tagProp != NULL);
+	NEARDAL_ASSERT_RET(adpProp != NULL, NEARDAL_ERROR_INVALID_PARAMETER);
+	NEARDAL_ASSERT_RET(tagProp != NULL, NEARDAL_ERROR_INVALID_PARAMETER);
 
 	while (len < g_list_length(adpProp->tagList)) {
 		tag = g_list_nth_data(adpProp->tagList, len);
@@ -437,8 +438,8 @@ errorCode_t neardal_adp_prv_get_dev(AdpProp *adpProp, gchar *devName,
 	guint		len = 0;
 	DevProp		*dev;
 
-	g_assert(adpProp != NULL);
-	g_assert(devProp != NULL);
+	NEARDAL_ASSERT_RET(adpProp != NULL, NEARDAL_ERROR_INVALID_PARAMETER);
+	NEARDAL_ASSERT_RET(devProp != NULL, NEARDAL_ERROR_INVALID_PARAMETER);
 
 	while (len < g_list_length(adpProp->devList)) {
 		dev = g_list_nth_data(adpProp->devList, len);
@@ -465,7 +466,7 @@ static errorCode_t neardal_adp_prv_init(AdpProp *adpProp)
 	errorCode_t	err = NEARDAL_SUCCESS;
 
 	NEARDAL_TRACEIN();
-	g_assert(adpProp != NULL);
+	NEARDAL_ASSERT_RET(adpProp != NULL, NEARDAL_ERROR_INVALID_PARAMETER);
 
 	if (adpProp->proxy != NULL) {
 		g_signal_handlers_disconnect_by_func(adpProp->proxy,
@@ -610,7 +611,7 @@ errorCode_t neardal_adp_remove(AdpProp *adpProp)
 	GList		*node = NULL;
 	GList		**adpList;
 
-	g_assert(adpProp != NULL);
+	NEARDAL_ASSERT_RET(adpProp != NULL, NEARDAL_ERROR_INVALID_PARAMETER);
 
 	NEARDAL_TRACEF("Removing adapter:%s\n", adpProp->name);
 

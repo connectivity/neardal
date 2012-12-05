@@ -27,7 +27,7 @@ AC_ARG_ENABLE(debug, AC_HELP_STRING([--disable-debug],
 ])
 
 if (test "${debug}" = "yes"); then
-	CFLAGS="$CFLAGS -g -O0"
+	CFLAGS="$CFLAGS -g -O0 -DNEARDAL_DEBUG"
  	echo 'NEARDAL will be compiled in debug mode. CFLAGS='${CFLAGS}
 else
 	CFLAGS="$CFLAGS -O2"

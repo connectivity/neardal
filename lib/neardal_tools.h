@@ -27,6 +27,25 @@ extern "C" {
 
 
 /*****************************************************************************
+ * Debugging macro to manage assertion.
+ *****************************************************************************/
+#define NEARDAL_ASSERT(cond) do { \
+	if (!(cond)) { \
+		neardal_trace(stderr, "\nASSERT!! %s -> %s():l%d: cond=(%s)\n\n" \
+			, __FILE__, __func__, __LINE__, #cond); \
+		return; \
+	} \
+} while (0);
+
+#define NEARDAL_ASSERT_RET(cond, val) do { \
+	if (!(cond)) { \
+		neardal_trace(stderr, "\nASSERT!! %s -> %s():l%d: cond=(%s)\n\n" \
+			, __FILE__, __func__, __LINE__, #cond); \
+		return val; \
+	} \
+} while (0);
+
+/*****************************************************************************
  * neardal_tools_prv_free_gerror: freeing gerror in neardal context
  *****************************************************************************/
 void neardal_tools_prv_free_gerror(GError **gerror);
