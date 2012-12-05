@@ -1,4 +1,4 @@
-AC_INIT([libneardal], [0.1.0])
+AC_INIT([neardal], 0.8.0, Neardal for Neard v0.8)
 AM_INIT_AUTOMAKE([foreign -Wall -Werror])
 
 AC_PROG_LIBTOOL

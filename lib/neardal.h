@@ -182,6 +182,21 @@ typedef void (*dev_cb) (const char *devName, void *user_data);
  **/
 typedef void (*record_cb) (const char *rcdName, void *user_data);
 
+/**
+ * @brief Callback prototype for a registered tag type
+ *
+ * @param rcdArray array of records path (as identifier=dbus object path)
+ * @param rcdLen number of records path in rcdArray
+ * @param ndefArray array of raw NDEF data 
+ * @param ndefLen number of bytes in ndefArray
+ * @param user_data Client user data
+ **/
+typedef void (*agent_cb) (unsigned char **rcdArray, unsigned int rcdLen
+			  , unsigned char *ndefArray
+			  , unsigned int ndefLen
+			  , void *user_data);
+
+
 /* @}*/
 
 
@@ -494,6 +509,20 @@ void neardal_free_record(neardal_record *record);
  **/
 errorCode_t neardal_set_cb_record_found(record_cb cb_rcd_found,
 					 void *user_data);
+
+/*! \fn errorCode_t neardal_agent_set_NDEF_cb(char *tagType, agent_cb cb_agent,
+ * void *user_data)
+ * @brief register or unregister a callback to handle a record macthing
+ * a registered tag type. This callback will received the whole NDEF as
+ * a raw byte stream.
+ * @param tagType tag type to register
+ * @param cb_agent Client callback for the registered tag type
+ * @param user_data Client user data
+ * @return errorCode_t error code
+ **/
+errorCode_t neardal_agent_set_NDEF_cb(char *tagType, agent_cb cb_agent
+				      , void *user_data);
+
 
 /*! @fn errorCode_t neardal_free_array(char ***array)
  *

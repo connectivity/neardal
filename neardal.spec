@@ -1,19 +1,19 @@
 # >> macros
-%define libneardal_dir %{_libdir}
-%define libneardal_pkg %{_libdir}/pkgconfig
-%define libneardal_inc %{_includedir}/neardal
+%define neardal_dir %{_libdir}
+%define neardal_pkg %{_libdir}/pkgconfig
+%define neardal_inc %{_includedir}/neardal
 
 %define glib2_version   		2.30.0
 # << macros
 
 Name: neardal
-Summary: Neard Abstraction Library
-Version: 0.1.0
+Summary: Neard Abstraction Library (for Neard v0.7)
+Version: 0.7.0
 Release: 1.0
 Group: System/Libraries
 License: LGPLv2
 URL: https://github.com/connectivity/neardal.git
-Source0: lib%{name}-%{version}.tar.bz2
+Source0: %{name}-%{version}.tar.bz2
 
 Requires(post): /sbin/ldconfig
 Requires(postun): /sbin/ldconfig
@@ -30,14 +30,22 @@ BuildRequires: pkgconfig(dbus-glib-1)
 This package provides simple C APIs to exchange datas with NFC daemon (Neard) present on the system.
 
 %prep
-%setup -q -n lib%{name}-%{version}
+%setup -q -n %{name}-%{version}
 
 %build
 autoreconf --force --install
 
-%configure --prefix=/usr
+%configure --disable-traces --prefix=/usr
 make
   
+%package dev
+Summary:    Headers for neardal
+Group:      Development/Libraries
+
+
+%description dev
+Development headers and libraries for neardal
+
 %install      
 rm -rf %{buildroot}
 %make_install
@@ -59,14 +67,15 @@ rm -rf %{buildroot}
 %doc README AUTHORS NEWS COPYING
 
 # libraries files
-%{libneardal_dir}/libneardal.so
-%{libneardal_dir}/libneardal.so.0
-%{libneardal_dir}/libneardal.so.0.0.1
+%{neardal_dir}/libneardal.so
+%{neardal_dir}/libneardal.so.0
+%{neardal_dir}/libneardal.so.0.0.1
 
-# headers files
-%{libneardal_inc}/neardal.h
-%{libneardal_inc}/neardal_errors.h
-# pkg-config files
-%{libneardal_pkg}/*.pc
 %changelog
+
+%files dev
+# headers files
+%{neardal_inc}/*.h
+# pkg-config files
+%{neardal_pkg}/neardal.pc
 

@@ -33,7 +33,15 @@ neard_record_proxy.h:  interface/org.neard.Record.xml
 			--interface-prefix org.neard.Record \
 			$<
 
-BUILT_SOURCES =	neard_adapter_proxy.h \
+neardal_ndef_agent.h:  interface/org.neard.NDEFAgent.xml
+	gdbus-codegen --generate-c-code neardal_ndef_agent \
+			--c-generate-object-manager \
+			--c-namespace neardal \
+			--interface-prefix org.neard. \
+			$<
+
+BUILT_SOURCES =	neardal_ndef_agent.h \
+		neard_adapter_proxy.h \
 		neard_device_proxy.h \
 		neard_manager_proxy.h \
 		neard_tag_proxy.h \
@@ -41,6 +49,7 @@ BUILT_SOURCES =	neard_adapter_proxy.h \
 
 neardal_PRV_HDR = \
 		neardal_adapter.h \
+		neardal_agent.h \
 		neardal_device.h \
 		neardal_manager.h \
 		neardal_prv.h \
@@ -56,7 +65,14 @@ noinst_HEADERS = $(BUILT_SOURCES) $(neardal_PRV_HDR)
 dist_neardalheaders_HEADERS =	neardal.h \
 				neardal_errors.h
 
-CLEANFILES = $(BUILT_SOURCES)
+CLEANFILES = 	$(BUILT_SOURCES) \
+		neardal_ndef_agent.c \
+		neard_adapter_proxy.c \
+		neard_device_proxy.c \
+		neard_manager_proxy.c \
+		neard_tag_proxy.c \
+		neard_record_proxy.c
+
 EXTRA_DIST = interface/org.neard.Manager.xml interface/org.neard.Adapter.xml \
 	     interface/org.neard.Tag.xml interface/org.neard.Device.xml \
 	     interface/org.neard.Record.xml
@@ -65,6 +81,8 @@ lib_LTLIBRARIES =		libneardal.la
 libneardal_la_SOURCES =		neardal.c \
 				neardal_adapter.c \
 				neard_adapter_proxy.c \
+				neardal_agent.c \
+				neardal_ndef_agent.c \
 				neardal_device.c \
 				neard_device_proxy.c \
 				neardal_manager.c \

@@ -73,4 +73,7 @@ void			ncl_cmd_print(FILE *fprintout, char *format, ...);
 			ncl_cmd_print(stderr, "ERR in %s(): " format, \
 			__func__, ## __VA_ARGS__)
 
+#define		NCL_CMD_DUMP(mem, size) \
+			ncl_trace_dump_mem((char *) mem, size)
+
 #endif /* __NCL_CMD_H__ */

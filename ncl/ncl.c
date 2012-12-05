@@ -34,8 +34,80 @@
 #define PROMPT_PREFIX		"NCL> "
 #define NB_MAX_PARAMETERS	20	/* Max number of parameters in a
 					command */
+#define NB_COLUMN		16
 
 NCLContext	gNclCtx;
+
+static void ncl_trace_prv_dump_data_as_binary_format(char *bufToReadP,
+						    int remainingSize,
+						    GString *bufDestP,
+						    int nbColumn)
+{
+	int offset = 0;
+
+	while (offset < nbColumn && offset < remainingSize) {
+		g_string_append_printf(bufDestP, "%02hX ",
+				       ((unsigned char) bufToReadP[offset]));
+		offset++;
+	}
+	/* Adding space to align ascii format */
+	if (offset < nbColumn) {
+		/* 3 space because each byte in binary format as 2 digit and
+		1 space */
+		g_string_append_len(bufDestP, "   ", nbColumn - offset);
+	}
+}
+
+static void ncl_trace_prv_dump_data_as_ascii_format(char *bufToReadP,
+					      int remainingSize,
+					      GString *bufDestP, int nbColumn)
+{
+	int		offset = 0;
+
+	while (offset < nbColumn && offset < remainingSize) {
+		if (g_ascii_isprint(((unsigned char) bufToReadP[offset])))
+			g_string_append_c(bufDestP,
+					  ((unsigned char) bufToReadP[offset]));
+		else
+			g_string_append_c(bufDestP, '.');
+		offset++;
+	}
+	/* Adding space to finish ascii column */
+	if (offset < nbColumn)
+		g_string_append_len(bufDestP, " ", nbColumn - offset);
+}
+
+
+void ncl_trace_dump_mem(char *bufToReadP, int size)
+{
+	char	*memP = bufToReadP;
+	int		len = size;
+	int		offset = 0;
+	GString *bufTrace;
+
+	if (!memP || size <= 0)
+		return;
+
+	offset	= 0;
+
+	bufTrace = g_string_new(NULL);
+	while (len > 0) {
+		g_string_append_printf(bufTrace, "%08lX : ",
+				       (unsigned long) (&bufToReadP[offset]));
+		ncl_trace_prv_dump_data_as_binary_format(&bufToReadP[offset],
+							len, bufTrace,
+							NB_COLUMN);
+		ncl_trace_prv_dump_data_as_ascii_format(&bufToReadP[offset],
+						       len, bufTrace,
+						       NB_COLUMN);
+		NCL_CMD_PRINT("%s\n", bufTrace->str);
+		len		-= NB_COLUMN;
+		offset	+= NB_COLUMN;
+		g_string_truncate(bufTrace, 0);
+	}
+	g_string_free(bufTrace, TRUE);
+}
+
 
 char *ncl_error_get_text(NCLError ec)
 {

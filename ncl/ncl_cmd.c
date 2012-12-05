@@ -1104,6 +1104,122 @@ static NCLError ncl_cmd_stop_poll(int argc, char *argv[])
  * ncl_cmd_stop_poll : END
  ****************************************************************************/
 
+
+/*****************************************************************************
+ * ncl_cmd_(un)register_NDEF_agent : BEGIN
+ * Handle a record macthing a registered tag type
+ ****************************************************************************/
+void ncl_cmd_agent_cb ( unsigned char **rcdArray, unsigned int rcdLen
+		      , unsigned char *ndefArray, unsigned int ndefLen
+		      , void *user_data)
+{
+	(void) user_data;
+	
+	NCL_CMD_PRINTF("Received %d records and %d bytes of NDEF raw data.\n"
+		      , rcdLen, ndefLen);
+
+	NCL_CMD_DUMP(ndefArray, ndefLen);
+	
+	neardal_free_array((char***) &rcdArray);
+	g_free(ndefArray);
+	
+}
+
+static NCLError ncl_cmd_register_NDEF_agent(int argc, char *argv[])
+{
+	errorCode_t	ec		= NEARDAL_SUCCESS;
+	NCLError	nclErr;
+	static char	*tagType	= NULL;
+
+	if (argc <= 1)
+		return NCLERR_PARSING_PARAMETERS;
+
+static GOptionEntry options[] = {
+		{ "tagType", 's', 0, G_OPTION_ARG_STRING , &tagType
+				, "tag Type to register",
+				"'Text', 'URI'..." },
+
+		{ NULL, 0, 0, 0, NULL, NULL, NULL} /* End of List */
+	};
+
+	if (argc > 1)
+		/* Parse options */
+		nclErr = ncl_cmd_prv_parseOptions(&argc, &argv, options);
+	else
+		nclErr = NCLERR_PARSING_PARAMETERS;
+
+	if (nclErr != NCLERR_NOERROR)
+		goto exit;
+
+	/* Install Neardal Callback*/
+	if (sNclCmdCtx.cb_initialized == false)
+		ncl_cmd_install_callback();
+
+	ec = neardal_agent_set_NDEF_cb(tagType, ncl_cmd_agent_cb, NULL);
+	if (ec != NEARDAL_SUCCESS) {
+		NCL_CMD_PRINTF("Set NDEF callback failed! error:%d='%s'.\n",
+			       ec, neardal_error_get_text(ec));
+		return NCLERR_LIB_ERROR;
+	}
+	NCL_CMD_PRINT("\nExit with error code %d:%s\n", ec,
+		      neardal_error_get_text(ec));
+
+exit:
+	g_free(tagType);
+	tagType = NULL;
+
+	return NCLERR_NOERROR;
+}
+static NCLError ncl_cmd_unregister_NDEF_agent(int argc, char *argv[])
+{
+	errorCode_t	ec		= NEARDAL_SUCCESS;
+	NCLError	nclErr;
+	static char	*tagType	= NULL;
+
+	if (argc <= 1)
+		return NCLERR_PARSING_PARAMETERS;
+
+static GOptionEntry options[] = {
+		{ "tagType", 's', 0, G_OPTION_ARG_STRING , &tagType
+				, "tag Type to unregister",
+				"'Text', 'URI'..." },
+
+		{ NULL, 0, 0, 0, NULL, NULL, NULL} /* End of List */
+	};
+
+	if (argc > 1)
+		/* Parse options */
+		nclErr = ncl_cmd_prv_parseOptions(&argc, &argv, options);
+	else
+		nclErr = NCLERR_PARSING_PARAMETERS;
+
+	if (nclErr != NCLERR_NOERROR)
+		goto exit;
+
+	/* Install Neardal Callback*/
+	if (sNclCmdCtx.cb_initialized == false)
+		ncl_cmd_install_callback();
+
+	ec = neardal_agent_set_NDEF_cb(tagType, NULL, NULL);
+	if (ec != NEARDAL_SUCCESS) {
+		NCL_CMD_PRINTF("Set NDEF callback failed! error:%d='%s'.\n",
+			       ec, neardal_error_get_text(ec));
+		return NCLERR_LIB_ERROR;
+	}
+	NCL_CMD_PRINT("\nExit with error code %d:%s\n", ec,
+		      neardal_error_get_text(ec));
+
+exit:
+	g_free(tagType);
+	tagType = NULL;
+
+	return NCLERR_NOERROR;
+}
+/*****************************************************************************
+ * ncl_cmd_(un)register_NDEF_agent : END
+ ****************************************************************************/
+
+
 /*****************************************************************************
  * test parameter type (sample code) : BEGIN
  ****************************************************************************/
@@ -1233,6 +1349,10 @@ static NCLError ncl_cmd_exit(int argc, char *argv[])
  ****************************************************************************/
 /* Array of command line functions interpretor (alphabetical order) */
 static NCLCmdInterpretor itFunc[] = {
+	{ "exit",
+	ncl_cmd_exit,
+	"Exit from command line interpretor" },
+
 	{ "get_adapters",
 	ncl_cmd_get_adapters,
 	"Get adapters list"},
@@ -1277,9 +1397,9 @@ static NCLCmdInterpretor itFunc[] = {
 	ncl_cmd_write,
 	"Creates and write a NDEF record to a NFC tag"},
 
-	{ "exit",
-	ncl_cmd_exit,
-	"Exit from command line interpretor" },
+	{ "registerNDEFtype",
+	ncl_cmd_register_NDEF_agent,
+	"register a handler for a specific NDEF tag type"},
 
 	{ "set_adp_property",
 	ncl_cmd_set_adapter_property,
@@ -1295,7 +1415,15 @@ static NCLCmdInterpretor itFunc[] = {
 
 	{ "test_parameters",
 	ncl_cmd_test_parameters,
-	"Simple test to parse input parameters"}
+	"Simple test to parse input parameters"},
+	
+	{ "unregisterNDEFtype",
+	ncl_cmd_unregister_NDEF_agent,
+	"unregister a handler for a specific NDEF tag type"},
+
+	{ "write",
+	ncl_cmd_write,
+	"Creates and write a NDEF record to a NFC tag"}
 };
 #define NB_CL_FUNC		(sizeof(itFunc) / sizeof(NCLCmdInterpretor))
 

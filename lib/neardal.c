@@ -20,6 +20,7 @@
  */
 
 #include <stdio.h>
+#include <unistd.h>
 #include <string.h>
 #include <glib.h>
 #include <glib-object.h>
@@ -43,8 +44,7 @@
 #define	ADP_MODE_TARGET			"Target"
 #define	ADP_MODE_DUAL			"Dual"
 
-neardalCtx neardalMgr = {NULL, NULL, {NULL}, NULL, NULL, NULL, NULL, NULL, NULL,
-NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, NULL};
+neardalCtx neardalMgr = {.proxy = NULL};
 
 /*---------------------------------------------------------------------------
  * Context Management
@@ -61,11 +61,16 @@ void neardal_prv_construct(errorCode_t *ec)
 		return;
 
 	NEARDAL_TRACEIN();
+	memset(&neardalMgr, 0, sizeof(neardalCtx));
 	/* Create DBUS connection */
 	g_type_init();
-	neardalMgr.conn = g_bus_get_sync(G_BUS_TYPE_SYSTEM, NULL,
+	neardalMgr.conn = g_bus_get_sync(NEARDAL_DBUS_TYPE, NULL,
 					   &neardalMgr.gerror);
 	if (neardalMgr.conn != NULL) {
+		err = neardal_agent_acquire_dbus_name();
+		if (err != NEARDAL_SUCCESS)
+			NEARDAL_TRACE_ERR("Agent not managed!\n");
+
 		/* We have a DBUS connection, create proxy on Neard Manager */
 		err =  neardal_mgr_create();
 		if (err != NEARDAL_SUCCESS) {
@@ -75,8 +80,10 @@ void neardal_prv_construct(errorCode_t *ec)
 
 		}
 		/* No Neard daemon, destroying neardal object... */
-		if (err == NEARDAL_ERROR_DBUS_CANNOT_CREATE_PROXY)
-			neardal_tools_prv_free_gerror(&neardalMgr.gerror);
+		if (err != NEARDAL_SUCCESS)
+			goto exit;
+		
+
 	} else {
 		NEARDAL_TRACE_ERR("Unable to connect to dbus: %s\n",
 				 neardalMgr.gerror->message);
@@ -84,9 +91,12 @@ void neardal_prv_construct(errorCode_t *ec)
 		err = NEARDAL_ERROR_DBUS;
 	}
 
+exit:
 	if (ec != NULL)
 		*ec = err;
 
+	neardal_tools_prv_free_gerror(&neardalMgr.gerror);
+	
 	NEARDAL_TRACEF("Exit\n");
 	return;
 }
@@ -103,6 +113,7 @@ void neardal_destroy(void)
 		neardal_tools_prv_free_gerror(&neardalMgr.gerror);
 		neardal_mgr_destroy();
 	}
+	neardal_agent_stop_owning_dbus_name();
 }
 
 /*****************************************************************************
@@ -992,7 +1003,7 @@ exit:
 }
 
 /*****************************************************************************
- * neardal_tag_write: Write NDEF record to an NFC dev
+ * neardal_dev_push: Push NDEF record to an NFC dev
  ****************************************************************************/
 errorCode_t neardal_dev_push(neardal_record *record)
 {
@@ -1176,4 +1187,78 @@ exit:
 	return err;
 }
 
+/*---------------------------------------------------------------------------
+ * NFC Agent Management
+ ---------------------------------------------------------------------------*/
+/*****************************************************************************
+ * neardal_agent_set_NDEF_cb: register or unregister a callback to handle a
+ * record macthing a registered tag type. This callback will received the
+ * whole NDEF as a raw byte stream
+ ****************************************************************************/
+errorCode_t neardal_agent_set_NDEF_cb(char *tagType, agent_cb cb_agent
+				      , void *user_data)
+{
+	errorCode_t	err	= NEARDAL_ERROR_INVALID_PARAMETER;
+	neardal_agent_t agent;
+
+
+	if (tagType == NULL)
+		goto exit;
+	err = NEARDAL_ERROR_NO_MEMORY;
+	
+	agent.cb_agent	= cb_agent;
+	agent.pid	= getpid();
+	agent.tagType	= g_strdup(tagType);
+	{ // replace ':' with '_'
+		int len = strlen(agent.tagType);
+		while (len > 0) {
+			if (agent.tagType[len] == ':')
+				agent.tagType[len] = '_';
+			len--;
+		}
+	}
+	agent.user_data = user_data;
+	agent.objPath	= NULL;
+	agent.objPath = g_strdup_printf("%s/%s/%d", NEARDAL_AGENT_PREFIX
+					, agent.tagType, agent.pid);
+	
+	if (agent.objPath == NULL)
+		goto exit;
+	
+	err = neardal_ndefagent_prv_manage(agent);
+	if (err != NEARDAL_SUCCESS)
+		goto exit;
+
+	if (cb_agent != NULL)
+		// RegisterNDEFAgent
+		org_neard_mgr__call_register_ndefagent_sync(neardalMgr.proxy
+							    , agent.objPath
+							    , tagType, NULL
+							 , &neardalMgr.gerror);
+	else
+		// UnregisterNDEFAgent
+		org_neard_mgr__call_unregister_ndefagent_sync(neardalMgr.proxy
+							    , agent.objPath
+							    , tagType, NULL
+							 , &neardalMgr.gerror);
+			
+
+	if (neardalMgr.gerror != NULL) {
+		NEARDAL_TRACE_ERR(
+			"Error with neard dbus method (err:%d:'%s')\n"
+				, neardalMgr.gerror->code
+				, neardalMgr.gerror->message);
+		err = NEARDAL_ERROR_DBUS_INVOKE_METHOD_ERROR;
+		goto exit;
+	}
+
+exit:
+	if (err != NEARDAL_SUCCESS) {
+		neardal_tools_prv_free_gerror(&neardalMgr.gerror);
+	}
+	g_free(agent.objPath);
+	g_free(agent.tagType);
+	
+	return err;
+}
 

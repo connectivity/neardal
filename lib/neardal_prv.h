@@ -22,6 +22,8 @@
 #define __NEARDAL_PRV_H
 
 #include "neard_manager_proxy.h"
+
+#include "neardal_agent.h"
 #include "neardal_manager.h"
 #include "neardal_tools.h"
 #include "neardal_traces_prv.h"
@@ -82,11 +84,21 @@ typedef struct neardalCtx {
 							client callback
 							'tag record found'*/
 
+	guint		OwnerId;		/* dbus Id server side */
+						/* (for neard agent Mgnt) */
+	GDBusObjectManagerServer *agentMgr;	/* Object 'agent' Manager */
+
 	errorCode_t	ec;		/* Lastest NEARDAL error */
 	GError		*gerror;	/* Lastest GError if available */
 } neardalCtx;
 
 extern neardalCtx neardalMgr;
+
+// DBUS TYPE
+#define NEARDAL_DBUS_TYPE				G_BUS_TYPE_SYSTEM
+
+// The well-known name to own
+#define NEARDAL_DBUS_WELLKNOWN_NAME			"org.neardal"
 
 /*! \fn neardal_t neardal_prv_construct(errorCode_t *ec)
 *  \brief create NEARDAL object instance, Neard Dbus connection,

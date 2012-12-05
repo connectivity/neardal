@@ -53,5 +53,6 @@ NCLContext *ncl_get_ctx(void);
 
 /* Display prompt */
 void ncl_prompt(void);
+void ncl_trace_dump_mem(char *bufToReadP, int size);
 
 #endif /* __NCL_H__ */

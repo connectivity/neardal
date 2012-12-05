@@ -283,7 +283,7 @@ errorCode_t neardal_tag_prv_write(TagProp *tagProp, RcdProp *rcd)
 		goto exit;
 
 	in = g_variant_builder_end(builder);
-	NEARDAL_TRACE_LOG("Sending:\n%s\n", g_variant_print(in, TRUE));
+	NEARDAL_TRACEF("Sending:\n%s\n", g_variant_print(in, TRUE));
 	org_neard_tag__call_write_sync(tagProp->proxy, in, NULL, &gerror);
 
 exit:
