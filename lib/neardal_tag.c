@@ -242,19 +242,19 @@ void neardal_tag_notify_tag_found(TagProp *tagProp)
 
 	g_assert(tagProp != NULL);
 
-	if (tagProp->notified == FALSE && neardalMgr.cb_tag_found != NULL) {
-		(neardalMgr.cb_tag_found)(tagProp->name,
-					   neardalMgr.cb_tag_found_ud);
+	if (tagProp->notified == FALSE && neardalMgr.cb.tag_found != NULL) {
+		(neardalMgr.cb.tag_found)(tagProp->name,
+					   neardalMgr.cb.tag_found_ud);
 		tagProp->notified = TRUE;
 	}
 
 	len = 0;
-	if (neardalMgr.cb_rcd_found != NULL)
+	if (neardalMgr.cb.rcd_found != NULL)
 		while (len < g_list_length(tagProp->rcdList)) {
 			rcdProp = g_list_nth_data(tagProp->rcdList, len++);
 			if (rcdProp->notified == FALSE) {
-				(neardalMgr.cb_rcd_found)(rcdProp->name,
-						neardalMgr.cb_rcd_found_ud);
+				(neardalMgr.cb.rcd_found)(rcdProp->name,
+						neardalMgr.cb.rcd_found_ud);
 				rcdProp->notified = TRUE;
 			}
 		}

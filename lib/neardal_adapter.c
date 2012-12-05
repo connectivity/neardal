@@ -83,9 +83,9 @@ static void neardal_adp_prv_cb_tag_lost(orgNeardTag *proxy,
 	err = neardal_adp_prv_get_tag(adpProp, (char *) arg_unnamed_arg0,
 						  &tagProp);
 	if (err == NEARDAL_SUCCESS) {
-		if (neardalMgr.cb_tag_lost != NULL)
-			(neardalMgr.cb_tag_lost)((char *) arg_unnamed_arg0,
-					      neardalMgr.cb_tag_lost_ud);
+		if (neardalMgr.cb.tag_lost != NULL)
+			(neardalMgr.cb.tag_lost)((char *) arg_unnamed_arg0,
+					      neardalMgr.cb.tag_lost_ud);
 		neardal_tag_prv_remove(tagProp);
 		NEARDAL_TRACEF("NEARDAL LIB tagList contains %d elements\n",
 			      g_list_length(adpProp->tagList));
@@ -146,9 +146,9 @@ static void neardal_adp_prv_cb_dev_lost(orgNeardDev *proxy,
 	err = neardal_adp_prv_get_dev(adpProp, (char *) arg_unnamed_arg0,
 						  &devProp);
 	if (err == NEARDAL_SUCCESS) {
-		if (neardalMgr.cb_dev_lost != NULL)
-			(neardalMgr.cb_dev_lost)((char *) arg_unnamed_arg0,
-					      neardalMgr.cb_dev_lost_ud);
+		if (neardalMgr.cb.dev_lost != NULL)
+			(neardalMgr.cb.dev_lost)((char *) arg_unnamed_arg0,
+					      neardalMgr.cb.dev_lost_ud);
 		neardal_dev_prv_remove(devProp);
 		NEARDAL_TRACEF("NEARDAL LIB devList contains %d elements\n",
 			      g_list_length(adpProp->devList));
@@ -288,11 +288,11 @@ static void neardal_adp_prv_cb_property_changed(orgNeardAdp *proxy,
 		array = NULL;
 	}
 
-	if (neardalMgr.cb_adp_prop_changed != NULL)
-		(neardalMgr.cb_adp_prop_changed)(adpProp->name,
+	if (neardalMgr.cb.adp_prop_changed != NULL)
+		(neardalMgr.cb.adp_prop_changed)(adpProp->name,
 						  (char *) arg_unnamed_arg0,
 						  clientValue,
-					neardalMgr.cb_adp_prop_changed_ud);
+					neardalMgr.cb.adp_prop_changed_ud);
 	return;
 
 exit:
@@ -583,9 +583,9 @@ errorCode_t neardal_adp_add(gchar *adapterName)
 			g_list_length(*adpList));
 
 		/* Invoke client cb 'adapter added' */
-		if (neardalMgr.cb_adp_added != NULL)
-				(neardalMgr.cb_adp_added)((char *) adapterName,
-						neardalMgr.cb_adp_added_ud);
+		if (neardalMgr.cb.adp_added != NULL)
+				(neardalMgr.cb.adp_added)((char *) adapterName,
+						neardalMgr.cb.adp_added_ud);
 
 		/* Notify 'Tag Found' */
 		len = 0;

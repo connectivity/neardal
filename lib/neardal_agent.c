@@ -46,6 +46,9 @@ static gboolean on_get_ndef(neardalNDEFAgent		*ndefAgent
 	gchar		*ndefArray	= NULL;
 	gsize		ndefLen		= 0;
 	gconstpointer  value;
+
+	(void) ndefAgent;	/* Avoid warning */
+	(void) invocation;	/* Avoid warning */
 	
 	NEARDAL_TRACEIN();
 	NEARDAL_TRACEF("%s\n", g_variant_print(out, TRUE));

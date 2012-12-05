@@ -191,19 +191,19 @@ void neardal_dev_notify_dev_found(DevProp *devProp)
 
 	g_assert(devProp != NULL);
 
-	if (devProp->notified == FALSE && neardalMgr.cb_dev_found != NULL) {
-		(neardalMgr.cb_dev_found)(devProp->name,
-					   neardalMgr.cb_dev_found_ud);
+	if (devProp->notified == FALSE && neardalMgr.cb.dev_found != NULL) {
+		(neardalMgr.cb.dev_found)(devProp->name,
+					   neardalMgr.cb.dev_found_ud);
 		devProp->notified = TRUE;
 	}
 
 	len = 0;
-	if (neardalMgr.cb_rcd_found != NULL)
+	if (neardalMgr.cb.rcd_found != NULL)
 		while (len < g_list_length(devProp->rcdList)) {
 			rcdProp = g_list_nth_data(devProp->rcdList, len++);
 			if (rcdProp->notified == FALSE) {
-				(neardalMgr.cb_rcd_found)(rcdProp->name,
-						neardalMgr.cb_rcd_found_ud);
+				(neardalMgr.cb.rcd_found)(rcdProp->name,
+						neardalMgr.cb.rcd_found_ud);
 				rcdProp->notified = TRUE;
 			}
 		}

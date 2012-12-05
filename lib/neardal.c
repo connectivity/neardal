@@ -61,7 +61,7 @@ void neardal_prv_construct(errorCode_t *ec)
 		return;
 
 	NEARDAL_TRACEIN();
-	memset(&neardalMgr, 0, sizeof(neardalCtx));
+	memset(&neardalMgr.conn, 0, sizeof(neardalCtx) - sizeof(neardalCb));
 	/* Create DBUS connection */
 	g_type_init();
 	neardalMgr.conn = g_bus_get_sync(NEARDAL_DBUS_TYPE, NULL,
@@ -124,8 +124,8 @@ void neardal_destroy(void)
 errorCode_t neardal_set_cb_adapter_added(adapter_cb cb_adp_added,
 					 void *user_data)
 {
-	neardalMgr.cb_adp_added		= cb_adp_added;
-	neardalMgr.cb_adp_added_ud	= user_data;
+	neardalMgr.cb.adp_added		= cb_adp_added;
+	neardalMgr.cb.adp_added_ud	= user_data;
 
 	if (neardalMgr.proxy == NULL)
 		neardal_prv_construct(NULL);
@@ -142,8 +142,8 @@ errorCode_t neardal_set_cb_adapter_removed(adapter_cb cb_adp_removed,
 					   void *user_data)
 {
 
-	neardalMgr.cb_adp_removed	= cb_adp_removed;
-	neardalMgr.cb_adp_removed_ud	= user_data;
+	neardalMgr.cb.adp_removed	= cb_adp_removed;
+	neardalMgr.cb.adp_removed_ud	= user_data;
 
 	if (neardalMgr.proxy == NULL)
 		neardal_prv_construct(NULL);
@@ -160,8 +160,8 @@ errorCode_t neardal_set_cb_adapter_property_changed(
 					adapter_prop_cb cb_adp_property_changed,
 					void *user_data)
 {
-	neardalMgr.cb_adp_prop_changed		= cb_adp_property_changed;
-	neardalMgr.cb_adp_prop_changed_ud	= user_data;
+	neardalMgr.cb.adp_prop_changed		= cb_adp_property_changed;
+	neardalMgr.cb.adp_prop_changed_ud	= user_data;
 
 	if (neardalMgr.proxy == NULL)
 		neardal_prv_construct(NULL);
@@ -177,8 +177,8 @@ errorCode_t neardal_set_cb_adapter_property_changed(
 errorCode_t neardal_set_cb_tag_found(tag_cb cb_tag_found,
 					void *user_data)
 {
-	neardalMgr.cb_tag_found		= cb_tag_found;
-	neardalMgr.cb_tag_found_ud	= user_data;
+	neardalMgr.cb.tag_found		= cb_tag_found;
+	neardalMgr.cb.tag_found_ud	= user_data;
 
 	if (neardalMgr.proxy == NULL)
 		neardal_prv_construct(NULL);
@@ -194,8 +194,8 @@ errorCode_t neardal_set_cb_tag_found(tag_cb cb_tag_found,
 errorCode_t neardal_set_cb_tag_lost(tag_cb cb_tag_lost,
 				       void *user_data)
 {
-	neardalMgr.cb_tag_lost		= cb_tag_lost;
-	neardalMgr.cb_tag_lost_ud	= user_data;
+	neardalMgr.cb.tag_lost		= cb_tag_lost;
+	neardalMgr.cb.tag_lost_ud	= user_data;
 
 	if (neardalMgr.proxy == NULL)
 		neardal_prv_construct(NULL);
@@ -211,8 +211,8 @@ errorCode_t neardal_set_cb_tag_lost(tag_cb cb_tag_lost,
 errorCode_t neardal_set_cb_dev_found(dev_cb cb_dev_found,
 					void *user_data)
 {
-	neardalMgr.cb_dev_found		= cb_dev_found;
-	neardalMgr.cb_dev_found_ud	= user_data;
+	neardalMgr.cb.dev_found		= cb_dev_found;
+	neardalMgr.cb.dev_found_ud	= user_data;
 
 	if (neardalMgr.proxy == NULL)
 		neardal_prv_construct(NULL);
@@ -228,8 +228,8 @@ errorCode_t neardal_set_cb_dev_found(dev_cb cb_dev_found,
 errorCode_t neardal_set_cb_dev_lost(dev_cb cb_dev_lost,
 				       void *user_data)
 {
-	neardalMgr.cb_dev_lost		= cb_dev_lost;
-	neardalMgr.cb_dev_lost_ud	= user_data;
+	neardalMgr.cb.dev_lost		= cb_dev_lost;
+	neardalMgr.cb.dev_lost_ud	= user_data;
 
 	if (neardalMgr.proxy == NULL)
 		neardal_prv_construct(NULL);
@@ -246,8 +246,8 @@ errorCode_t neardal_set_cb_dev_lost(dev_cb cb_dev_lost,
 errorCode_t neardal_set_cb_record_found(record_cb cb_rcd_found,
 					void *user_data)
 {
-	neardalMgr.cb_rcd_found		= cb_rcd_found;
-	neardalMgr.cb_rcd_found_ud	= user_data;
+	neardalMgr.cb.rcd_found		= cb_rcd_found;
+	neardalMgr.cb.rcd_found_ud	= user_data;
 
 	if (neardalMgr.proxy == NULL)
 		neardal_prv_construct(NULL);

@@ -95,9 +95,9 @@ static void neardal_mgr_prv_cb_adapter_removed(orgNeardMgr *proxy,
 	}
 
 	/* Invoke client cb 'adapter removed' */
-	if (neardalMgr.cb_adp_removed != NULL)
-		(neardalMgr.cb_adp_removed)((char *) arg_unnamed_arg0,
-					 neardalMgr.cb_adp_removed_ud);
+	if (neardalMgr.cb.adp_removed != NULL)
+		(neardalMgr.cb.adp_removed)((char *) arg_unnamed_arg0,
+					 neardalMgr.cb.adp_removed_ud);
 
 	neardal_adp_remove(((AdpProp *)node->data));
 

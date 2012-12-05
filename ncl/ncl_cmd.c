@@ -311,7 +311,7 @@ static void ncl_cmd_cb_adapter_added(const char *adpName, void *user_data)
 	return;
 }
 
-static void ncl_cmd_cb_adapter_removed(const char *adpName, void * user_data)
+static void ncl_cmd_cb_adapter_removed(const char *adpName, void *user_data)
 {
 	(void) user_data; /* remove warning */
 
@@ -529,7 +529,7 @@ static NCLError ncl_cmd_get_devices(int argc, char *argv[])
 	if (sNclCmdCtx.cb_initialized == false)
 		ncl_cmd_install_callback();
 
-	ec = neardal_get_devices (argv[1], &devArray, &devLen);
+	ec = neardal_get_devices(argv[1], &devArray, &devLen);
 	if (ec == NEARDAL_SUCCESS) {
 		devOff = 0;
 			/* For each dev */
@@ -797,7 +797,7 @@ static GOptionEntry options[] = {
 	};
 
 	if (argc > 1) {
-	/* Parse options */
+		/* Parse options */
 		memset(&rcd, 0, sizeof(neardal_record));
 		nclErr = ncl_cmd_prv_parseOptions(&argc, &argv, options);
 	} else
@@ -893,12 +893,12 @@ static GOptionEntry options[] = {
 	};
 
 	if (argc > 1) {
-	/* Parse options */
+		/* Parse options */
 		memset(&rcd, 0, sizeof(neardal_record));
 		nclErr = ncl_cmd_prv_parseOptions(&argc, &argv, options);
 	} else
 		nclErr = NCLERR_PARSING_PARAMETERS;
-	
+
 	if (nclErr != NCLERR_NOERROR) {
 		ncl_cmd_print(stdout, "Sample (Type 'Text'):");
 		ncl_cmd_print(stdout, "e.g. < write --type Text --lang en-US \
@@ -961,20 +961,18 @@ static NCLError ncl_cmd_set_adapter_property(int argc, char *argv[])
 static GOptionEntry options[] = {
 		{ "powered", 's', 0, G_OPTION_ARG_INT , &powered
 				, "Set Adapter power ON/OFF", "<>0 or =0" },
-				
 		{ NULL, 0, 0, 0, NULL, NULL, NULL} /* End of List */
 	};
 
 	if (argc > 2) {
 		/* Parse options */
-//		memset(&rcd, 0, sizeof(neardal_record));
 		nclErr = ncl_cmd_prv_parseOptions(&argc, &argv, options);
 	} else
 		nclErr = NCLERR_PARSING_PARAMETERS;
 
 	if (nclErr != NCLERR_NOERROR) {
 		ncl_cmd_print(stdout, "e.g. < %s /org/neard/nfc0 --powered=1 \
- >\n", argv[0]);
+>\n", argv[0]);
 	}
 
 	if (nclErr != NCLERR_NOERROR)
@@ -989,11 +987,11 @@ static GOptionEntry options[] = {
 		ec = neardal_set_adapter_property(adapterName,
 						  NEARD_ADP_PROP_POWERED,
 						  (void*) powered);
-	
+
 exit:
 	NCL_CMD_PRINT("\nExit with error code %d:%s\n", ec,
 		      neardal_error_get_text(ec));
-	
+
 	return nclErr;
 }
 /*****************************************************************************
@@ -1009,13 +1007,12 @@ static NCLError ncl_cmd_start_poll(int argc, char *argv[])
 	errorCode_t	ec		= NEARDAL_SUCCESS;
 	NCLError	nclErr;
 	char		*adpName	= NULL;
-	static char	*strMode	= NULL;
+	static char	*strMode;
 
 static GOptionEntry options[] = {
 		{ "mode", 's', 0, G_OPTION_ARG_STRING , &strMode
 				, "Set Adapter mode initiator/target/dual",
 				"'initiator, target, dual'" },
-
 		{ NULL, 0, 0, 0, NULL, NULL, NULL} /* End of List */
 	};
 
@@ -1023,10 +1020,11 @@ static GOptionEntry options[] = {
 	if (sNclCmdCtx.cb_initialized == false)
 		ncl_cmd_install_callback();
 
-	if (argc > 1)
+	if (argc > 1) {
 		/* Parse options */
+		strMode = NULL;
 		nclErr = ncl_cmd_prv_parseOptions(&argc, &argv, options);
-	else
+	} else
 		nclErr = NCLERR_PARSING_PARAMETERS;
 
 	if (nclErr != NCLERR_NOERROR)
@@ -1049,7 +1047,7 @@ static GOptionEntry options[] = {
 						     NEARD_ADP_MODE_INITIATOR);
 	} else
 		ec = neardal_start_poll(adpName);
-	
+
 	if (ec != NEARDAL_SUCCESS) {
 		NCL_CMD_PRINTF("NFC polling activation error:%d='%s'\n",
 				ec, neardal_error_get_text(ec));
@@ -1062,7 +1060,7 @@ static GOptionEntry options[] = {
 exit:
 	if (strMode != NULL)
 		g_free(strMode);
-	
+
 	if (ec != NEARDAL_SUCCESS)
 		nclErr = NCLERR_LIB_ERROR;
 
@@ -1109,27 +1107,26 @@ static NCLError ncl_cmd_stop_poll(int argc, char *argv[])
  * ncl_cmd_(un)register_NDEF_agent : BEGIN
  * Handle a record macthing a registered tag type
  ****************************************************************************/
-void ncl_cmd_agent_cb ( unsigned char **rcdArray, unsigned int rcdLen
+void ncl_cmd_agent_cb(unsigned char **rcdArray, unsigned int rcdLen
 		      , unsigned char *ndefArray, unsigned int ndefLen
 		      , void *user_data)
 {
 	(void) user_data;
-	
+
 	NCL_CMD_PRINTF("Received %d records and %d bytes of NDEF raw data.\n"
 		      , rcdLen, ndefLen);
 
 	NCL_CMD_DUMP(ndefArray, ndefLen);
-	
+
 	neardal_free_array((char***) &rcdArray);
 	g_free(ndefArray);
-	
 }
 
 static NCLError ncl_cmd_register_NDEF_agent(int argc, char *argv[])
 {
 	errorCode_t	ec		= NEARDAL_SUCCESS;
 	NCLError	nclErr;
-	static char	*tagType	= NULL;
+	static char	*tagType;
 
 	if (argc <= 1)
 		return NCLERR_PARSING_PARAMETERS;
@@ -1142,10 +1139,11 @@ static GOptionEntry options[] = {
 		{ NULL, 0, 0, 0, NULL, NULL, NULL} /* End of List */
 	};
 
-	if (argc > 1)
+	if (argc > 1) {
 		/* Parse options */
+		tagType = NULL;
 		nclErr = ncl_cmd_prv_parseOptions(&argc, &argv, options);
-	else
+	} else
 		nclErr = NCLERR_PARSING_PARAMETERS;
 
 	if (nclErr != NCLERR_NOERROR)
@@ -1174,7 +1172,7 @@ static NCLError ncl_cmd_unregister_NDEF_agent(int argc, char *argv[])
 {
 	errorCode_t	ec		= NEARDAL_SUCCESS;
 	NCLError	nclErr;
-	static char	*tagType	= NULL;
+	static char	*tagType;
 
 	if (argc <= 1)
 		return NCLERR_PARSING_PARAMETERS;
@@ -1187,10 +1185,11 @@ static GOptionEntry options[] = {
 		{ NULL, 0, 0, 0, NULL, NULL, NULL} /* End of List */
 	};
 
-	if (argc > 1)
+	if (argc > 1) {
 		/* Parse options */
+		tagType = NULL;
 		nclErr = ncl_cmd_prv_parseOptions(&argc, &argv, options);
-	else
+	} else
 		nclErr = NCLERR_PARSING_PARAMETERS;
 
 	if (nclErr != NCLERR_NOERROR)
@@ -1392,10 +1391,6 @@ static NCLCmdInterpretor itFunc[] = {
 	{ "push",
 	ncl_cmd_push,
 	"Creates and push a NDEF record to a NFC device"},
-	
-	{ "write",
-	ncl_cmd_write,
-	"Creates and write a NDEF record to a NFC tag"},
 
 	{ "registerNDEFtype",
 	ncl_cmd_register_NDEF_agent,
@@ -1416,7 +1411,7 @@ static NCLCmdInterpretor itFunc[] = {
 	{ "test_parameters",
 	ncl_cmd_test_parameters,
 	"Simple test to parse input parameters"},
-	
+
 	{ "unregisterNDEFtype",
 	ncl_cmd_unregister_NDEF_agent,
 	"unregister a handler for a specific NDEF tag type"},
