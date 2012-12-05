@@ -29,7 +29,6 @@
 extern "C" {
 #endif	/* __cplusplus */
 
-#define NEARD_ADP_IF_NAME				"org.neard.Adapter"
 #define NEARD_ADP_SIG_PROPCHANGED			"property-changed"
 #define NEARD_ADP_SIG_TAG_FOUND				"tag-found"
 #define NEARD_ADP_SIG_TAG_LOST				"tag-lost"

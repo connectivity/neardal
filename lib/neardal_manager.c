@@ -124,7 +124,7 @@ static errorCode_t neardal_mgr_prv_get_all_adapters(gchar ***adpArray,
 		NEARDAL_TRACEF("Reading:\n%s\n", g_variant_print(tmp, TRUE));
 		NEARDAL_TRACEF("Parsing neard adapters...\n");
 
-		tmpOut = g_variant_lookup_value(tmp, "Adapters",
+		tmpOut = g_variant_lookup_value(tmp, NEARD_MGR_SECTION_ADAPTERS,
 						G_VARIANT_TYPE_ARRAY);
 		if (tmpOut != NULL) {
 			*adpArray = g_variant_dup_objv(tmpOut, len);

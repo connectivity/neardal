@@ -27,12 +27,12 @@
 extern "C" {
 #endif	/* __cplusplus */
 
-#define NEARDAL_AGENT_PREFIX	"/neardal"
+#define AGENT_PREFIX	"/neardal"
 
 
 typedef struct {
-	gchar		*objPath;	// agent object path
-	gchar		*tagType;	// tag Type to register
+	gchar		*objPath;	/* agent object path */
+	gchar		*tagType;	/* tag Type to register */
 	gint		pid;
 	agent_cb	cb_agent;
 	gpointer	user_data;

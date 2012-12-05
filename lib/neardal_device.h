@@ -28,7 +28,6 @@
 extern "C" {
 #endif	/* __cplusplus */
 
-#define NEARD_DEVS_IF_NAME		"org.neard.Dev"
 #define NEARD_DEV_SIG_PROPCHANGED	"property-changed"
 
 /* NEARDAL Dev Properties */

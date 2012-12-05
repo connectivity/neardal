@@ -28,7 +28,6 @@
 extern "C" {
 #endif	/* __cplusplus */
 
-#define NEARD_TAGS_IF_NAME		"org.neard.Tag"
 #define NEARD_TAG_SIG_PROPCHANGED	"property-changed"
 
 /* NEARDAL Tag Properties */
@@ -61,7 +60,7 @@ void neardal_tag_notify_tag_found(TagProp *tagProp);
 errorCode_t neardal_tag_prv_add(gchar *tagName, void *parent);
 
 /******************************************************************************
- * neardal_tag_remove: remove NEARDAL tag, unref DBus Proxy connection,
+ * neardal_tag_prv_remove: remove NEARDAL tag, unref DBus Proxy connection,
  * unregister tag signal
  *****************************************************************************/
 void neardal_tag_prv_remove(TagProp *tagProp);

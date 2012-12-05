@@ -261,8 +261,8 @@ void neardal_tag_notify_tag_found(TagProp *tagProp)
 }
 
 /*****************************************************************************
- * neardal_tag_prv_write: Creates and write NDEF record to be written to
- * an NFC tag
+ * neardal_tag_prv_write: Creates and write NDEF record to be written to a NFC
+ * tag
  ****************************************************************************/
 errorCode_t neardal_tag_prv_write(TagProp *tagProp, RcdProp *rcd)
 {

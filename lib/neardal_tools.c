@@ -88,10 +88,12 @@ GHashTable *neardal_tools_prv_create_dict(void)
 /*****************************************************************************
  * neardal_tools_prv_add_dict_entry: add an entry in a dictionnary
  ****************************************************************************/
-errorCode_t neardal_tools_prv_add_dict_entry(GVariantBuilder *builder, gchar *key,
-					  void *value, int gVariantType)
+errorCode_t neardal_tools_prv_add_dict_entry(GVariantBuilder *builder
+					     , gchar *key, void *value
+					     , int gVariantType)
 {
-	GVariant *tmp;
+	GVariant *tmp = NULL;
+
 	g_assert(builder != NULL);
 
 	switch (gVariantType) {
@@ -101,6 +103,8 @@ errorCode_t neardal_tools_prv_add_dict_entry(GVariantBuilder *builder, gchar *ke
 	case G_TYPE_UINT:
 		tmp = g_variant_new_uint32((guint32) value);
 		break;
+	case G_TYPE_VARIANT:
+		tmp = (GVariant *) value;
 	}
 	g_variant_builder_add(builder, "{sv}", key, tmp);
 

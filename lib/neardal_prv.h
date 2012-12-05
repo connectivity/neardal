@@ -98,10 +98,10 @@ typedef struct {
 
 extern neardalCtx neardalMgr;
 
-// DBUS TYPE
+/* DBUS TYPE */
 #define NEARDAL_DBUS_TYPE				G_BUS_TYPE_SYSTEM
 
-// The well-known name to own
+/* The well-known name to own */
 #define NEARDAL_DBUS_WELLKNOWN_NAME			"org.neardal"
 
 /*! \fn neardal_t neardal_prv_construct(errorCode_t *ec)
@@ -111,8 +111,6 @@ extern neardalCtx neardalMgr;
 *  \return the NEARDAL context
 */
 void neardal_prv_construct(errorCode_t *ec);
-
-
 
 #ifdef __cplusplus
 }

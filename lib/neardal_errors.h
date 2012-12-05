@@ -65,11 +65,13 @@ typedef		int	errorCode_t;
 #define NEARDAL_ERROR_NO_TAG			((errorCode_t) -9)
 /*! @brief Neard service, no NEARDAL record present */
 #define NEARDAL_ERROR_NO_RECORD			((errorCode_t) -10)
+/*! @brief Invalid record format */
+#define NEARDAL_ERROR_INVALID_RECORD			((errorCode_t) -11)
 /*! @brief Neard service, no NEARDAL device present */
-#define NEARDAL_ERROR_NO_DEV			((errorCode_t) -11)
+#define NEARDAL_ERROR_NO_DEV				((errorCode_t) -12)
 
 /*! @brief Neard service, Error while invoking error */
-#define NEARDAL_ERROR_DBUS_INVOKE_METHOD_ERROR		((errorCode_t) -12)
+#define NEARDAL_ERROR_DBUS_INVOKE_METHOD_ERROR		((errorCode_t) -13)
 
 /* @}*/
 

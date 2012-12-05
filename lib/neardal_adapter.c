@@ -563,7 +563,7 @@ errorCode_t neardal_adp_add(gchar *adapterName)
 	TagProp		*tagProp;
 	gsize		len;
 
-	// Check if adapter already exist in list...
+	/* Check if adapter already exist in list... */
 	err = neardal_mgr_prv_get_adapter(adapterName, NULL);
 	if (err != NEARDAL_SUCCESS) {
 		NEARDAL_TRACEF("Adding adapter:%s\n", adapterName);
@@ -596,7 +596,7 @@ errorCode_t neardal_adp_add(gchar *adapterName)
 		}
 	} else
 		NEARDAL_TRACEF("Adapter '%s' already added\n", adapterName);
-	
+
 	return err;
 }
 
@@ -627,4 +627,3 @@ errorCode_t neardal_adp_remove(AdpProp *adpProp)
 
 	return NEARDAL_SUCCESS;
 }
-

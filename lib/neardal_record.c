@@ -58,6 +58,8 @@ static errorCode_t neardal_rcd_prv_read_properties(RcdProp *rcd)
 	tmpOut = g_variant_lookup_value(tmp, "Type", G_VARIANT_TYPE_STRING);
 	if (tmpOut != NULL)
 		rcd->type = g_variant_dup_string(tmpOut, NULL);
+	else
+		goto error;
 
 	tmpOut = g_variant_lookup_value(tmp, "Representation",
 					G_VARIANT_TYPE_STRING);
@@ -84,6 +86,9 @@ static errorCode_t neardal_rcd_prv_read_properties(RcdProp *rcd)
 		rcd->uri = g_variant_dup_string(tmpOut, NULL);
 
 	return err;
+error:
+	/* due to error, record content will be destroyed later */
+	return NEARDAL_ERROR_INVALID_RECORD;
 }
 
 /*****************************************************************************
@@ -156,13 +161,15 @@ errorCode_t neardal_rcd_prv_format(GVariantBuilder *builder, RcdProp *rcd)
 
 	/* Encoding */
 	if (rcd->encoding != NULL)
-		neardal_tools_prv_add_dict_entry(builder, "Encoding", rcd->encoding,
-					    (int) G_TYPE_STRING);
+		neardal_tools_prv_add_dict_entry(builder, "Encoding"
+						 , rcd->encoding
+						 , (int) G_TYPE_STRING);
 
 	/* Language */
 	if (rcd->language != NULL)
-		neardal_tools_prv_add_dict_entry(builder, "Language", rcd->language,
-					    (int) G_TYPE_STRING);
+		neardal_tools_prv_add_dict_entry(builder, "Language"
+						 , rcd->language
+						 , (int) G_TYPE_STRING);
 
 	/* Representation */
 	if (rcd->representation != NULL)

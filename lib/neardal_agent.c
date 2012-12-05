@@ -29,7 +29,7 @@
 static gboolean neardal_agent_prv_remove(gchar *objPath)
 {
 	g_assert(objPath != NULL);
-	
+
 	NEARDAL_TRACEIN();
 	return g_dbus_object_manager_server_unexport(neardalMgr.agentMgr
 						     , objPath);
@@ -49,11 +49,10 @@ static gboolean on_get_ndef(neardalNDEFAgent		*ndefAgent
 
 	(void) ndefAgent;	/* Avoid warning */
 	(void) invocation;	/* Avoid warning */
-	
+
 	NEARDAL_TRACEIN();
 	NEARDAL_TRACEF("%s\n", g_variant_print(out, TRUE));
 
-	
 	if (agent_data != NULL) {
 		NEARDAL_TRACEF("ndefAgent pid=%d, obj path is : %s\n"
 			      , agent_data->pid
@@ -66,7 +65,7 @@ static gboolean on_get_ndef(neardalNDEFAgent		*ndefAgent
 			if (tmpOut != NULL) {
 				rcdArray = (gchar**) g_variant_dup_strv(tmpOut
 								, &rcdLen);
-				
+
 				if (rcdLen == 0) {
 					g_strfreev(rcdArray);
 					rcdArray = NULL;
@@ -93,8 +92,7 @@ static gboolean on_get_ndef(neardalNDEFAgent		*ndefAgent
 					, agent_data->user_data);
 		}
 	}
-		
-//	neardal_ndefagent_complete_get_ndef(ndefAgent, invocation, out);
+
 	return TRUE;
 }
 
@@ -127,30 +125,30 @@ static void on_object_removed( GDBusObjectManager *manager
 			      , gpointer            user_data)
 {
 	NEARDAL_TRACEIN();
-	(void) manager; // avoid warning
+	(void) manager; /* avoid warning */
 	on_release( NEARDAL_NDEFAGENT(object), NULL, user_data);
 }
 
 static void
-on_name_acquired (GDBusConnection *connection,
-                 const gchar     *name,
-                 gpointer         user_data)
+on_name_acquired (GDBusConnection *connection
+		 , const gchar     *name
+		 , gpointer         user_data)
 {
-	(void) connection;	// avoid warning
-	(void) name;		// avoid warning
-	(void) user_data;	// avoid warning
+	(void) connection;	/* avoid warning */
+	(void) name;		/* avoid warning */
+	(void) user_data;	/* avoid warning */
 	NEARDAL_TRACEIN();
 	NEARDAL_TRACE_LOG(":%s\n", name);
 }
 
 static void
-on_name_lost (GDBusConnection *connection,
-                 const gchar     *name,
-                 gpointer         user_data)
+on_name_lost(GDBusConnection *connection
+	     , const gchar     *name
+	     , gpointer         user_data)
 {
-	(void) connection;	// avoid warning
-	(void) name;		// avoid warning
-	(void) user_data;	// avoid warning
+	(void) connection;	/* avoid warning */
+	(void) name;		/* avoid warning */
+	(void) user_data;	/* avoid warning */
 	NEARDAL_TRACEIN();
 	NEARDAL_TRACE_LOG(":%s\n", name);
 }
@@ -183,11 +181,12 @@ errorCode_t neardal_ndefagent_prv_manage(neardal_agent_t agentData)
 		ndefAgent = neardal_ndefagent_skeleton_new();
 		neardal_object_skeleton_set_ndefagent(objSkel, ndefAgent);
 
-		/* Handle Poke() D-Bus method invocations on the .Animal interface */
+		/* Handle GetNDEF D-Bus method invocations */
 		g_signal_connect ( ndefAgent, "handle-get-ndef"
 				, G_CALLBACK (on_get_ndef)
 				, data);
 
+		/* Handle Release D-Bus method invocations */
 		g_signal_connect ( ndefAgent, "handle-release"
 				, G_CALLBACK (on_release), data);
 
@@ -195,7 +194,7 @@ errorCode_t neardal_ndefagent_prv_manage(neardal_agent_t agentData)
 				, G_CALLBACK (on_object_removed), data);
 		g_object_unref (ndefAgent);
 
-		/* Export the object (@manager takes its own reference to @object) */
+		/* Export the object */
 		g_dbus_object_manager_server_export (neardalMgr.agentMgr
 					, G_DBUS_OBJECT_SKELETON (objSkel));
 		g_object_unref (objSkel);
@@ -222,7 +221,7 @@ errorCode_t neardal_ndefagent_prv_release(gchar *objPath)
 		NEARDAL_TRACE("removed\n");
 	else
 		NEARDAL_TRACE("not removed!\n");
-		
+
 	return err;
 }
 
@@ -242,32 +241,33 @@ errorCode_t neardal_agent_acquire_dbus_name(void)
 				, NEARDAL_DBUS_WELLKNOWN_NAME
 				, G_BUS_NAME_OWNER_FLAGS_ALLOW_REPLACEMENT |
 				  G_BUS_NAME_OWNER_FLAGS_REPLACE
-				, on_name_acquired	// on_name_acquired
-				, on_name_lost		// on_name_lost
-				, NULL			// user data
-				, NULL);		// freeing user_data func
-	
+				, on_name_acquired	/* on_name_acquired */
+				, on_name_lost		/* on_name_lost */
+				, NULL			/* user data */
+				, NULL);	/* freeing user_data func */
+
 	if (neardalMgr.OwnerId == 0) {
 		err = NEARDAL_ERROR_DBUS;
 		goto exit;
 	}
-	
-	/* Create a new org.freedesktop.DBus.ObjectManager rooted at /example/Animals */
-	neardalMgr.agentMgr = g_dbus_object_manager_server_new (NEARDAL_AGENT_PREFIX);
+
+	/* Create a new org.neardal.ObjectManager rooted at /neardal */
+	neardalMgr.agentMgr = g_dbus_object_manager_server_new(AGENT_PREFIX);
 	if (neardalMgr.agentMgr == NULL) {
 		err = NEARDAL_ERROR_DBUS;
 		goto exit;
 	}
-	
+
 	/* Export all objects */
-	g_dbus_object_manager_server_set_connection (neardalMgr.agentMgr, neardalMgr.conn);
-	
+	g_dbus_object_manager_server_set_connection (neardalMgr.agentMgr
+						     , neardalMgr.conn);
+
 
 exit:
 	if (err != NEARDAL_SUCCESS)
 		NEARDAL_TRACE_ERR("(%d:%s)\n", err
 				  , neardal_error_get_text(err));
-		
+
 	return err;
 }
 
@@ -280,5 +280,5 @@ void neardal_agent_stop_owning_dbus_name(void)
 	if (neardalMgr.OwnerId > 0)
 		g_bus_unown_name (neardalMgr.OwnerId);
 	neardalMgr.OwnerId = 0;
-	
+
 }

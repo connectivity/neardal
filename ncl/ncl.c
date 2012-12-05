@@ -192,7 +192,7 @@ static ncl_cmd_func ncl_prv_find_func(char *cmd)
 	int			nbClCmd;
 
 	it = ncl_cmd_get_list(&nbClCmd);
-	if (it == NULL)
+	if (it == NULL || cmd == NULL)
 		return NULL;
 
 	for (index = 0; index < nbClCmd; index++)

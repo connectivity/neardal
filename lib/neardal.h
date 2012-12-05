@@ -75,7 +75,7 @@ typedef struct {
 
 /*! @brief Number of records in tag */
 	int		nbRecords;
-/*! @brief tag records list to free) */
+/*! @brief tag records list */
 	char		**records;
 /*! @brief Number of supported 'types' in tag */
 	int		nbTagTypes;
@@ -187,7 +187,7 @@ typedef void (*record_cb) (const char *rcdName, void *user_data);
  *
  * @param rcdArray array of records path (as identifier=dbus object path)
  * @param rcdLen number of records path in rcdArray
- * @param ndefArray array of raw NDEF data 
+ * @param ndefArray array of raw NDEF data
  * @param ndefLen number of bytes in ndefArray
  * @param user_data Client user data
  **/
@@ -219,8 +219,6 @@ void neardal_destroy();
 #define NEARD_ADP_MODE_INITIATOR		0
 #define NEARD_ADP_MODE_TARGET			1
 #define NEARD_ADP_MODE_DUAL			2
-
-
 /* @}*/
 
 
@@ -228,7 +226,7 @@ void neardal_destroy();
 *  \brief Request Neard to start polling on specific NEARDAL adapter with
 *  specific mode
 *  \param adpName : DBus interface adapter name (as identifier=dbus object
-* 		     path)
+*		     path)
 *  \param mode : Polling mode (see NEARD_ADP_MODE_...)
 *  @return errorCode_t error code
 */
@@ -252,9 +250,9 @@ errorCode_t neardal_stop_poll(char *adpName);
 
 /*! \fn errorCode_t neardal_get_adapters(char ***array, int *len)
  * @brief get an array of NEARDAL adapters present
- * 
+ *
  * @param array array of DBus interface adapter name (as identifier=dbus
- * object path).  use @link neardal_free_adapter @endlink(& ) to free
+ * object path).  release with @link neardal_free_adapter @endlink(& )
  * @param len (optional), number of adapters
  * @return errorCode_t error code
  **/
@@ -266,7 +264,7 @@ errorCode_t neardal_get_adapters(char ***array, int *len);
  * @param adpName adapter name (identifier) on which devices list must be
  * retrieve
  * @param array array of DBus interface device name (as identifier=dbus object
- * path), use @link neardal_free_device @endlink(& ) to free
+ * path), release with @link neardal_free_device @endlink(& )
  * @param len (optional), number of devs
  * @return errorCode_t error code
  **/
@@ -279,7 +277,7 @@ errorCode_t neardal_get_devices(char *adpName, char ***array, int *len);
  * @param adpName adapter name (identifier) on which tags list must be
  * retrieve
  * @param array array of DBus interface tag name (as identifier=dbus object
- * path), use @link neardal_free_tag @endlink(& ) to free
+ * path), release with @link neardal_free_tag @endlink(& )
  * @param len (optional), number of tags
  * @return errorCode_t error code
  **/
@@ -291,7 +289,7 @@ errorCode_t neardal_get_tags(char *adpName, char ***array, int *len);
  * @param tagName tag name (identifier) on which records list must be
  * retrieve
  * @param array array of DBus interface record name (as identifier=dbus object
- * path), use @link neardal_free_record @endlink(& ) to free
+ * path), release with @link neardal_free_record @endlink(& )
  * @param len (optional), number of records
  * @return errorCode_t error code
  **/

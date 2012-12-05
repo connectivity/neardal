@@ -82,7 +82,6 @@ void neardal_prv_construct(errorCode_t *ec)
 		/* No Neard daemon, destroying neardal object... */
 		if (err != NEARDAL_SUCCESS)
 			goto exit;
-		
 
 	} else {
 		NEARDAL_TRACE_ERR("Unable to connect to dbus: %s\n",
@@ -96,7 +95,7 @@ exit:
 		*ec = err;
 
 	neardal_tools_prv_free_gerror(&neardalMgr.gerror);
-	
+
 	NEARDAL_TRACEF("Exit\n");
 	return;
 }
@@ -157,7 +156,7 @@ errorCode_t neardal_set_cb_adapter_removed(adapter_cb cb_adp_removed,
  * cb_mgr_adp_property_changed = NULL to remove actual callback.
  ****************************************************************************/
 errorCode_t neardal_set_cb_adapter_property_changed(
-					adapter_prop_cb cb_adp_property_changed,
+				adapter_prop_cb cb_adp_property_changed,
 					void *user_data)
 {
 	neardalMgr.cb.adp_prop_changed		= cb_adp_property_changed;
@@ -382,28 +381,28 @@ errorCode_t neardal_get_adapters(char ***array, int *len)
 void neardal_free_adapter(neardal_adapter *adapter)
 {
 	int ct		= 0;	/* counter */
-	
+
 	if (adapter == NULL) {
 		NEARDAL_TRACE_ERR("Adapter provided is NULL!\n");
 		return;
 	}
 
-	// Freeing adapter name
+	/* Freeing adapter name */
 	g_free(adapter->name);
-	
-	// Freeing protocols list
+
+	/* Freeing protocols list */
 	ct = 0;
-	while (ct < adapter->nbProtocols) {
+	while (ct < adapter->nbProtocols)
 		g_free(adapter->protocols[ct++]);
-	}
 	g_free(adapter->protocols);
-	// Freeing tags list
+
+	/* Freeing tags list */
 	ct = 0;
-	while (ct < adapter->nbTags) {
+	while (ct < adapter->nbTags)
 		g_free(adapter->tags[ct++]);
-	}
 	g_free(adapter->tags);
-	// Freeing adapter struct
+
+	/* Freeing adapter struct */
 	g_free(adapter);
 }
 
@@ -484,7 +483,7 @@ exit:
 		if (adapter != NULL)
 			*adapter = NULL;
 	}
-	
+
 	return err;
 }
 
@@ -570,7 +569,7 @@ errorCode_t neardal_start_poll_loop(char *adpName, int mode)
 		err = NEARDAL_ERROR_POLLING_ALREADY_ACTIVE;
 		goto exit;
 	}
-	
+
 	if (mode == NEARD_ADP_MODE_INITIATOR)
 		org_neard_adp__call_start_poll_loop_sync(adpProp->proxy,
 							ADP_MODE_INITIATOR,
@@ -585,10 +584,11 @@ errorCode_t neardal_start_poll_loop(char *adpName, int mode)
 							ADP_MODE_DUAL, NULL,
 							&neardalMgr.gerror);
 	else
-		org_neard_adp__call_start_poll_loop_sync(adpProp->proxy,
-							ADP_MODE_INITIATOR, NULL,
+		org_neard_adp__call_start_poll_loop_sync(adpProp->proxy
+							, ADP_MODE_INITIATOR
+							, NULL,
 							&neardalMgr.gerror);
-	
+
 	if (neardalMgr.gerror != NULL) {
 		NEARDAL_TRACE_ERR(
 			"Error with neard dbus method (err:%d:'%s')\n"
@@ -706,25 +706,23 @@ void neardal_free_tag(neardal_tag *tag)
 		return;
 	}
 
-	// Freeing tag name/type
+	/* Freeing tag name/type */
 	g_free((gpointer) tag->name);
 	g_free((gpointer) tag->type);
 
-	// Freeing records list
+	/* Freeing records list */
 	ct = 0;
-	while (ct < tag->nbRecords) {
+	while (ct < tag->nbRecords)
 		g_free(tag->records[ct++]);
-	}
 	g_free(tag->records);
 
-	// Freeing tag type list
+	/* Freeing tag type list */
 	ct = 0;
-	while (ct < tag->nbTagTypes) {
+	while (ct < tag->nbTagTypes)
 		g_free(tag->tagType[ct++]);
-	}
 	g_free(tag->tagType);
 
-	// Freeing adapter struct
+	/* Freeing adapter struct */
 	g_free(tag);
 }
 
@@ -781,7 +779,8 @@ errorCode_t neardal_get_tag_properties(const char *tagName,
 		while (ct < tagClient->nbRecords) {
 			record = g_list_nth_data(tagProp->rcdList, ct);
 			if (record != NULL)
-				tagClient->records[ct++] = g_strdup(record->name);
+				tagClient->records[ct] = g_strdup(record->name);
+			ct++;
 		}
 		err = NEARDAL_SUCCESS;
 	}
@@ -921,17 +920,16 @@ void neardal_free_device(neardal_dev *dev)
 		return;
 	}
 
-	// Freeing dev name/type
+	/* Freeing dev name/type */
 	g_free((gpointer) dev->name);
 
-	// Freeing records list
+	/* Freeing records list */
 	ct = 0;
-	while (ct < dev->nbRecords) {
+	while (ct < dev->nbRecords)
 		g_free(dev->records[ct++]);
-	}
 	g_free(dev->records);
 
-	// Freeing adapter struct
+	/* Freeing adapter struct */
 	g_free(dev);
 }
 
@@ -985,7 +983,8 @@ errorCode_t neardal_get_dev_properties(const char *devName,
 		while (ct < devClient->nbRecords) {
 			record = g_list_nth_data(devProp->rcdList, ct);
 			if (record != NULL)
-				devClient->records[ct++] = g_strdup(record->name);
+				devClient->records[ct++] = g_strdup(
+								record->name);
 		}
 		err = NEARDAL_SUCCESS;
 	}
@@ -1110,7 +1109,7 @@ void neardal_free_record(neardal_record *record)
 		return;
 	}
 
-	// Freeing record properties
+	/* Freeing record properties */
 	g_free((gpointer) record->name);
 	g_free((gpointer) record->encoding);
 	g_free((gpointer) record->language);
@@ -1119,11 +1118,11 @@ void neardal_free_record(neardal_record *record)
 	g_free((gpointer) record->representation);
 	g_free((gpointer) record->uri);
 	g_free((gpointer) record->mime);
-	
-	// Freeing record struct
+
+	/* Freeing record struct */
 	g_free(record);
 }
-	
+
 /*****************************************************************************
  * neardal_get_record_properties: Get values of a specific tag record
  ****************************************************************************/
@@ -1165,7 +1164,7 @@ errorCode_t neardal_get_record_properties(const char *recordName,
 		goto exit;
 	}
 	*record = rcdClient;
-	
+
 	rcdClient->name			= g_strdup(rcdProp->name);
 	rcdClient->encoding		= g_strdup(rcdProp->encoding);
 	rcdClient->language		= g_strdup(rcdProp->language);
@@ -1183,7 +1182,7 @@ exit:
 		if (record != NULL)
 			*record = NULL;
 	}
-	
+
 	return err;
 }
 
@@ -1205,11 +1204,11 @@ errorCode_t neardal_agent_set_NDEF_cb(char *tagType, agent_cb cb_agent
 	if (tagType == NULL)
 		goto exit;
 	err = NEARDAL_ERROR_NO_MEMORY;
-	
+
 	agent.cb_agent	= cb_agent;
 	agent.pid	= getpid();
 	agent.tagType	= g_strdup(tagType);
-	{ // replace ':' with '_'
+	{ /* replace ':' with '_' */
 		int len = strlen(agent.tagType);
 		while (len > 0) {
 			if (agent.tagType[len] == ':')
@@ -1219,29 +1218,29 @@ errorCode_t neardal_agent_set_NDEF_cb(char *tagType, agent_cb cb_agent
 	}
 	agent.user_data = user_data;
 	agent.objPath	= NULL;
-	agent.objPath = g_strdup_printf("%s/%s/%d", NEARDAL_AGENT_PREFIX
+	agent.objPath = g_strdup_printf("%s/%s/%d", AGENT_PREFIX
 					, agent.tagType, agent.pid);
-	
+
 	if (agent.objPath == NULL)
 		goto exit;
-	
+
 	err = neardal_ndefagent_prv_manage(agent);
 	if (err != NEARDAL_SUCCESS)
 		goto exit;
 
 	if (cb_agent != NULL)
-		// RegisterNDEFAgent
+		/* RegisterNDEFAgent */
 		org_neard_mgr__call_register_ndefagent_sync(neardalMgr.proxy
 							    , agent.objPath
 							    , tagType, NULL
 							 , &neardalMgr.gerror);
 	else
-		// UnregisterNDEFAgent
+		/* UnregisterNDEFAgent */
 		org_neard_mgr__call_unregister_ndefagent_sync(neardalMgr.proxy
 							    , agent.objPath
 							    , tagType, NULL
 							 , &neardalMgr.gerror);
-			
+
 
 	if (neardalMgr.gerror != NULL) {
 		NEARDAL_TRACE_ERR(
@@ -1253,12 +1252,10 @@ errorCode_t neardal_agent_set_NDEF_cb(char *tagType, agent_cb cb_agent
 	}
 
 exit:
-	if (err != NEARDAL_SUCCESS) {
+	if (err != NEARDAL_SUCCESS)
 		neardal_tools_prv_free_gerror(&neardalMgr.gerror);
-	}
 	g_free(agent.objPath);
 	g_free(agent.tagType);
-	
+
 	return err;
 }
-

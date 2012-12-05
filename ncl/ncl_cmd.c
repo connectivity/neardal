@@ -755,8 +755,8 @@ static NCLError ncl_cmd_get_record_properties(int argc, char *argv[])
  * ncl_cmd_get_record_properties : END
  ****************************************************************************/
 /*****************************************************************************
- * ncl_cmd_write : BEGIN
- * write NDEF record to tag
+ * ncl_cmd_push : BEGIN
+ * Push NDEF record to device
  ****************************************************************************/
 static NCLError ncl_cmd_push(int argc, char *argv[])
 {
@@ -847,7 +847,7 @@ exit:
 	return nclErr;
 }
 /*****************************************************************************
- * ncl_cmd_write : END
+ * ncl_cmd_push : END
  ****************************************************************************/
 
 /*****************************************************************************
