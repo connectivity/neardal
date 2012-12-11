@@ -47,6 +47,8 @@ extern "C" {
 typedef struct {
 /*! \brief DBus interface adapter name (as identifier) */
 	char	*name;
+/*! \brief Neard adapter NFC radio mode */
+	char	*mode;
 /*! \brief Neard adapter polling already active ? */
 	short	polling;
 /*! \brief Neard adapter powered ? */

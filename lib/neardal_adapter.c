@@ -172,6 +172,7 @@ static void neardal_adp_prv_cb_property_changed(orgNeardAdp *proxy,
 	DevProp		*devProp	= NULL;
 	gchar		**array		= NULL;
 	GVariant	*gvalue		= NULL;
+	gsize		mode_len;
 
 	(void) proxy; /* remove warning */
 	(void) user_data; /* remove warning */
@@ -188,6 +189,19 @@ static void neardal_adp_prv_cb_property_changed(orgNeardAdp *proxy,
 	if (gvalue == NULL) {
 		err = NEARDAL_ERROR_GENERAL_ERROR;
 		goto exit;
+	}
+
+	NEARDAL_TRACEF(" arg_unnamed_arg0 : %s\n", arg_unnamed_arg0);
+
+	if (!strcmp(arg_unnamed_arg0, "Mode")) {
+		if (adpProp->mode != NULL) {
+			g_free(adpProp->mode);
+			adpProp->mode = NULL;
+		}
+
+		adpProp->mode = g_strdup(g_variant_get_string(gvalue, &mode_len));
+		clientValue = adpProp->mode;
+		NEARDAL_TRACEF("neardalMgr.mode=%s\n", adpProp->mode);
 	}
 
 	if (!strcmp(arg_unnamed_arg0, "Polling")) {
@@ -383,6 +397,10 @@ static errorCode_t neardal_adp_prv_read_properties(AdpProp *adpProp)
 	if (tmpOut != NULL)
 		adpProp->powered = g_variant_get_boolean(tmpOut);
 
+	tmpOut = g_variant_lookup_value(tmp, "Mode", G_VARIANT_TYPE_STRING);
+	if (tmpOut != NULL)
+		adpProp->mode = g_variant_dup_string(tmpOut, &len);
+
 	tmpOut = g_variant_lookup_value(tmp, "Protocols",
 					G_VARIANT_TYPE_ARRAY);
 	if (tmpOut != NULL) {
@@ -546,6 +564,8 @@ static void neardal_adp_prv_free(AdpProp **adpProp)
 		(*adpProp)->proxy = NULL;
 	}
 	g_free((*adpProp)->name);
+	if ((*adpProp)->mode != NULL)
+		g_free((*adpProp)->mode);
 	if ((*adpProp)->protocols != NULL)
 		g_strfreev((*adpProp)->protocols);
 	g_free((*adpProp));

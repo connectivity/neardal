@@ -39,6 +39,7 @@ typedef struct {
 						Adapter interface */
 	gchar			*name;		/* DBus interface name
 						(as id) */
+	gchar			*mode;		/* NFC radio mode */
 	void			*parent;
 	gboolean		polling;	/* adapter polling active ? */
 	gboolean		powered;	/* adapter powered ? */

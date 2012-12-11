@@ -157,6 +157,8 @@ static void ncl_cmd_prv_dump_adapter(neardal_adapter *adapter)
 		      adapter->polling ? "TRUE" : "FALSE");
 	NCL_CMD_PRINT(".. Powered:\t\t'%s'\n",
 		      adapter->powered ? "TRUE" : "FALSE");
+	if (adapter->mode)
+		NCL_CMD_PRINT(".. NFC Radio Mode:\t'%s'\n", adapter->mode);
 
 	tags = adapter->tags;
 	NCL_CMD_PRINT(".. Number of tags:\t%d\n", adapter->nbTags);

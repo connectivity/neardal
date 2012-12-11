@@ -393,6 +393,9 @@ void neardal_free_adapter(neardal_adapter *adapter)
 	/* Freeing adapter name */
 	g_free(adapter->name);
 
+	/* Freeing adapter mode */
+	g_free(adapter->mode);
+
 	/* Freeing protocols list */
 	ct = 0;
 	while (ct < adapter->nbProtocols)
@@ -440,6 +443,7 @@ errorCode_t neardal_get_adapter_properties(const char *adpName,
 	*adapter = adpClient;
 
 	adpClient->name		= g_strdup(adpProp->name);
+	adpClient->mode		= g_strdup(adpProp->mode);
 	adpClient->polling	= (short) adpProp->polling;
 	adpClient->powered	= (short) adpProp->powered;
 
