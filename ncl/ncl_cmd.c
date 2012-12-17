@@ -894,9 +894,9 @@ static GOptionEntry options[] = {
 		{ NULL, 0, 0, 0, NULL, NULL, NULL} /* End of List */
 	};
 
+	memset(&rcd, 0, sizeof(neardal_record));
 	if (argc > 1) {
 		/* Parse options */
-		memset(&rcd, 0, sizeof(neardal_record));
 		nclErr = ncl_cmd_prv_parseOptions(&argc, &argv, options);
 	} else
 		nclErr = NCLERR_PARSING_PARAMETERS;
@@ -1109,19 +1109,26 @@ static NCLError ncl_cmd_stop_poll(int argc, char *argv[])
  * ncl_cmd_(un)register_NDEF_agent : BEGIN
  * Handle a record macthing a registered tag type
  ****************************************************************************/
-void ncl_cmd_agent_cb(unsigned char **rcdArray, unsigned int rcdLen
+void ncl_cmd_ndef_agent_cb(unsigned char **rcdArray, unsigned int rcdLen
 		      , unsigned char *ndefArray, unsigned int ndefLen
 		      , void *user_data)
 {
+	unsigned int i;
+	
 	(void) user_data;
 
-	NCL_CMD_PRINTF("Received %d records and %d bytes of NDEF raw data.\n"
-		      , rcdLen, ndefLen);
+	NCL_CMD_PRINTF("Received %d records :\n"
+		      , rcdLen);
+	for (i = 0; i < rcdLen; i++) {
+		NCL_CMD_PRINT("Record : '%s'\n", rcdArray[i]);
+	}
 
+	NCL_CMD_PRINT("\n");
+	NCL_CMD_PRINTF("%d bytes of NDEF raw data Received :\n"
+		      , ndefLen);
 	NCL_CMD_DUMP(ndefArray, ndefLen);
+	NCL_CMD_PRINT("\n");
 
-	neardal_free_array((char***) &rcdArray);
-	g_free(ndefArray);
 }
 
 static NCLError ncl_cmd_register_NDEF_agent(int argc, char *argv[])
@@ -1130,13 +1137,10 @@ static NCLError ncl_cmd_register_NDEF_agent(int argc, char *argv[])
 	NCLError	nclErr;
 	static char	*tagType;
 
-	if (argc <= 1)
-		return NCLERR_PARSING_PARAMETERS;
-
 static GOptionEntry options[] = {
 		{ "tagType", 's', 0, G_OPTION_ARG_STRING , &tagType
 				, "tag Type to register",
-				"'Text', 'URI'..." },
+				"'urn:nfc:wkt:U'..." },
 
 		{ NULL, 0, 0, 0, NULL, NULL, NULL} /* End of List */
 	};
@@ -1148,6 +1152,11 @@ static GOptionEntry options[] = {
 	} else
 		nclErr = NCLERR_PARSING_PARAMETERS;
 
+	if (nclErr != NCLERR_NOERROR) {
+		ncl_cmd_print(stdout, "Sample (Type 'Text'):");
+		ncl_cmd_print(stdout, "e.g. < %s --tagType urn:nfc:wkt:U >\n"
+			     , argv[0]);
+	}
 	if (nclErr != NCLERR_NOERROR)
 		goto exit;
 
@@ -1155,7 +1164,7 @@ static GOptionEntry options[] = {
 	if (sNclCmdCtx.cb_initialized == false)
 		ncl_cmd_install_callback();
 
-	ec = neardal_agent_set_NDEF_cb(tagType, ncl_cmd_agent_cb, NULL);
+	ec = neardal_agent_set_NDEF_cb(tagType, ncl_cmd_ndef_agent_cb, NULL);
 	if (ec != NEARDAL_SUCCESS) {
 		NCL_CMD_PRINTF("Set NDEF callback failed! error:%d='%s'.\n",
 			       ec, neardal_error_get_text(ec));
@@ -1216,8 +1225,99 @@ exit:
 
 	return NCLERR_NOERROR;
 }
+
 /*****************************************************************************
  * ncl_cmd_(un)register_NDEF_agent : END
+ ****************************************************************************/
+
+/*****************************************************************************
+ * ncl_cmd_(un)register_handover_agent : BEGIN
+ * Handle a record macthing a registered tag type
+ ****************************************************************************/
+void ncl_cmd_handover_req_agent_cb(unsigned char *blobEIR
+				   , unsigned int blobSize
+				   , unsigned char ** oobData
+				   , unsigned int * oobDataSize
+				   , freeFunc *freeF
+				   , void *user_data)
+{
+	const unsigned char test_data[] = {0x16,0x00,0x01,0x02,0x03,0x04,
+					    0x05,0x06,0x08,0x09,0x41,0x72,
+					    0x72,0x61,0x6b,0x69,0x73,0x04,
+					    0x0d,0x6e,0x01,0x00};
+
+	(void) user_data;
+
+	NCL_CMD_PRINTF("Received blobEIR = \n");
+	NCL_CMD_DUMP(blobEIR, blobSize);
+
+	*oobData = g_try_malloc0(sizeof(test_data));
+	memcpy(*oobData , test_data, sizeof(test_data));
+	*oobDataSize = sizeof(test_data);
+	*freeF = g_free;
+	NCL_CMD_PRINTF("return oobData = \n");
+	NCL_CMD_DUMP(*oobData, *oobDataSize);
+}
+
+void ncl_cmd_handover_push_agent_cb (unsigned char *blobEIR
+				     , unsigned int blobSize
+				     , void *user_data)
+{
+	NCL_CMD_PRINTF("Received blobEIR = \n");
+	NCL_CMD_DUMP(blobEIR, blobSize);
+	(void) user_data;
+
+	NCL_CMD_PRINTF("\n");
+}
+
+static NCLError ncl_cmd_register_handover_agent(int argc, char *argv[])
+{
+	errorCode_t	ec		= NEARDAL_SUCCESS;
+
+	(void) argc;
+	(void) argv;
+
+	/* Install Neardal Callback*/
+	if (sNclCmdCtx.cb_initialized == false)
+		ncl_cmd_install_callback();
+
+	ec = neardal_agent_set_handover_cb(ncl_cmd_handover_push_agent_cb
+					   , ncl_cmd_handover_req_agent_cb
+					   , NULL);
+	if (ec != NEARDAL_SUCCESS) {
+		NCL_CMD_PRINTF("Set handover callback failed! error:%d='%s'.\n",
+			       ec, neardal_error_get_text(ec));
+		return NCLERR_LIB_ERROR;
+	}
+	NCL_CMD_PRINT("\nExit with error code %d:%s\n", ec,
+		      neardal_error_get_text(ec));
+
+	return NCLERR_NOERROR;
+}
+static NCLError ncl_cmd_unregister_handover_agent(int argc, char *argv[])
+{
+	errorCode_t	ec		= NEARDAL_SUCCESS;
+
+	(void) argc;
+	(void) argv;
+	
+	/* Install Neardal Callback*/
+	if (sNclCmdCtx.cb_initialized == false)
+		ncl_cmd_install_callback();
+
+	ec = neardal_agent_set_handover_cb(NULL, NULL, NULL);
+	if (ec != NEARDAL_SUCCESS) {
+		NCL_CMD_PRINTF("Set handover callback failed! error:%d='%s'.\n",
+			       ec, neardal_error_get_text(ec));
+		return NCLERR_LIB_ERROR;
+	}
+	NCL_CMD_PRINT("\nExit with error code %d:%s\n", ec,
+		      neardal_error_get_text(ec));
+
+	return NCLERR_NOERROR;
+}
+/*****************************************************************************
+ * ncl_cmd_(un)register_handover_agent : END
  ****************************************************************************/
 
 
@@ -1394,6 +1494,10 @@ static NCLCmdInterpretor itFunc[] = {
 	ncl_cmd_push,
 	"Creates and push a NDEF record to a NFC device"},
 
+	{ "registerHandover",
+	ncl_cmd_register_handover_agent,
+	"register a handler for handover connection"},
+
 	{ "registerNDEFtype",
 	ncl_cmd_register_NDEF_agent,
 	"register a handler for a specific NDEF tag type"},
@@ -1413,6 +1517,10 @@ static NCLCmdInterpretor itFunc[] = {
 	{ "test_parameters",
 	ncl_cmd_test_parameters,
 	"Simple test to parse input parameters"},
+
+	{ "unregisterHandover",
+	ncl_cmd_unregister_handover_agent,
+	"unregister a handler for handover connection"},
 
 	{ "unregisterNDEFtype",
 	ncl_cmd_unregister_NDEF_agent,

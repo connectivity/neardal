@@ -23,7 +23,7 @@
 
 #include "neard_manager_proxy.h"
 
-#include "neardal_agent.h"
+#include "neardal_agent_mgr.h"
 #include "neardal_manager.h"
 #include "neardal_tools.h"
 #include "neardal_traces_prv.h"

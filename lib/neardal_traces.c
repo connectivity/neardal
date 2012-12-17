@@ -67,7 +67,10 @@ static void neardal_prv_dump_data_as_binary_format(char *bufToReadP,
 	if (offset < nbColumn) {
 		/* 3 space because each byte in binary format as 2 digit and
 		1 space */
-		g_string_append_len(bufDestP, "   ", nbColumn - offset);
+		remainingSize = (nbColumn - offset) * 3;
+		offset = 0;
+		while ((offset++) < remainingSize)
+			g_string_append_c(bufDestP, ' ');
 	}
 }
 
@@ -86,8 +89,12 @@ static void neardal_prv_dump_data_as_ascii_format(char *bufToReadP,
 		offset++;
 	}
 	/* Adding space to finish ascii column */
-	if (offset < nbColumn)
-		g_string_append_len(bufDestP, " ", nbColumn - offset);
+ 	if (offset < nbColumn) {
+		remainingSize = nbColumn - offset;
+		offset = 0;
+		while ((offset++) < remainingSize)
+			g_string_append_c(bufDestP, '.');
+	}
 }
 
 

@@ -90,9 +90,14 @@ GHashTable *neardal_tools_prv_create_dict(void)
  ****************************************************************************/
 errorCode_t neardal_tools_prv_add_dict_entry(GVariantBuilder *builder
 					     , gchar *key, void *value
+					     , gsize valueSize
 					     , int gVariantType)
 {
-	GVariant *tmp = NULL;
+	GVariant	*tmp			= NULL;
+	GVariantBuilder	*bytesArrayBuilder	= NULL;
+	unsigned char	*bytePtr;
+	gsize		count;
+	errorCode_t	err			= NEARDAL_SUCCESS;
 
 	NEARDAL_ASSERT_RET(builder != NULL, NEARDAL_ERROR_INVALID_PARAMETER);
 
@@ -103,11 +108,31 @@ errorCode_t neardal_tools_prv_add_dict_entry(GVariantBuilder *builder
 	case G_TYPE_UINT:
 		tmp = g_variant_new_uint32((guint32) value);
 		break;
-	case G_TYPE_VARIANT:
-		tmp = (GVariant *) value;
+	default:
+		/* if valueSize > 0, consider value as byte array
+		 processing like g_variant_new_bytestring() but based on array
+		 size and not a null terminated string  (allowing byte = 0
+		 in array) */
+		if (valueSize > 0) {
+			err = NEARDAL_ERROR_GENERAL_ERROR;
+			bytePtr = (unsigned char*) value;
+			bytesArrayBuilder = g_variant_builder_new(
+						G_VARIANT_TYPE_BYTESTRING);
+			if (bytesArrayBuilder == NULL)
+				break;
+
+			for (count = 0; count < valueSize; count++)
+				g_variant_builder_add(bytesArrayBuilder, "y"
+						      , bytePtr[count]);
+
+			tmp = g_variant_builder_end(bytesArrayBuilder);
+			g_variant_builder_unref(bytesArrayBuilder);
+			err = NEARDAL_SUCCESS;
+		}
+		break;
 	}
 	g_variant_builder_add(builder, "{sv}", key, tmp);
 
-	return NEARDAL_SUCCESS;
+	return err;
 }
 

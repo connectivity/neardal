@@ -66,6 +66,7 @@ GHashTable *neardal_tools_prv_create_dict(void);
  *****************************************************************************/
 errorCode_t neardal_tools_prv_add_dict_entry(GVariantBuilder *builder
 					     , gchar *key, void *value
+					     , gsize valueSize
 					     , int gVariantType);
 
 #ifdef __cplusplus

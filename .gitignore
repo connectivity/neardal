@@ -10,7 +10,6 @@ Makefile.in
 lib/Makefile
 lib/Makefile.in
 lib/libneardal.la
-lib/neard_*
 neardal.pc
 libtool
 ltmain.sh
@@ -28,6 +27,8 @@ config.*
 *.lo
 *.o
 *kdev4*
+lib/neardal_agent.*
+lib/neard_*
 
 # Specific directories and files in a directory.
 autom4te.cache/*

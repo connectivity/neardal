@@ -193,10 +193,49 @@ typedef void (*record_cb) (const char *rcdName, void *user_data);
  * @param ndefLen number of bytes in ndefArray
  * @param user_data Client user data
  **/
-typedef void (*agent_cb) (unsigned char **rcdArray, unsigned int rcdLen
-			  , unsigned char *ndefArray
-			  , unsigned int ndefLen
-			  , void *user_data);
+typedef void (*ndef_agent_cb) (unsigned char **rcdArray, unsigned int rcdLen,
+			       unsigned char *ndefArray, unsigned int ndefLen,
+			       void *user_data);
+
+/**
+ * @brief TODO
+ **/
+typedef void (*freeFunc) (void *ptr);
+
+/**
+ * @brief Callback prototype to get Out Of Band data from the handover agent
+ *
+ * @param blobEIR  EIR blob as described in Bluetooth Core
+ * Specification 4.0 (Vol 3, Part C, chapter 8.1.6). Used by SSP capable
+ * devices
+ * 
+ * @param blobSize EIR blob size (in bytes)
+ * @param oobData used to build a Handover Request or Select message
+ * (oobData* will be never null)
+ * @param oobDataSize Number of bytes returned (oobDataSize* will be never null)
+ * @param freeFunc Free function to release oobData
+ * @param user_data Client user data
+ * @return Out Of Band data (as an array of bytes)
+ **/
+typedef void (*oob_req_agent_cb) (unsigned char *blobEIR,
+				  unsigned int blobSize,
+				  unsigned char **oobData,
+				  unsigned int *oobDataSize, freeFunc *freeF,
+				  void *user_data);
+
+/**
+ * @brief Callback prototype to to pass remote Out Of Band data to agent to
+ * start handover
+ * 
+ * @param blobEIR  EIR blob as described in Bluetooth Core
+ * Specification 4.0 (Vol 3, Part C, chapter 8.1.6). Used by SSP capable
+ * devices
+ *
+ * @param blobSize EIR blob size (in bytes)
+ * @param user_data Client user data
+ **/
+typedef void (*oob_push_agent_cb) (unsigned char *blobEIR,
+				   unsigned int blobSize, void *user_data);
 
 
 /* @}*/
@@ -335,7 +374,7 @@ void neardal_free_adapter(neardal_adapter *adapter);
  * @return errorCode_t error code
  **/
 errorCode_t neardal_set_adapter_property(const char *adpName,
-					   int adpPropId, void *value);
+					  int adpPropId, void *value);
 
 /*! \fn errorCode_t neardal_set_cb_adapter_added( adapter_cb cb_adp_added,
  *					     void * user_data)
@@ -384,7 +423,7 @@ errorCode_t neardal_set_cb_adapter_property_changed(
  * @return errorCode_t error code
  **/
 errorCode_t neardal_get_tag_properties(const char *tagName,
-					   neardal_tag **tag);
+				       neardal_tag **tag);
 
 /*! \fn errorCode_t neardal_tag_write(neardal_record *record)
  * @brief Write NDEF record to an NFC tag
@@ -412,7 +451,7 @@ void neardal_free_tag(neardal_tag *tag);
  * @return errorCode_t error code
  **/
 errorCode_t neardal_set_cb_tag_found(tag_cb cb_tag_found,
-					 void *user_data);
+				     void *user_data);
 
 /*! \fn errorCode_t neardal_set_cb_tag_lost(tag_cb cb_tag_lost,
  * void * user_data)
@@ -424,7 +463,7 @@ errorCode_t neardal_set_cb_tag_found(tag_cb cb_tag_found,
  * @return errorCode_t error code
  **/
 errorCode_t neardal_set_cb_tag_lost(tag_cb cb_tag_lost,
-					void *user_data);
+				    void *user_data);
 
 /*! \fn errorCode_t neardal_get_dev_properties(const char* devName,
  * neardal_dev **dev)
@@ -435,7 +474,7 @@ errorCode_t neardal_set_cb_tag_lost(tag_cb cb_tag_lost,
  * @return errorCode_t error code
  **/
 errorCode_t neardal_get_dev_properties(const char *devName,
-					   neardal_dev **dev);
+				       neardal_dev **dev);
 
 /*! \fn errorCode_t neardal_dev_push(neardal_record *record)
  * @brief Create and push NDEF record to an NFC device
@@ -513,16 +552,33 @@ errorCode_t neardal_set_cb_record_found(record_cb cb_rcd_found,
 /*! \fn errorCode_t neardal_agent_set_NDEF_cb(char *tagType, agent_cb cb_agent,
  * void *user_data)
  * @brief register or unregister a callback to handle a record macthing
- * a registered tag type. This callback will received the whole NDEF as
- * a raw byte stream.
+ * a registered tag type. This callback will received the whole NDEF as a raw
+ * byte stream and the records object paths.
+ * If the callback is null, the agent is unregistered.
  * @param tagType tag type to register
  * @param cb_agent Client callback for the registered tag type
  * @param user_data Client user data
  * @return errorCode_t error code
  **/
-errorCode_t neardal_agent_set_NDEF_cb(char *tagType, agent_cb cb_agent
+errorCode_t neardal_agent_set_NDEF_cb(char *tagType
+				      , ndef_agent_cb cb_ndef_agent
 				      , void *user_data);
 
+
+/*! \fn errorCode_t neardal_agent_set_handover_cb(
+ * 					  oob_push_agent_cb cb_oob_push_agent
+ * 					, oob_req_agent_cb  cb_oob_req_agent
+					, void *user_data)
+ * @brief register or unregister two callbacks to handle handover connection.
+ * If one of this callback is null, the agent is unregistered.
+ * @param cb_oob_push_agent used to pass remote Out Of Band data
+ * @param cb_oob_req_agent used to get Out Of Band data
+ * @param user_data Client user data
+ * @return errorCode_t error code
+ **/
+errorCode_t neardal_agent_set_handover_cb(oob_push_agent_cb cb_oob_push_agent
+					  , oob_req_agent_cb  cb_oob_req_agent
+					  , void *user_data);
 
 /*! @fn errorCode_t neardal_free_array(char ***array)
  *

@@ -21,7 +21,7 @@
 #ifndef __NEARDAL_AGENT_H
 #define __NEARDAL_AGENT_H
 
-#include "neardal_adapter.h"
+#include "neardal.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -31,11 +31,28 @@ extern "C" {
 
 
 typedef struct {
-	gchar		*objPath;	/* agent object path */
-	gchar		*tagType;	/* tag Type to register */
-	gint		pid;
-	agent_cb	cb_agent;
-	gpointer	user_data;
+	gchar			*objPath;		/* agent object path */
+	gchar			*tagType;		/* tag Type to register
+							(for NDEF agent only )
+							*/
+							
+	gint			pid;			/* process pid */
+	
+	ndef_agent_cb		cb_ndef_agent;		/* client callback to
+							retrieve raw NDEF data
+							and records object path
+							*/
+							
+	oob_req_agent_cb	cb_oob_req_agent;	/* client callback to
+							get Out Of Band data
+							from the handover agent
+							*/
+							
+	oob_push_agent_cb	cb_oob_push_agent;	/* client callback to
+							pass remote Out Of Band
+							data to agent to start
+							handover */
+	gpointer		user_data;
 } neardal_agent_t;
 
 /*****************************************************************************
@@ -51,10 +68,16 @@ void neardal_agent_stop_owning_dbus_name(void);
 
 /*****************************************************************************
  * neardal_ndefagent_prv_manage: create or release an agent and register or
- * unregister it with neardal object manager
+ * unregister it with neardal object manager and Neard for NDEF data
  ****************************************************************************/
 errorCode_t neardal_ndefagent_prv_manage(neardal_agent_t agentData);
 
+/*****************************************************************************
+ * neardal_handoveragent_prv_manage: create or release an agent and register
+ * or unregister it with neardal object manager and Neard for handover message
+ * (request / answer)
+ ****************************************************************************/
+errorCode_t neardal_handoveragent_prv_manage(neardal_agent_t agentData);
 
 #ifdef __cplusplus
 }

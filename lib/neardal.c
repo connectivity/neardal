@@ -1199,22 +1199,26 @@ exit:
 /*****************************************************************************
  * neardal_agent_set_NDEF_cb: register or unregister a callback to handle a
  * record macthing a registered tag type. This callback will received the
- * whole NDEF as a raw byte stream
+ * whole NDEF as a raw byte stream and the records object paths.
+ * If the callback is null, the agent is unregistered
  ****************************************************************************/
-errorCode_t neardal_agent_set_NDEF_cb(char *tagType, agent_cb cb_agent
-				      , void *user_data)
+errorCode_t neardal_agent_set_NDEF_cb(char *tagType,
+				      ndef_agent_cb cb_ndef_agent,
+				      void *user_data)
 {
 	errorCode_t	err	= NEARDAL_ERROR_INVALID_PARAMETER;
 	neardal_agent_t agent;
 
 
+	memset(&agent, 0, sizeof(neardal_agent_t));
 	if (tagType == NULL)
 		goto exit;
 	err = NEARDAL_ERROR_NO_MEMORY;
 
-	agent.cb_agent	= cb_agent;
-	agent.pid	= getpid();
-	agent.tagType	= g_strdup(tagType);
+	agent.cb_ndef_agent	= cb_ndef_agent;
+	agent.pid		= getpid();
+	agent.user_data		= user_data;
+	agent.tagType		= g_strdup(tagType);
 	{ /* replace ':' with '_' */
 		int len = strlen(agent.tagType);
 		while (len > 0) {
@@ -1223,11 +1227,8 @@ errorCode_t neardal_agent_set_NDEF_cb(char *tagType, agent_cb cb_agent
 			len--;
 		}
 	}
-	agent.user_data = user_data;
-	agent.objPath	= NULL;
-	agent.objPath = g_strdup_printf("%s/%s/%d", AGENT_PREFIX
-					, agent.tagType, agent.pid);
-
+	agent.objPath = g_strdup_printf("%s/%s/%d", AGENT_PREFIX,
+					agent.tagType, agent.pid);
 	if (agent.objPath == NULL)
 		goto exit;
 
@@ -1235,18 +1236,18 @@ errorCode_t neardal_agent_set_NDEF_cb(char *tagType, agent_cb cb_agent
 	if (err != NEARDAL_SUCCESS)
 		goto exit;
 
-	if (cb_agent != NULL)
+	if (cb_ndef_agent != NULL)
 		/* RegisterNDEFAgent */
-		org_neard_mgr__call_register_ndefagent_sync(neardalMgr.proxy
-							    , agent.objPath
-							    , tagType, NULL
-							 , &neardalMgr.gerror);
+		org_neard_mgr__call_register_ndefagent_sync(neardalMgr.proxy,
+							     agent.objPath,
+							     tagType, NULL,
+							&neardalMgr.gerror);
 	else
 		/* UnregisterNDEFAgent */
-		org_neard_mgr__call_unregister_ndefagent_sync(neardalMgr.proxy
-							    , agent.objPath
-							    , tagType, NULL
-							 , &neardalMgr.gerror);
+		org_neard_mgr__call_unregister_ndefagent_sync(neardalMgr.proxy,
+							    agent.objPath,
+							    tagType, NULL,
+							 &neardalMgr.gerror);
 
 
 	if (neardalMgr.gerror != NULL) {
@@ -1263,6 +1264,69 @@ exit:
 		neardal_tools_prv_free_gerror(&neardalMgr.gerror);
 	g_free(agent.objPath);
 	g_free(agent.tagType);
+
+	return err;
+}
+
+/*****************************************************************************
+ * neardal_agent_set_handover_cb: register or unregister two callbacks to
+ * handle handover connection. Two callbacks are used, the first one
+ * (oob_request) is used to get Out Of Band data, the second one (oob_push) is
+ * used to pass remote Out Of Band data.
+ * If one of this callback is null, the agent is unregistered
+ ****************************************************************************/
+errorCode_t neardal_agent_set_handover_cb(oob_push_agent_cb cb_oob_push_agent,
+					  oob_req_agent_cb  cb_oob_req_agent,
+					  void *user_data)
+{
+	errorCode_t	err	= NEARDAL_ERROR_INVALID_PARAMETER;
+	neardal_agent_t agent;
+
+
+	err = NEARDAL_ERROR_NO_MEMORY;
+
+	memset(&agent, 0, sizeof(neardal_agent_t));
+	agent.cb_oob_push_agent	= cb_oob_push_agent;
+	agent.cb_oob_req_agent	= cb_oob_req_agent;
+	agent.pid		= getpid();
+	agent.user_data		= user_data;
+	agent.objPath		= g_strdup_printf("%s/handover/%d",
+						  AGENT_PREFIX, agent.pid);
+	if (agent.objPath == NULL)
+		goto exit;
+
+	err = neardal_handoveragent_prv_manage(agent);
+	if (err != NEARDAL_SUCCESS)
+		goto exit;
+
+	if (cb_oob_push_agent != NULL && cb_oob_req_agent != NULL)
+		/* RegisterNDEFAgent */
+		org_neard_mgr__call_register_handover_agent_sync(
+							       neardalMgr.proxy,
+							       agent.objPath,
+							       NULL,
+							   &neardalMgr.gerror);
+	else
+		/* UnregisterNDEFAgent */
+		org_neard_mgr__call_unregister_handover_agent_sync(
+							neardalMgr.proxy,
+							agent.objPath, NULL,
+							 &neardalMgr.gerror);
+
+
+	if (neardalMgr.gerror != NULL) {
+		NEARDAL_TRACE_ERR(
+			"Error with neard dbus method (err:%d:'%s')\n"
+				, neardalMgr.gerror->code
+				, neardalMgr.gerror->message);
+		err = NEARDAL_ERROR_DBUS_INVOKE_METHOD_ERROR;
+		goto exit;
+	}
+
+exit:
+	if (err != NEARDAL_SUCCESS)
+		neardal_tools_prv_free_gerror(&neardalMgr.gerror);
+	g_free(agent.objPath);
 
 	return err;
 }

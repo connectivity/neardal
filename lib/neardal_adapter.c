@@ -245,6 +245,7 @@ static void neardal_adp_prv_cb_property_changed(orgNeardAdp *proxy,
 			err = neardal_adp_prv_get_tag(adpProp,
 							     dbusObjPath,
 							     &tagProp);
+			clientValue = dbusObjPath;
 			if (err == NEARDAL_ERROR_NO_TAG) {
 				neardal_adp_prv_cb_tag_found(NULL,
 								dbusObjPath,
@@ -292,6 +293,7 @@ static void neardal_adp_prv_cb_property_changed(orgNeardAdp *proxy,
 						      dbusObjPath,
 						      &devProp);
 			if (err == NEARDAL_ERROR_NO_DEV) {
+				clientValue = dbusObjPath;
 				neardal_adp_prv_cb_dev_found(NULL,
 							     dbusObjPath,
 							     adpProp);
@@ -422,7 +424,7 @@ exit:
  * neardal_adp_prv_get_tag: Get NFC tag from adapter
  ****************************************************************************/
 errorCode_t neardal_adp_prv_get_tag(AdpProp *adpProp, gchar *tagName,
-				       TagProp **tagProp)
+                                    TagProp **tagProp)
 {
 	errorCode_t	err	= NEARDAL_ERROR_NO_TAG;
 	guint		len = 0;

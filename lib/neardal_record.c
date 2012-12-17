@@ -157,45 +157,45 @@ errorCode_t neardal_rcd_prv_format(GVariantBuilder *builder, RcdProp *rcd)
 
 	/* Type */
 	if (rcd->type != NULL)
-		neardal_tools_prv_add_dict_entry(builder, "Type", rcd->type,
-					    (int) G_TYPE_STRING);
+		neardal_tools_prv_add_dict_entry(builder, "Type", rcd->type
+						 , 0, (int) G_TYPE_STRING);
 
 	/* Encoding */
 	if (rcd->encoding != NULL)
 		neardal_tools_prv_add_dict_entry(builder, "Encoding"
-						 , rcd->encoding
+						 , rcd->encoding, 0
 						 , (int) G_TYPE_STRING);
 
 	/* Language */
 	if (rcd->language != NULL)
 		neardal_tools_prv_add_dict_entry(builder, "Language"
-						 , rcd->language
+						 , rcd->language, 0
 						 , (int) G_TYPE_STRING);
 
 	/* Representation */
 	if (rcd->representation != NULL)
-		neardal_tools_prv_add_dict_entry(builder, "Representation",
-					     rcd->representation,
-					    (int) G_TYPE_STRING);
+		neardal_tools_prv_add_dict_entry(builder, "Representation"
+						 , rcd->representation, 0
+						 , (int) G_TYPE_STRING);
 
 	/* URI */
 	if (rcd->uri != NULL) {
-		neardal_tools_prv_add_dict_entry(builder, "URI", rcd->uri,
-					    (int) G_TYPE_STRING);
-		neardal_tools_prv_add_dict_entry(builder, "Size",
-					    (void *) rcd->uriObjSize,
-					    (int) G_TYPE_UINT);
-
+		neardal_tools_prv_add_dict_entry(builder, "URI", rcd->uri, 0
+						 , (int) G_TYPE_STRING);
+		neardal_tools_prv_add_dict_entry(builder, "Size"
+						 , (void *) rcd->uriObjSize, 0
+						 , (int) G_TYPE_UINT);
 	}
 	/* MIME */
 	if (rcd->mime != NULL)
-		neardal_tools_prv_add_dict_entry(builder, "MIME", rcd->mime,
-						(int) G_TYPE_STRING);
+		neardal_tools_prv_add_dict_entry(builder, "MIME", rcd->mime
+						 ,0 , (int) G_TYPE_STRING);
 
 	/* Action */
 	if (rcd->action != NULL)
-		neardal_tools_prv_add_dict_entry(builder, "Action", rcd->action,
-					    (int) G_TYPE_STRING);
+		neardal_tools_prv_add_dict_entry(builder, "Action"
+						 , rcd->action, 0
+						 , (int) G_TYPE_STRING);
 
 	return err;
 }

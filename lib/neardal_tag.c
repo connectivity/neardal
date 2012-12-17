@@ -267,23 +267,22 @@ void neardal_tag_notify_tag_found(TagProp *tagProp)
  ****************************************************************************/
 errorCode_t neardal_tag_prv_write(TagProp *tagProp, RcdProp *rcd)
 {
-	GVariantBuilder	*builder = NULL;
+	GVariantBuilder	*dictBuilder = NULL;
 	GVariant	*in;
 	errorCode_t	err;
 	GError		*gerror	= NULL;
 
 	NEARDAL_ASSERT_RET(tagProp != NULL, NEARDAL_ERROR_INVALID_PARAMETER);
 
-	builder = g_variant_builder_new(G_VARIANT_TYPE_ARRAY);
-	if (builder == NULL)
+	dictBuilder = g_variant_builder_new(G_VARIANT_TYPE_ARRAY);
+	if (dictBuilder == NULL)
 		return NEARDAL_ERROR_NO_MEMORY;
 
-	g_variant_builder_init(builder,  G_VARIANT_TYPE_ARRAY);
-	err = neardal_rcd_prv_format(builder, rcd);
+	err = neardal_rcd_prv_format(dictBuilder, rcd);
 	if (err != NEARDAL_SUCCESS)
 		goto exit;
 
-	in = g_variant_builder_end(builder);
+	in = g_variant_builder_end(dictBuilder);
 	NEARDAL_TRACEF("Sending:\n%s\n", g_variant_print(in, TRUE));
 	org_neard_tag__call_write_sync(tagProp->proxy, in, NULL, &gerror);
 
@@ -294,8 +293,7 @@ exit:
 		g_error_free(gerror);
 		err = NEARDAL_ERROR_DBUS;
 	}
-	if (builder != NULL)
-		g_variant_builder_unref(builder);
+	g_variant_builder_unref(dictBuilder);
 
 	return err;
 }
