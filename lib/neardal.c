@@ -1202,23 +1202,25 @@ exit:
  * whole NDEF as a raw byte stream and the records object paths.
  * If the callback is null, the agent is unregistered
  ****************************************************************************/
-errorCode_t neardal_agent_set_NDEF_cb(char *tagType,
-				      ndef_agent_cb cb_ndef_agent,
-				      void *user_data)
+errorCode_t neardal_agent_set_NDEF_cb(char *tagType
+				     , ndef_agent_cb cb_ndef_agent
+				     , ndef_agent_free_cb cb_ndef_release_agent
+				     , void *user_data)
 {
-	errorCode_t	err	= NEARDAL_ERROR_INVALID_PARAMETER;
-	neardal_agent_t agent;
+	errorCode_t		err	= NEARDAL_ERROR_INVALID_PARAMETER;
+	neardal_ndef_agent_t	agent;
 
 
-	memset(&agent, 0, sizeof(neardal_agent_t));
+	memset(&agent, 0, sizeof(neardal_ndef_agent_t));
 	if (tagType == NULL)
 		goto exit;
 	err = NEARDAL_ERROR_NO_MEMORY;
 
-	agent.cb_ndef_agent	= cb_ndef_agent;
-	agent.pid		= getpid();
-	agent.user_data		= user_data;
-	agent.tagType		= g_strdup(tagType);
+	agent.cb_ndef_agent		= cb_ndef_agent;
+	agent.cb_ndef_release_agent	= cb_ndef_release_agent;
+	agent.pid			= getpid();
+	agent.user_data			= user_data;
+	agent.tagType			= g_strdup(tagType);
 	{ /* replace ':' with '_' */
 		int len = strlen(agent.tagType);
 		while (len > 0) {
@@ -1227,13 +1229,11 @@ errorCode_t neardal_agent_set_NDEF_cb(char *tagType,
 			len--;
 		}
 	}
-	agent.objPath = g_strdup_printf("%s/%s/%d", AGENT_PREFIX,
-					agent.tagType, agent.pid);
+	agent.objPath 			= g_strdup_printf("%s/%s/%d"
+							 , AGENT_PREFIX
+							 , agent.tagType
+							 , agent.pid);
 	if (agent.objPath == NULL)
-		goto exit;
-
-	err = neardal_ndefagent_prv_manage(agent);
-	if (err != NEARDAL_SUCCESS)
 		goto exit;
 
 	if (cb_ndef_agent != NULL)
@@ -1249,6 +1249,10 @@ errorCode_t neardal_agent_set_NDEF_cb(char *tagType,
 							    tagType, NULL,
 							 &neardalMgr.gerror);
 
+
+	err = neardal_ndefagent_prv_manage(agent);
+	if (err != NEARDAL_SUCCESS)
+		goto exit;
 
 	if (neardalMgr.gerror != NULL) {
 		NEARDAL_TRACE_ERR(
@@ -1275,23 +1279,26 @@ exit:
  * used to pass remote Out Of Band data.
  * If one of this callback is null, the agent is unregistered
  ****************************************************************************/
-errorCode_t neardal_agent_set_handover_cb(oob_push_agent_cb cb_oob_push_agent,
-					  oob_req_agent_cb  cb_oob_req_agent,
-					  void *user_data)
+errorCode_t neardal_agent_set_handover_cb(oob_push_agent_cb cb_oob_push_agent
+					  , oob_req_agent_cb  cb_oob_req_agent
+				, oob_agent_free_cb cb_oob_release_agent
+					  , void *user_data)
 {
-	errorCode_t	err	= NEARDAL_ERROR_INVALID_PARAMETER;
-	neardal_agent_t agent;
+	errorCode_t			err;
+	neardal_handover_agent_t	agent;
 
 
 	err = NEARDAL_ERROR_NO_MEMORY;
 
-	memset(&agent, 0, sizeof(neardal_agent_t));
-	agent.cb_oob_push_agent	= cb_oob_push_agent;
-	agent.cb_oob_req_agent	= cb_oob_req_agent;
-	agent.pid		= getpid();
-	agent.user_data		= user_data;
-	agent.objPath		= g_strdup_printf("%s/handover/%d",
-						  AGENT_PREFIX, agent.pid);
+	memset(&agent, 0, sizeof(neardal_handover_agent_t));
+	agent.cb_oob_push_agent		= cb_oob_push_agent;
+	agent.cb_oob_req_agent		= cb_oob_req_agent;
+	agent.cb_oob_release_agent	= cb_oob_release_agent;
+	agent.pid			= getpid();
+	agent.user_data			= user_data;
+	agent.objPath			= g_strdup_printf("%s/handover/%d"
+							 , AGENT_PREFIX
+							 , agent.pid);
 	if (agent.objPath == NULL)
 		goto exit;
 

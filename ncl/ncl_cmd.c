@@ -1114,7 +1114,7 @@ void ncl_cmd_ndef_agent_cb(unsigned char **rcdArray, unsigned int rcdLen
 		      , void *user_data)
 {
 	unsigned int i;
-	
+
 	(void) user_data;
 
 	NCL_CMD_PRINTF("Received %d records :\n"
@@ -1129,6 +1129,14 @@ void ncl_cmd_ndef_agent_cb(unsigned char **rcdArray, unsigned int rcdLen
 	NCL_CMD_DUMP(ndefArray, ndefLen);
 	NCL_CMD_PRINT("\n");
 
+	NCL_CMD_PRINTF("user_data= %s\n", user_data);
+
+}
+
+void ncl_cmd_ndef_agent_release_cb(void *user_data)
+{
+	NCL_CMD_PRINTF("Release user_data=%s\n", user_data);
+	g_free(user_data);
 }
 
 static NCLError ncl_cmd_register_NDEF_agent(int argc, char *argv[])
@@ -1136,6 +1144,7 @@ static NCLError ncl_cmd_register_NDEF_agent(int argc, char *argv[])
 	errorCode_t	ec		= NEARDAL_SUCCESS;
 	NCLError	nclErr;
 	static char	*tagType;
+	char		*test_user_data;
 
 static GOptionEntry options[] = {
 		{ "tagType", 's', 0, G_OPTION_ARG_STRING , &tagType
@@ -1153,7 +1162,7 @@ static GOptionEntry options[] = {
 		nclErr = NCLERR_PARSING_PARAMETERS;
 
 	if (nclErr != NCLERR_NOERROR) {
-		ncl_cmd_print(stdout, "Sample (Type 'Text'):");
+		ncl_cmd_print(stdout, "Sample (Type 'URI'):");
 		ncl_cmd_print(stdout, "e.g. < %s --tagType urn:nfc:wkt:U >\n"
 			     , argv[0]);
 	}
@@ -1164,7 +1173,10 @@ static GOptionEntry options[] = {
 	if (sNclCmdCtx.cb_initialized == false)
 		ncl_cmd_install_callback();
 
-	ec = neardal_agent_set_NDEF_cb(tagType, ncl_cmd_ndef_agent_cb, NULL);
+	test_user_data = g_strdup("test NDEF user data");
+	ec = neardal_agent_set_NDEF_cb(tagType, ncl_cmd_ndef_agent_cb
+				       , ncl_cmd_ndef_agent_release_cb
+				       , test_user_data);
 	if (ec != NEARDAL_SUCCESS) {
 		NCL_CMD_PRINTF("Set NDEF callback failed! error:%d='%s'.\n",
 			       ec, neardal_error_get_text(ec));
@@ -1210,7 +1222,7 @@ static GOptionEntry options[] = {
 	if (sNclCmdCtx.cb_initialized == false)
 		ncl_cmd_install_callback();
 
-	ec = neardal_agent_set_NDEF_cb(tagType, NULL, NULL);
+	ec = neardal_agent_set_NDEF_cb(tagType, NULL, NULL, NULL);
 	if (ec != NEARDAL_SUCCESS) {
 		NCL_CMD_PRINTF("Set NDEF callback failed! error:%d='%s'.\n",
 			       ec, neardal_error_get_text(ec));
@@ -1251,6 +1263,8 @@ void ncl_cmd_handover_req_agent_cb(unsigned char *blobEIR
 	NCL_CMD_PRINTF("Received blobEIR = \n");
 	NCL_CMD_DUMP(blobEIR, blobSize);
 
+	NCL_CMD_PRINTF("user_data= %s\n", user_data);
+
 	*oobData = g_try_malloc0(sizeof(test_data));
 	memcpy(*oobData , test_data, sizeof(test_data));
 	*oobDataSize = sizeof(test_data);
@@ -1270,9 +1284,17 @@ void ncl_cmd_handover_push_agent_cb (unsigned char *blobEIR
 	NCL_CMD_PRINTF("\n");
 }
 
+void ncl_cmd_handover_release_agent_cb(void *user_data)
+{
+	NCL_CMD_PRINTF("Release user_data= %s\n", user_data);
+	g_free(user_data);
+}
+
+
 static NCLError ncl_cmd_register_handover_agent(int argc, char *argv[])
 {
 	errorCode_t	ec		= NEARDAL_SUCCESS;
+	char		*test_user_data;
 
 	(void) argc;
 	(void) argv;
@@ -1281,9 +1303,12 @@ static NCLError ncl_cmd_register_handover_agent(int argc, char *argv[])
 	if (sNclCmdCtx.cb_initialized == false)
 		ncl_cmd_install_callback();
 
+	test_user_data = g_strdup("test HANDOVER user data");
+
 	ec = neardal_agent_set_handover_cb(ncl_cmd_handover_push_agent_cb
 					   , ncl_cmd_handover_req_agent_cb
-					   , NULL);
+					   , ncl_cmd_handover_release_agent_cb
+					   , test_user_data);
 	if (ec != NEARDAL_SUCCESS) {
 		NCL_CMD_PRINTF("Set handover callback failed! error:%d='%s'.\n",
 			       ec, neardal_error_get_text(ec));
@@ -1300,12 +1325,12 @@ static NCLError ncl_cmd_unregister_handover_agent(int argc, char *argv[])
 
 	(void) argc;
 	(void) argv;
-	
+
 	/* Install Neardal Callback*/
 	if (sNclCmdCtx.cb_initialized == false)
 		ncl_cmd_install_callback();
 
-	ec = neardal_agent_set_handover_cb(NULL, NULL, NULL);
+	ec = neardal_agent_set_handover_cb(NULL, NULL, NULL, NULL);
 	if (ec != NEARDAL_SUCCESS) {
 		NCL_CMD_PRINTF("Set handover callback failed! error:%d='%s'.\n",
 			       ec, neardal_error_get_text(ec));
