@@ -40,12 +40,12 @@ static gboolean on_GetNDEF(neardalNDEFAgent             *ndefAgent,
                            , GVariant                   *values
                            , gpointer                   user_data)
 {
-	neardal_agent_t	*agent_data	= user_data;
-	gchar		**rcdArray	= NULL;
-	gsize		rcdLen		= 0;
-	gchar		*ndefArray	= NULL;
-	gsize		ndefLen		= 0;
-	gconstpointer	value;
+	neardal_ndef_agent_t	*agent_data	= user_data;
+	gchar			**rcdArray	= NULL;
+	gsize			rcdLen		= 0;
+	gchar			*ndefArray	= NULL;
+	gsize			ndefLen		= 0;
+	gconstpointer		value;
 
 	(void) ndefAgent;       /* Avoid warning */
 	(void) invocation;      /* Avoid warning */
@@ -98,24 +98,62 @@ static gboolean on_GetNDEF(neardalNDEFAgent             *ndefAgent,
 	return TRUE;
 }
 
+static gboolean on_NDEF_Release( neardalNDEFAgent		*agent
+			   	, GDBusMethodInvocation		*invocation
+			   	, gpointer			user_data)
+{
+	neardal_ndef_agent_t	*agent_data = user_data;
+	NEARDAL_TRACEIN();
+
+	if (invocation != NULL)
+		neardal_ndefagent_complete_release(agent, invocation);
+	if (agent_data != NULL) {
+		NEARDAL_TRACEF("agent '%s'\n",agent_data->objPath);
+
+		if (agent_data->cb_ndef_release_agent)
+			(agent_data->cb_ndef_release_agent)(
+							agent_data->user_data);
+
+		if (neardal_agent_prv_remove(agent_data->objPath) == TRUE)
+			NEARDAL_TRACE("removed\n");
+		else
+			NEARDAL_TRACE("not removed!\n");
+		g_free(agent_data->objPath);
+		g_free(agent_data->tagType);
+		g_free(agent_data);
+	}
+
+	return TRUE;
+}
+
+static void on_ndef_object_removed( GDBusObjectManager *manager
+			      , GDBusObject        *object
+			      , gpointer            user_data)
+{
+	NEARDAL_TRACEIN();
+	(void) manager; /* avoid warning */
+	on_NDEF_Release( NEARDAL_NDEFAGENT(object), NULL, user_data);
+}
+
 static gboolean on_RequestOOB(neardalHandoverAgent	*handoverAgent
 			      , GDBusMethodInvocation	*invocation
 			      , GVariant		*values
 			      , gpointer		user_data)
 {
-	neardal_agent_t	*agent_data	= user_data;
-	unsigned char  	*oobData	= NULL;
-	unsigned int	oobDataLen	= 0;
-	void		(*freeFunc)(void * ptr);
-	gchar	   	*blobKey;
-	gchar	   	*blob		= NULL;
-	gsize	   	blobLen		= 0;
-	gconstpointer	value;
-	GVariant	*result;
-	errorCode_t	err = NEARDAL_ERROR_GENERAL_ERROR;
+	neardal_handover_agent_t	*agent_data	= user_data;
+	unsigned char  			*oobData	= NULL;
+	unsigned int			oobDataLen	= 0;
+	void				(*freeFunc)(void * ptr);
+	gchar	   			*blobKey;
+	gchar	   			*blob		= NULL;
+	gsize	   			blobLen		= 0;
+	gconstpointer			value;
+	GVariant			*result;
+	errorCode_t			err;
 
 	(void) handoverAgent;       /* Avoid warning */
 	(void) invocation;      /* Avoid warning */
+	err = NEARDAL_ERROR_GENERAL_ERROR;
 
 	NEARDAL_TRACEIN();
 	NEARDAL_TRACEF("%s\n", g_variant_print(values, TRUE));
@@ -167,7 +205,7 @@ static gboolean on_RequestOOB(neardalHandoverAgent	*handoverAgent
 						, agent_data->user_data);
 			if (oobData != NULL) {
 				GVariantBuilder	*dictBuilder		= NULL;
-				
+
  				dictBuilder = g_variant_builder_new(
 							G_VARIANT_TYPE_ARRAY);
 				err = neardal_tools_prv_add_dict_entry(
@@ -175,11 +213,11 @@ static gboolean on_RequestOOB(neardalHandoverAgent	*handoverAgent
 						blobKey, oobData, oobDataLen
 					     				, -1);
 				result = g_variant_builder_end(dictBuilder);
-				
+
 				NEARDAL_TRACE_LOG("Sending:\n%s\n",
 						  g_variant_print(result
 								  , TRUE));
-				
+
 				neardal_handover_agent_complete_request_oob(
 								handoverAgent
 								, invocation
@@ -199,7 +237,7 @@ static gboolean on_RequestOOB(neardalHandoverAgent	*handoverAgent
 						      , G_DBUS_ERROR_FAILED
 						      , G_DBUS_ERROR_FAILED
 						, neardal_error_get_text(err));
-	
+
 	return TRUE;
 }
 
@@ -208,11 +246,11 @@ static gboolean on_PushOOB(neardalHandoverAgent	*handoverAgent
 			   , GVariant			*values
 			   , gpointer			user_data)
 {
-	neardal_agent_t	*agent_data = user_data;
-	gconstpointer	value;
-	gchar	   	*blobKey;
-	gchar	   	*blob		= NULL;
-	gsize	   	blobLen		= 0;
+	neardal_handover_agent_t	*agent_data	= user_data;
+	gconstpointer			value;
+	gchar	   			*blobKey;
+	gchar	   			*blob		= NULL;
+	gsize	   			blobLen		= 0;
 
 	(void) handoverAgent;       /* Avoid warning */
 	(void) invocation;      /* Avoid warning */
@@ -267,37 +305,40 @@ static gboolean on_PushOOB(neardalHandoverAgent	*handoverAgent
 	return TRUE;
 }
 
-static gboolean on_Release( neardalNDEFAgent		*agent
-			   , GDBusMethodInvocation	*invocation
-			   , gpointer			user_data)
+static gboolean on_Handover_Release( neardalHandoverAgent	*agent
+			   	, GDBusMethodInvocation		*invocation
+			   	, gpointer			user_data)
 {
-	neardal_agent_t	*agent_data = user_data;
+	neardal_handover_agent_t	*agent_data = user_data;
 	NEARDAL_TRACEIN();
 
 	if (invocation != NULL)
-		neardal_ndefagent_complete_release(agent, invocation);
+		neardal_handover_agent_complete_release(agent, invocation);
 	if (agent_data != NULL) {
-		NEARDAL_TRACEF("agent '%s' ",agent_data->objPath);
+		NEARDAL_TRACEF("agent '%s'\n",agent_data->objPath);
+
+		if (agent_data->cb_oob_release_agent)
+			(agent_data->cb_oob_release_agent)(
+							agent_data->user_data);
 
 		if (neardal_agent_prv_remove(agent_data->objPath) == TRUE)
 			NEARDAL_TRACE("removed\n");
 		else
 			NEARDAL_TRACE("not removed!\n");
 		g_free(agent_data->objPath);
-		g_free(agent_data->tagType);
 		g_free(agent_data);
 	}
 
 	return TRUE;
 }
 
-static void on_object_removed( GDBusObjectManager *manager
+static void on_handover_object_removed( GDBusObjectManager *manager
 			      , GDBusObject        *object
 			      , gpointer            user_data)
 {
 	NEARDAL_TRACEIN();
 	(void) manager; /* avoid warning */
-	on_Release( NEARDAL_NDEFAGENT(object), NULL, user_data);
+	on_Handover_Release( NEARDAL_HANDOVER_AGENT(object), NULL, user_data);
 }
 
 static void
@@ -328,21 +369,21 @@ on_name_lost(GDBusConnection *connection
  * neardal_ndefagent_prv_manage: create or release an agent and register or
  * unregister it with neardal object manager and Neard
  ****************************************************************************/
-errorCode_t neardal_ndefagent_prv_manage(neardal_agent_t agentData)
+errorCode_t neardal_ndefagent_prv_manage(neardal_ndef_agent_t agentData)
 {
 	errorCode_t		err = NEARDAL_SUCCESS;
 	neardalObjectSkeleton	*objSkel;
 	neardalNDEFAgent	*ndefAgent;
-	neardal_agent_t		*data;
+	neardal_ndef_agent_t	*data;
 
 	NEARDAL_TRACEIN();
 
 	if (agentData.cb_ndef_agent != NULL) {
-		data = g_try_malloc0(sizeof(neardal_agent_t));
+		data = g_try_malloc0(sizeof(neardal_ndef_agent_t));
 		if (data == NULL)
 			return NEARDAL_ERROR_NO_MEMORY;
 
-		memcpy(data, &agentData, sizeof(neardal_agent_t));
+		memcpy(data, &agentData, sizeof(neardal_ndef_agent_t));
 		data->objPath = g_strdup(agentData.objPath);
 		data->tagType = g_strdup(agentData.tagType);
 
@@ -353,20 +394,20 @@ errorCode_t neardal_ndefagent_prv_manage(neardal_agent_t agentData)
 		neardal_object_skeleton_set_ndefagent(objSkel, ndefAgent);
 
 		/* Handle GetNDEF D-Bus method invocations */
-		g_signal_connect ( ndefAgent, "handle-get-ndef"
-				, G_CALLBACK (on_GetNDEF)
-				, data);
+		g_signal_connect( ndefAgent, "handle-get-ndef"
+				 , G_CALLBACK (on_GetNDEF)
+				 , data);
 
 		/* Handle Release D-Bus method invocations */
-		g_signal_connect ( ndefAgent, "handle-release"
-				, G_CALLBACK (on_Release), data);
+		g_signal_connect( ndefAgent, "handle-release"
+				, G_CALLBACK (on_NDEF_Release), data);
 
-		g_signal_connect ( neardalMgr.agentMgr, "object-removed"
-				, G_CALLBACK (on_object_removed), data);
-		g_object_unref (ndefAgent);
+		g_signal_connect( neardalMgr.agentMgr, "object-removed"
+				, G_CALLBACK (on_ndef_object_removed), data);
+		g_object_unref(ndefAgent);
 
 		/* Export the object */
-		g_dbus_object_manager_server_export (neardalMgr.agentMgr
+		g_dbus_object_manager_server_export(neardalMgr.agentMgr
 					, G_DBUS_OBJECT_SKELETON (objSkel));
 		g_object_unref (objSkel);
 	} else {
@@ -375,25 +416,7 @@ errorCode_t neardal_ndefagent_prv_manage(neardal_agent_t agentData)
 			err = NEARDAL_SUCCESS;
 		else
 			err = NEARDAL_ERROR_DBUS;
-		g_free(agentData.objPath);
-		g_free(agentData.tagType);
 	}
-
-	return err;
-}
-
-/*****************************************************************************
- * neardal_ndefagent_prv_release: unregister an agent from Neard and neardal
- * object manager
- ****************************************************************************/
-errorCode_t neardal_ndefagent_prv_release(gchar *objPath)
-{
-	errorCode_t		err = NEARDAL_SUCCESS;
-
-	if (neardal_agent_prv_remove(objPath) == TRUE)
-		NEARDAL_TRACE("removed\n");
-	else
-		NEARDAL_TRACE("not removed!\n");
 
 	return err;
 }
@@ -402,22 +425,23 @@ errorCode_t neardal_ndefagent_prv_release(gchar *objPath)
  * neardal_handoveragent_prv_manage: create or release an agent and register
  * or unregister it with neardal object manager and Neard
  ****************************************************************************/
-errorCode_t neardal_handoveragent_prv_manage(neardal_agent_t agentData)
+errorCode_t neardal_handoveragent_prv_manage(
+					neardal_handover_agent_t agentData)
 {
-        errorCode_t		err = NEARDAL_SUCCESS;
-        neardalObjectSkeleton	*objSkel;
-        neardalHandoverAgent	*handoverAgent;
-        neardal_agent_t		*data;
+        errorCode_t			err = NEARDAL_SUCCESS;
+        neardalObjectSkeleton		*objSkel;
+        neardalHandoverAgent		*handoverAgent;
+        neardal_handover_agent_t	*data;
 
         NEARDAL_TRACEIN();
 
         if (agentData.cb_oob_push_agent != NULL &&
 	    agentData.cb_oob_req_agent != NULL) {
-                data = g_try_malloc0(sizeof(neardal_agent_t));
+                data = g_try_malloc0(sizeof(neardal_handover_agent_t));
                 if (data == NULL)
                         return NEARDAL_ERROR_NO_MEMORY;
 
-                memcpy(data, &agentData, sizeof(neardal_agent_t));
+                memcpy(data, &agentData, sizeof(neardal_handover_agent_t));
                 data->objPath = g_strdup(agentData.objPath);
 
                 NEARDAL_TRACEF("Create agent '%s'\n", data->objPath);
@@ -428,25 +452,26 @@ errorCode_t neardal_handoveragent_prv_manage(neardal_agent_t agentData)
                                                           handoverAgent);
 
                 /* Handle RequestOOB() D-Bus method invocations */
-                g_signal_connect ( handoverAgent, "handle-request-oob"
+                g_signal_connect( handoverAgent, "handle-request-oob"
                                 , G_CALLBACK (on_RequestOOB)
                                 , data);
 
                 /* Handle PushOOB() D-Bus method invocations */
-                g_signal_connect ( handoverAgent, "handle-push-oob"
+                g_signal_connect( handoverAgent, "handle-push-oob"
                                 , G_CALLBACK (on_PushOOB)
                                 , data);
 
                 /* Handle Release D-Bus method invocations */
-                g_signal_connect ( handoverAgent, "handle-release"
-                                , G_CALLBACK (on_Release), data);
+                g_signal_connect( handoverAgent, "handle-release"
+                                , G_CALLBACK (on_Handover_Release), data);
 
-                g_signal_connect ( neardalMgr.agentMgr, "object-removed"
-                                , G_CALLBACK (on_object_removed), data);
-                g_object_unref (handoverAgent);
+                g_signal_connect( neardalMgr.agentMgr, "object-removed"
+                                , G_CALLBACK (on_handover_object_removed)
+				 , data);
+                g_object_unref(handoverAgent);
 
                 /* Export the object */
-                g_dbus_object_manager_server_export (neardalMgr.agentMgr
+                g_dbus_object_manager_server_export(neardalMgr.agentMgr
                                         , G_DBUS_OBJECT_SKELETON (objSkel));
                 g_object_unref (objSkel);
         } else {

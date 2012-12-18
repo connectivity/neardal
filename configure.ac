@@ -28,10 +28,10 @@ AC_ARG_ENABLE(debug, AC_HELP_STRING([--disable-debug],
 
 if (test "${debug}" = "yes"); then
 	CFLAGS="$CFLAGS -g -O0 -DNEARDAL_DEBUG"
- 	echo 'NEARDAL will be compiled in debug mode. CFLAGS='${CFLAGS}
+	echo 'NEARDAL will be compiled in debug mode.(NEARDAL_DEBUG will be defined)'
 else
 	CFLAGS="$CFLAGS -O2"
- 	echo 'NEARDAL will not be compiled in debug mode. CFLAGS='${CFLAGS}
+	echo 'NEARDAL will not be compiled in debug mode. (NEARDAL_DEBUG will not be defined)'
 fi
 
 ## Traces ?
@@ -43,10 +43,11 @@ AC_ARG_ENABLE(traces, AC_HELP_STRING([--enable-traces],
 ])
 if (test "${traces}" = "yes"); then
 	CFLAGS="$CFLAGS -DNEARDAL_TRACES"
- 	echo 'NEARDAL will be compiled with debugging traces...('NEARDAL_TRACES' will be defined)'
+ 	echo "NEARDAL will be compiled with debugging traces...(NEARDAL_TRACES will be defined)"
 else
-	echo 'NEARDAL will be compiled without debugging traces... ('NEARDAL_TRACES' will not be defined)'
+	echo "NEARDAL will be compiled without debugging traces... (NEARDAL_TRACES will not be defined)"
 fi
+echo 'NEARDAL will be compiled with CFLAGS='${CFLAGS}
 
 ## Check dependances
 GLIB_REQUIRED=2.30.0

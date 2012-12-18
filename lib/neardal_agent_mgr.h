@@ -35,25 +35,54 @@ typedef struct {
 	gchar			*tagType;		/* tag Type to register
 							(for NDEF agent only )
 							*/
-							
+
 	gint			pid;			/* process pid */
-	
+
 	ndef_agent_cb		cb_ndef_agent;		/* client callback to
 							retrieve raw NDEF data
 							and records object path
 							*/
-							
+
+	ndef_agent_free_cb	cb_ndef_release_agent;	/* client callback gets
+							called when Neard
+							unregisters the agent.
+							Can be used to cleanup
+							tasks. There is no need
+							to unregister the agent,
+							because when this
+							callback gets called it
+							has already been
+							unregistered.*/
+	gpointer		user_data;
+} neardal_ndef_agent_t;
+
+typedef struct {
+	gchar			*objPath;		/* agent object path */
+	gint			pid;			/* process pid */
+
 	oob_req_agent_cb	cb_oob_req_agent;	/* client callback to
 							get Out Of Band data
 							from the handover agent
 							*/
-							
+
 	oob_push_agent_cb	cb_oob_push_agent;	/* client callback to
 							pass remote Out Of Band
 							data to agent to start
 							handover */
+
+	oob_agent_free_cb	cb_oob_release_agent;	/* client callback gets
+							called when Neard
+							unregisters the agent.
+							Can be used to cleanup
+							tasks. There is no need
+							to unregister the agent,
+							because when this
+							callback gets called it
+							has already been
+							unregistered.*/
+							
 	gpointer		user_data;
-} neardal_agent_t;
+} neardal_handover_agent_t;
 
 /*****************************************************************************
  * neardal_agent_acquire_dbus_name: acquire dbus name for management of neard
@@ -70,14 +99,15 @@ void neardal_agent_stop_owning_dbus_name(void);
  * neardal_ndefagent_prv_manage: create or release an agent and register or
  * unregister it with neardal object manager and Neard for NDEF data
  ****************************************************************************/
-errorCode_t neardal_ndefagent_prv_manage(neardal_agent_t agentData);
+errorCode_t neardal_ndefagent_prv_manage(neardal_ndef_agent_t agentData);
 
 /*****************************************************************************
  * neardal_handoveragent_prv_manage: create or release an agent and register
  * or unregister it with neardal object manager and Neard for handover message
  * (request / answer)
  ****************************************************************************/
-errorCode_t neardal_handoveragent_prv_manage(neardal_agent_t agentData);
+errorCode_t neardal_handoveragent_prv_manage(
+					neardal_handover_agent_t agentData);
 
 #ifdef __cplusplus
 }
