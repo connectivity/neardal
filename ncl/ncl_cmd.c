@@ -795,6 +795,9 @@ static GOptionEntry options[] = {
 		{ "uri", 'u', 0, G_OPTION_ARG_STRING, &rcd.uri
 				  , "URI", "http://www.intel.com" },
 
+		{ "carrier", 'u', 0, G_OPTION_ARG_STRING, &rcd.carrier
+				  , "Carrier", "bluetooth" },
+
 		{ NULL, 0, 0, 0, NULL, NULL, NULL} /* End of List */
 	};
 

@@ -850,6 +850,7 @@ errorCode_t neardal_tag_write(neardal_record *record)
 
 	rcd.name		= (gchar *) record->name;
 	rcd.action		= (gchar *) record->action;
+	rcd.carrier		= (gchar *) record->carrier;
 	rcd.encoding		= (gchar *) record->encoding;
 	rcd.language		= (gchar *) record->language;
 	rcd.type		= (gchar *) record->type;
@@ -1038,6 +1039,7 @@ errorCode_t neardal_dev_push(neardal_record *record)
 	rcd.encoding		= (gchar *) record->encoding;
 	rcd.language		= (gchar *) record->language;
 	rcd.type		= (gchar *) record->type;
+	rcd.carrier		= (gchar *) record->carrier;
 	rcd.representation	= (gchar *) record->representation;
 	rcd.uri			= (gchar *) record->uri;
 	rcd.uriObjSize		= record->uriObjSize;
