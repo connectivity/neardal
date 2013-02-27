@@ -39,6 +39,7 @@ typedef struct {
 	gchar		*language;
 	gboolean	smartPoster;
 	gchar		*action;
+	gchar		*carrier;
 	gchar		*type;
 	gchar		*representation;
 	gchar		*uri;

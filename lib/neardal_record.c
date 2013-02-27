@@ -62,6 +62,10 @@ static errorCode_t neardal_rcd_prv_read_properties(RcdProp *rcd)
 	else
 		goto error;
 
+	tmpOut = g_variant_lookup_value(tmp, "Carrier", G_VARIANT_TYPE_STRING);
+	if (tmpOut != NULL)
+		rcd->type = g_variant_dup_string(tmpOut, NULL);
+	
 	tmpOut = g_variant_lookup_value(tmp, "Representation",
 					G_VARIANT_TYPE_STRING);
 	if (tmpOut != NULL)
@@ -139,6 +143,7 @@ static void neardal_rcd_prv_free(RcdProp **rcd)
 	g_free((*rcd)->mime);
 	g_free((*rcd)->representation);
 	g_free((*rcd)->type);
+	g_free((*rcd)->carrier);
 	g_free((*rcd)->uri);
 	g_free((*rcd));
 	(*rcd) = NULL;
@@ -196,6 +201,12 @@ errorCode_t neardal_rcd_prv_format(GVariantBuilder *builder, RcdProp *rcd)
 		neardal_tools_prv_add_dict_entry(builder, "Action"
 						 , rcd->action, 0
 						 , (int) G_TYPE_STRING);
+
+	/* Carrier */
+	if (rcd->carrier != NULL)
+		neardal_tools_prv_add_dict_entry(builder, "Carrier"
+						 , rcd->carrier
+						 , 0, (int) G_TYPE_STRING);
 
 	return err;
 }
