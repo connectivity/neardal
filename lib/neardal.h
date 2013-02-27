@@ -127,6 +127,8 @@ typedef struct {
 	unsigned int	uriObjSize;
 /*! @brief The URI object MIME type */
 	const char	*mime;
+/*! @brief The Handover Carrier (e.g. bluetooth) */
+ 	const char	*carrier;
 } neardal_record;
 
 /* @}*/
