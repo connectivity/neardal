@@ -24,8 +24,8 @@
  *
  ******************************************************************************/
 
-#ifndef __NEARDAL_ERRORS_H
-#define __NEARDAL_ERRORS_H
+#ifndef NEARDAL_ERRORS_H
+#define NEARDAL_ERRORS_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -93,4 +93,4 @@ char *neardal_error_get_text(errorCode_t ec);
 }
 #endif	/* __cplusplus */
 
-#endif /* __NEARDAL_ERRORS_H */
+#endif /* NEARDAL_ERRORS_H */

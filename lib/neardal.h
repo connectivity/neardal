@@ -26,8 +26,8 @@
  *
  ******************************************************************************/
 
-#ifndef __NEARDAL_H
-#define __NEARDAL_H
+#ifndef NEARDAL_H
+#define NEARDAL_H
 #include "neardal_errors.h"
 
 #ifdef __cplusplus
@@ -617,4 +617,4 @@ errorCode_t neardal_free_array(char ***array);
 }
 #endif	/* __cplusplus */
 
-#endif /* __NEARDAL_H */
+#endif /* NEARDAL_H */
