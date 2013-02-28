@@ -328,7 +328,7 @@ static void ncl_cmd_cb_adapter_prop_changed(char *adpName, char *propName,
 	(void) user_data; /* remove warning */
 
 	if (!strcmp(propName, "Polling")) {
-		polling = (int)value;
+		polling = *(int*)value;
 		NCL_CMD_PRINTF("Polling=%d\n", polling);
 	} else
 		NCL_CMD_PRINTF("Adapter '%s' -> Property=%s=0x%X\n", adpName,

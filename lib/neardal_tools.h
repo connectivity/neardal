@@ -18,8 +18,8 @@
  *
  */
 
-#ifndef __NEARDAL_TOOLS_H
-#define __NEARDAL_TOOLS_H
+#ifndef NEARDAL_TOOLS_H
+#define NEARDAL_TOOLS_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -73,4 +73,4 @@ errorCode_t neardal_tools_prv_add_dict_entry(GVariantBuilder *builder
 }
 #endif	/* __cplusplus */
 
-#endif /* __NEARDAL_TOOLS_H */
+#endif /* NEARDAL_TOOLS_H */

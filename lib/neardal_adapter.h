@@ -18,8 +18,8 @@
  *
  */
 
-#ifndef __NEARDAL_ADAPTER_H
-#define __NEARDAL_ADAPTER_H
+#ifndef NEARDAL_ADAPTER_H
+#define NEARDAL_ADAPTER_H
 
 #include "neard_adapter_proxy.h"
 #include "neardal_device.h"
@@ -81,4 +81,4 @@ errorCode_t neardal_adp_remove(AdpProp *adpProp);
 }
 #endif	/* __cplusplus */
 
-#endif /* __NEARDAL_ADAPTER_H */
+#endif /* NEARDAL_ADAPTER_H */

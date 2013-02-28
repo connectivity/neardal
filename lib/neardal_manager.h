@@ -18,8 +18,8 @@
  *
  */
 
-#ifndef __NEARDAL_MANAGER_H
-#define __NEARDAL_MANAGER_H
+#ifndef NEARDAL_MANAGER_H
+#define NEARDAL_MANAGER_H
 
 #include "neardal_adapter.h"
 
@@ -72,4 +72,4 @@ void neardal_mgr_destroy(void);
 }
 #endif	/* __cplusplus */
 
-#endif /* __NEARDAL_MANAGER_H */
+#endif /* NEARDAL_MANAGER_H */

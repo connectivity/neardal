@@ -18,8 +18,8 @@
  *
  */
 
-#ifndef __NEARDAL_PRV_H
-#define __NEARDAL_PRV_H
+#ifndef NEARDAL_PRV_H
+#define NEARDAL_PRV_H
 
 #include "neard_manager_proxy.h"
 
@@ -116,4 +116,4 @@ void neardal_prv_construct(errorCode_t *ec);
 }
 #endif	/* __cplusplus */
 
-#endif /* __NEARDAL_PRV_H */
+#endif /* NEARDAL_PRV_H */

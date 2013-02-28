@@ -18,8 +18,8 @@
  *
  */
 
-#ifndef __NEARDAL_DEV_H
-#define __NEARDAL_DEV_H
+#ifndef NEARDAL_DEV_H
+#define NEARDAL_DEV_H
 
 #include "neard_device_proxy.h"
 #include "neardal_record.h"
@@ -71,4 +71,4 @@ errorCode_t neardal_dev_prv_push(DevProp *devProp, RcdProp *rcd);
 }
 #endif	/* __cplusplus */
 
-#endif /* __NEARDAL_DEV_H */
+#endif /* NEARDAL_DEV_H */

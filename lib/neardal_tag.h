@@ -18,8 +18,8 @@
  *
  */
 
-#ifndef __NEARDAL_TAG_H
-#define __NEARDAL_TAG_H
+#ifndef NEARDAL_TAG_H
+#define NEARDAL_TAG_H
 
 #include "neard_tag_proxy.h"
 #include "neardal_record.h"
@@ -81,4 +81,4 @@ errorCode_t neardal_tag_prv_get_record(TagProp *tagProp, gchar *rcdName,
 }
 #endif	/* __cplusplus */
 
-#endif /* __NEARDAL_TAG_H */
+#endif /* NEARDAL_TAG_H */

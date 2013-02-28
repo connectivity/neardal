@@ -18,8 +18,8 @@
  *
  */
 
-#ifndef __NEARDAL_TRACES_PRV_H
-#define __NEARDAL_TRACES_PRV_H
+#ifndef NEARDAL_TRACES_PRV_H
+#define NEARDAL_TRACES_PRV_H
 
 #include <stdio.h>
 
@@ -60,4 +60,4 @@ void neardal_trace_dump_mem(char *dataP, int size);
 }
 #endif	/* __cplusplus */
 
-#endif	/* __NEARDAL_TRACES_PRV_H */
+#endif	/* NEARDAL_TRACES_PRV_H */

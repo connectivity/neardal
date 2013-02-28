@@ -18,8 +18,8 @@
  *
  */
 
-#ifndef __NEARDAL_RECORD_H
-#define __NEARDAL_RECORD_H
+#ifndef NEARDAL_RECORD_H
+#define NEARDAL_RECORD_H
 
 #include "neard_record_proxy.h"
 
@@ -67,4 +67,4 @@ errorCode_t neardal_rcd_prv_format(GVariantBuilder *builder, RcdProp *rcd);
 }
 #endif	/* __cplusplus */
 
-#endif /* __NEARDAL_RECORD_H */
+#endif /* NEARDAL_RECORD_H */

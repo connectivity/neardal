@@ -18,8 +18,8 @@
  *
  */
 
-#ifndef __NEARDAL_AGENT_H
-#define __NEARDAL_AGENT_H
+#ifndef NEARDAL_AGENT_H
+#define NEARDAL_AGENT_H
 
 #include "neardal.h"
 
@@ -113,4 +113,4 @@ errorCode_t neardal_handoveragent_prv_manage(
 }
 #endif	/* __cplusplus */
 
-#endif /* __NEARDAL_AGENT_H */
+#endif /* NEARDAL_AGENT_H */
