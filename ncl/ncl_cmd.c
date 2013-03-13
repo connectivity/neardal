@@ -848,6 +848,8 @@ exit:
 		g_free((gchar *) rcd.type);
 	if (rcd.uri != NULL)
 		g_free((gchar *) rcd.uri);
+	if (rcd.carrier != NULL)
+		g_free((gchar *) rcd.carrier);
 
 	return nclErr;
 }
