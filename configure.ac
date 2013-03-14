@@ -1,7 +1,6 @@
 AC_INIT([neardal], 0.8.0, Neardal for Neard v0.8)
 AM_INIT_AUTOMAKE([foreign -Wall -Werror])
 
-AC_PROG_LIBTOOL
 AC_CONFIG_HEADERS([config.h])
 
 m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
@@ -15,6 +14,8 @@ traces=no
 
 AC_PROG_CC
 AM_PROG_CC_C_O
+AM_PROG_AR
+AC_PROG_LIBTOOL
 
 ## Compiler option
 ## Debug ?
