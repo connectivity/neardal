@@ -1,6 +1,3 @@
-neardal_LT_CURRENT = 0
-neardal_LT_REVISION = 1
-neardal_LT_AGE = 0
 
 #Rule to generate the binding headers
 neardal_agent.h:	interface/org.neard.Agent.xml
@@ -97,10 +94,7 @@ libneardal_la_SOURCES =		neardal.c \
 				neardal_tools.c \
 				neardal_traces.c
 
-libneardal_la_LDFLAGS = -version-info $(neardal_LT_CURRENT):$(neardal_LT_REVISION):$(neardal_LT_AGE)
-libneardal_la_CFLAGS = $(GLIB_CFLAGS) $(GIO_UNIX_CFLAGS)
-
-libneardal_la_LIBADD = $(GLIB_LIBS) $(GIO_UNIX_LIBS)
+libneardal_la_LDFLAGS = -version-info @VERSION_INFO@
 
 neardalheadersdir = $(includedir)/neardal
 

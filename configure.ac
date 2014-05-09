@@ -51,17 +51,16 @@ else
 fi
 echo 'NEARDAL will be compiled with CFLAGS='${CFLAGS}
 
-## Check dependances
-GLIB_REQUIRED=2.30.0
-PKG_CHECK_MODULES(GLIB, glib-2.0 >= $GLIB_REQUIRED, dummy=yes,
-				AC_MSG_ERROR(GLib >= $GLIB_REQUIRED is required))
-AC_SUBST(GLIB_CFLAGS)
-AC_SUBST(GLIB_LIBS)
+	
+VERSION_INFO=$(echo $VERSION | sed -e 's/\./\:/g')
 
-PKG_CHECK_MODULES(GIO_UNIX, gio-unix-2.0 >= $GLIB_REQUIRED, dummy=yes,
-				AC_MSG_ERROR(gio-unix >= $GLIB_REQUIRED is required))
-AC_SUBST(GIO_UNIX_CFLAGS)
-AC_SUBST(GIO_UNIX_LIBS)
+PKG_CHECK_MODULES(gio, gio-unix-2.0 >= 2.30,
+	AM_CPPFLAGS="$AM_CPPFLAGS $gio_CFLAGS" LIBS="$LIBS $gio_LIBS",
+	AC_MSG_ERROR(gio-unix-2.0 >= 2.30 is required))
+
+AC_SUBST(AM_CPPFLAGS)
+AC_SUBST(LIBS)
+AC_SUBST(VERSION_INFO)
 
 AC_CHECK_PROGS([DOXYGEN], [doxygen])
 if test -z "$DOXYGEN";
@@ -71,6 +70,4 @@ AM_CONDITIONAL([HAVE_DOXYGEN],
 [test -n "$DOXYGEN"])AM_COND_IF([HAVE_DOXYGEN], [AC_CONFIG_FILES([doxygen.cfg])])
 
 AC_CONFIG_FILES([Makefile lib/Makefile ncl/Makefile neardal.pc])
-
-
 AC_OUTPUT
