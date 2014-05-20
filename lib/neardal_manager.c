@@ -33,7 +33,7 @@
  * neardal_mgr_prv_cb_property_changed: Callback called when a NFC Manager
  * Property is changed
  ****************************************************************************/
-static void neardal_mgr_prv_cb_property_changed(orgNeardMgr *proxy,
+static void neardal_mgr_prv_cb_property_changed(OrgNeardManager *proxy,
 						const gchar *arg_unnamed_arg0,
 						GVariant *arg_unnamed_arg1,
 						void        *user_data)
@@ -53,7 +53,7 @@ static void neardal_mgr_prv_cb_property_changed(orgNeardMgr *proxy,
  * neardal_mgr_prv_cb_adapter_added: Callback called when a NFC adapter is
  * added
  ****************************************************************************/
-static void neardal_mgr_prv_cb_adapter_added(orgNeardMgr *proxy,
+static void neardal_mgr_prv_cb_adapter_added(OrgNeardManager *proxy,
 					     const gchar *arg_unnamed_arg0,
 					     void        *user_data)
 {
@@ -77,7 +77,7 @@ static void neardal_mgr_prv_cb_adapter_added(orgNeardMgr *proxy,
  * neardal_mgr_prv_cb_adapter_removed: Callback called when a NFC adapter
  * is removed
  ****************************************************************************/
-static void neardal_mgr_prv_cb_adapter_removed(orgNeardMgr *proxy,
+static void neardal_mgr_prv_cb_adapter_removed(OrgNeardManager *proxy,
 					       const gchar *arg_unnamed_arg0,
 					       void *user_data)
 {
@@ -120,7 +120,7 @@ static errorCode_t neardal_mgr_prv_get_all_adapters(gchar ***adpArray,
 	NEARDAL_ASSERT_RET(adpArray != NULL, NEARDAL_ERROR_INVALID_PARAMETER);
 
 	/* Invoking method 'GetProperties' on Neard Manager */
-	if (org_neard_mgr__call_get_properties_sync(neardalMgr.proxy, &tmp,
+	if (org_neard_manager_call_get_properties_sync(neardalMgr.proxy, &tmp,
 						    NULL,
 					     &neardalMgr.gerror)) {
 		NEARDAL_TRACEF("Reading:\n%s\n", g_variant_print(tmp, TRUE));
@@ -175,7 +175,7 @@ errorCode_t neardal_mgr_prv_get_adapter(gchar *adpName, AdpProp **adpProp)
 /*****************************************************************************
  * neardal_mgr_prv_get_adapter_from_proxy: Get NFC Adapter from proxy
  ****************************************************************************/
-errorCode_t neardal_mgr_prv_get_adapter_from_proxy(orgNeardAdp *adpProxy,
+errorCode_t neardal_mgr_prv_get_adapter_from_proxy(OrgNeardAdapter *adpProxy,
 						   AdpProp **adpProp)
 {
 	errorCode_t	err	= NEARDAL_ERROR_NO_ADAPTER;
@@ -229,7 +229,7 @@ errorCode_t neardal_mgr_create(void)
 		neardalMgr.proxy = NULL;
 	}
 
-	neardalMgr.proxy = org_neard_mgr__proxy_new_sync(neardalMgr.conn,
+	neardalMgr.proxy = org_neard_manager_proxy_new_sync(neardalMgr.conn,
 					G_DBUS_OBJECT_MANAGER_CLIENT_FLAGS_NONE,
 							NEARD_DBUS_SERVICE,
 							NEARD_MGR_PATH,

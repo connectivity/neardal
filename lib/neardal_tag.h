@@ -32,7 +32,7 @@ extern "C" {
 
 /* NEARDAL Tag Properties */
 typedef struct {
-	orgNeardTag	*proxy;	  /* proxy to Neard NEARDAL Tag interface */
+	OrgNeardTag	*proxy;	  /* proxy to Neard NEARDAL Tag interface */
 	gchar		*name;	  /* DBus interface name (as identifier) */
 	void		*parent;  /* parent (adapter ) */
 	gboolean	notified; /* Already notified to client? */

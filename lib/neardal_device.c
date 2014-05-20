@@ -33,7 +33,7 @@
  * neardal_dev_prv_cb_property_changed: Callback called when a NFC device
  * property is changed
  ****************************************************************************/
-static void neardal_dev_prv_cb_property_changed(orgNeardDev *proxy,
+static void neardal_dev_prv_cb_property_changed(OrgNeardDevice *proxy,
 						const gchar *arg_unnamed_arg0,
 						GVariant *arg_unnamed_arg1,
 						void		*user_data)
@@ -80,7 +80,7 @@ static errorCode_t neardal_dev_prv_read_properties(DevProp *devProp)
 	NEARDAL_ASSERT_RET(devProp->proxy != NULL
 			  , NEARDAL_ERROR_GENERAL_ERROR);
 
-	org_neard_dev__call_get_properties_sync(devProp->proxy, &tmp, NULL,
+	org_neard_device_call_get_properties_sync(devProp->proxy, &tmp, NULL,
 						&gerror);
 	if (gerror != NULL) {
 		err = NEARDAL_ERROR_DBUS_CANNOT_INVOKE_METHOD;
@@ -135,7 +135,7 @@ static errorCode_t neardal_dev_prv_init(DevProp *devProp)
 	}
 	devProp->proxy = NULL;
 
-	devProp->proxy = org_neard_dev__proxy_new_sync(neardalMgr.conn,
+	devProp->proxy = org_neard_device_proxy_new_sync(neardalMgr.conn,
 					G_DBUS_OBJECT_MANAGER_CLIENT_FLAGS_NONE,
 							NEARD_DBUS_SERVICE,
 							devProp->name,
@@ -233,7 +233,7 @@ errorCode_t neardal_dev_prv_push(DevProp *devProp, RcdProp *rcd)
 
 	in = g_variant_builder_end(dictBuilder);
 	NEARDAL_TRACE_LOG("Sending:\n%s\n", g_variant_print(in, TRUE));
-	org_neard_dev__call_push_sync(devProp->proxy, in, NULL, &gerror);
+	org_neard_device_call_push_sync(devProp->proxy, in, NULL, &gerror);
 
 exit:
 	if (gerror != NULL) {

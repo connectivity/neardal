@@ -33,7 +33,7 @@
  * neardal_tag_prv_cb_property_changed: Callback called when a NFC tag
  * property is changed
  ****************************************************************************/
-static void neardal_tag_prv_cb_property_changed(orgNeardTag *proxy,
+static void neardal_tag_prv_cb_property_changed(OrgNeardTag *proxy,
 						const gchar *arg_unnamed_arg0,
 						GVariant *arg_unnamed_arg1,
 						void		*user_data)
@@ -80,7 +80,7 @@ static errorCode_t neardal_tag_prv_read_properties(TagProp *tagProp)
 	NEARDAL_ASSERT_RET(tagProp->proxy != NULL
 			  , NEARDAL_ERROR_GENERAL_ERROR);
 
-	org_neard_tag__call_get_properties_sync(tagProp->proxy, &tmp, NULL,
+	org_neard_tag_call_get_properties_sync(tagProp->proxy, &tmp, NULL,
 						&gerror);
 	if (gerror != NULL) {
 		err = NEARDAL_ERROR_DBUS_CANNOT_INVOKE_METHOD;
@@ -154,7 +154,7 @@ static errorCode_t neardal_tag_prv_init(TagProp *tagProp)
 	}
 	tagProp->proxy = NULL;
 
-	tagProp->proxy = org_neard_tag__proxy_new_sync(neardalMgr.conn,
+	tagProp->proxy = org_neard_tag_proxy_new_sync(neardalMgr.conn,
 					G_DBUS_OBJECT_MANAGER_CLIENT_FLAGS_NONE,
 							NEARD_DBUS_SERVICE,
 							tagProp->name,
@@ -284,7 +284,7 @@ errorCode_t neardal_tag_prv_write(TagProp *tagProp, RcdProp *rcd)
 
 	in = g_variant_builder_end(dictBuilder);
 	NEARDAL_TRACEF("Sending:\n%s\n", g_variant_print(in, TRUE));
-	org_neard_tag__call_write_sync(tagProp->proxy, in, NULL, &gerror);
+	org_neard_tag_call_write_sync(tagProp->proxy, in, NULL, &gerror);
 
 exit:
 	if (gerror != NULL) {

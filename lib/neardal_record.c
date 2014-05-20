@@ -44,7 +44,7 @@ static errorCode_t neardal_rcd_prv_read_properties(RcdProp *rcd)
 	NEARDAL_ASSERT_RET(rcd->proxy != NULL
 			   , NEARDAL_ERROR_INVALID_PARAMETER);
 
-	org_neard_rcd__call_get_properties_sync(rcd->proxy, &tmp, NULL,
+	org_neard_record_call_get_properties_sync(rcd->proxy, &tmp, NULL,
 						&gerror);
 	if (gerror != NULL) {
 		err = NEARDAL_ERROR_DBUS;
@@ -110,7 +110,7 @@ static errorCode_t neardal_rcd_prv_init(RcdProp *rcd)
 		g_object_unref(rcd->proxy);
 	rcd->proxy = NULL;
 
-	rcd->proxy = org_neard_rcd__proxy_new_sync(neardalMgr.conn,
+	rcd->proxy = org_neard_record_proxy_new_sync(neardalMgr.conn,
 					G_DBUS_OBJECT_MANAGER_CLIENT_FLAGS_NONE,
 							NEARD_DBUS_SERVICE,
 							rcd->name,

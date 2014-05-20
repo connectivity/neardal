@@ -528,7 +528,7 @@ errorCode_t neardal_set_adapter_property(const char *adpName,
 	propValue = g_variant_new_variant(variantTmp);
 	NEARDAL_TRACE_LOG("Sending:\n%s=%s\n", propKey,
 			  g_variant_print(propValue, TRUE));
-	org_neard_adp__call_set_property_sync(adpProp->proxy, propKey,
+	org_neard_adapter_call_set_property_sync(adpProp->proxy, propKey,
 					      propValue, NULL,
 					      &neardalMgr.gerror);
 
@@ -578,20 +578,20 @@ errorCode_t neardal_start_poll_loop(char *adpName, int mode)
 	}
 
 	if (mode == NEARD_ADP_MODE_INITIATOR)
-		org_neard_adp__call_start_poll_loop_sync(adpProp->proxy,
+		org_neard_adapter_call_start_poll_loop_sync(adpProp->proxy,
 							ADP_MODE_INITIATOR,
 							NULL,
 							&neardalMgr.gerror);
 	else if (mode == NEARD_ADP_MODE_TARGET)
-		org_neard_adp__call_start_poll_loop_sync(adpProp->proxy,
+		org_neard_adapter_call_start_poll_loop_sync(adpProp->proxy,
 							ADP_MODE_TARGET, NULL,
 							&neardalMgr.gerror);
 	else if (mode == NEARD_ADP_MODE_DUAL)
-		org_neard_adp__call_start_poll_loop_sync(adpProp->proxy,
+		org_neard_adapter_call_start_poll_loop_sync(adpProp->proxy,
 							ADP_MODE_DUAL, NULL,
 							&neardalMgr.gerror);
 	else
-		org_neard_adp__call_start_poll_loop_sync(adpProp->proxy
+		org_neard_adapter_call_start_poll_loop_sync(adpProp->proxy
 							, ADP_MODE_INITIATOR
 							, NULL,
 							&neardalMgr.gerror);
@@ -630,7 +630,7 @@ errorCode_t neardal_stop_poll(char *adpName)
 		goto exit;
 
 	if (adpProp->polling) {
-		org_neard_adp__call_stop_poll_loop_sync(adpProp->proxy, NULL,
+		org_neard_adapter_call_stop_poll_loop_sync(adpProp->proxy, NULL,
 						   &neardalMgr.gerror);
 
 		err = NEARDAL_SUCCESS;
@@ -1240,13 +1240,13 @@ errorCode_t neardal_agent_set_NDEF_cb(char *tagType
 
 	if (cb_ndef_agent != NULL)
 		/* RegisterNDEFAgent */
-		org_neard_mgr__call_register_ndefagent_sync(neardalMgr.proxy,
+		org_neard_manager_call_register_ndefagent_sync(neardalMgr.proxy,
 							     agent.objPath,
 							     tagType, NULL,
 							&neardalMgr.gerror);
 	else
 		/* UnregisterNDEFAgent */
-		org_neard_mgr__call_unregister_ndefagent_sync(neardalMgr.proxy,
+		org_neard_manager_call_unregister_ndefagent_sync(neardalMgr.proxy,
 							    agent.objPath,
 							    tagType, NULL,
 							 &neardalMgr.gerror);
@@ -1310,14 +1310,14 @@ errorCode_t neardal_agent_set_handover_cb(oob_push_agent_cb cb_oob_push_agent
 
 	if (cb_oob_push_agent != NULL && cb_oob_req_agent != NULL)
 		/* RegisterNDEFAgent */
-		org_neard_mgr__call_register_handover_agent_sync(
+		org_neard_manager_call_register_handover_agent_sync(
 							       neardalMgr.proxy,
 							       agent.objPath,
 							       NULL,
 							   &neardalMgr.gerror);
 	else
 		/* UnregisterNDEFAgent */
-		org_neard_mgr__call_unregister_handover_agent_sync(
+		org_neard_manager_call_unregister_handover_agent_sync(
 							neardalMgr.proxy,
 							agent.objPath, NULL,
 							 &neardalMgr.gerror);

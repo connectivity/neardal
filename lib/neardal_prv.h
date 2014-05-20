@@ -85,7 +85,7 @@ typedef struct {
 typedef struct {
 	neardalCb	cb;			/* Neardal Callbacks */
 	GDBusConnection	*conn;			/* DBus connection */
-	orgNeardMgr	*proxy;			/* Neard Mgr dbus proxy */
+	OrgNeardManager	*proxy;			/* Neard Mgr dbus proxy */
 	MgrProp		prop;			/* Mgr Properties
 							(adapter list) */
 	guint		OwnerId;		/* dbus Id server side */

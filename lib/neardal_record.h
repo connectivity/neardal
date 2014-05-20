@@ -29,7 +29,7 @@ extern "C" {
 
 /* NEARDAL Record Properties */
 typedef struct {
-	orgNeardRcd	*proxy;	/* proxy to Neard NFC Record interface */
+	OrgNeardRecord	*proxy;	/* proxy to Neard NFC Record interface */
 	gchar		*name;	/* DBus interface name (as identifier) */
 	void		*parent; /* parent (tag) */
 	gboolean	notified; /* Already notified to client? */

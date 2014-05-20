@@ -47,7 +47,7 @@ errorCode_t neardal_mgr_prv_get_adapter(gchar *adpName, AdpProp **adpProp);
 /*****************************************************************************
  * neardal_mgr_prv_get_adapter_from_proxy: Get NEARDAL Adapter from proxy
  *****************************************************************************/
-errorCode_t neardal_mgr_prv_get_adapter_from_proxy(orgNeardAdp *adpProxy,
+errorCode_t neardal_mgr_prv_get_adapter_from_proxy(OrgNeardAdapter *adpProxy,
 							AdpProp **adpProp);
 
 /*****************************************************************************

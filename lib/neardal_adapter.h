@@ -35,7 +35,7 @@ extern "C" {
 
 /* NEARDAL Adapter Properties */
 typedef struct {
-	orgNeardAdp		*proxy;		/* The proxy connected to Neard
+	OrgNeardAdapter		*proxy;		/* The proxy connected to Neard
 						Adapter interface */
 	gchar			*name;		/* DBus interface name
 						(as id) */

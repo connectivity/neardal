@@ -33,7 +33,7 @@
  * neardal_adp_prv_cb_tag_found: Callback called when a NFC tag is
  * found
  ****************************************************************************/
-static void  neardal_adp_prv_cb_tag_found(orgNeardTag *proxy,
+static void  neardal_adp_prv_cb_tag_found(OrgNeardTag *proxy,
 					     const gchar *arg_unnamed_arg0,
 					     void        *user_data)
 {
@@ -63,7 +63,7 @@ static void  neardal_adp_prv_cb_tag_found(orgNeardTag *proxy,
  * neardal_adp_prv_cb_tag_lost: Callback called when a NFC tag is
  * lost (removed)
  ****************************************************************************/
-static void neardal_adp_prv_cb_tag_lost(orgNeardTag *proxy,
+static void neardal_adp_prv_cb_tag_lost(OrgNeardTag *proxy,
 					   const gchar *arg_unnamed_arg0,
 					   void *user_data)
 {
@@ -96,7 +96,7 @@ static void neardal_adp_prv_cb_tag_lost(orgNeardTag *proxy,
  * neardal_adp_prv_cb_dev_found: Callback called when a NFC dev is
  * found
  ****************************************************************************/
-static void  neardal_adp_prv_cb_dev_found(orgNeardDev *proxy,
+static void  neardal_adp_prv_cb_dev_found(OrgNeardDevice *proxy,
 					     const gchar *arg_unnamed_arg0,
 					     void        *user_data)
 {
@@ -126,7 +126,7 @@ static void  neardal_adp_prv_cb_dev_found(orgNeardDev *proxy,
  * neardal_adp_prv_cb_dev_lost: Callback called when a NFC dev is
  * lost (removed)
  ****************************************************************************/
-static void neardal_adp_prv_cb_dev_lost(orgNeardDev *proxy,
+static void neardal_adp_prv_cb_dev_lost(OrgNeardDevice *proxy,
 					   const gchar *arg_unnamed_arg0,
 					   void *user_data)
 {
@@ -159,7 +159,7 @@ static void neardal_adp_prv_cb_dev_lost(orgNeardDev *proxy,
  * neardal_adp_prv_cb_property_changed: Callback called when a NFC tag
  * is found
  ****************************************************************************/
-static void neardal_adp_prv_cb_property_changed(orgNeardAdp *proxy,
+static void neardal_adp_prv_cb_property_changed(OrgNeardAdapter *proxy,
 						const gchar *arg_unnamed_arg0,
 						GVariant *arg_unnamed_arg1,
 						void        *user_data)
@@ -335,7 +335,7 @@ static errorCode_t neardal_adp_prv_read_properties(AdpProp *adpProp)
 	NEARDAL_ASSERT_RET(adpProp->proxy != NULL
 			  , NEARDAL_ERROR_INVALID_PARAMETER);
 
-	org_neard_adp__call_get_properties_sync(adpProp->proxy, &tmp,
+	org_neard_adapter_call_get_properties_sync(adpProp->proxy, &tmp,
 						NULL, &gerror);
 	if (gerror != NULL) {
 		err = NEARDAL_ERROR_DBUS_CANNOT_INVOKE_METHOD;
@@ -506,7 +506,7 @@ static errorCode_t neardal_adp_prv_init(AdpProp *adpProp)
 	if (adpProp->name == NULL)
 		return err;
 
-	adpProp->proxy = org_neard_adp__proxy_new_sync(neardalMgr.conn,
+	adpProp->proxy = org_neard_adapter_proxy_new_sync(neardalMgr.conn,
 					G_DBUS_OBJECT_MANAGER_CLIENT_FLAGS_NONE,
 							NEARD_DBUS_SERVICE,
 							adpProp->name,
