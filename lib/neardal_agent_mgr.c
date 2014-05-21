@@ -143,7 +143,7 @@ static gboolean on_RequestOOB(neardalHandoverAgent	*handoverAgent
 	neardal_handover_agent_t	*agent_data	= user_data;
 	unsigned char  			*oobData	= NULL;
 	unsigned int			oobDataLen	= 0;
-	void				(*freeFunc)(void * ptr);
+	void				(*freeFunc)(void *) = NULL;
 	gchar	   			*blobKey;
 	gchar	   			*blob		= NULL;
 	gsize	   			blobLen		= 0;
@@ -159,7 +159,6 @@ static gboolean on_RequestOOB(neardalHandoverAgent	*handoverAgent
 	NEARDAL_TRACEF("%s\n", g_variant_print(values, TRUE));
 
 	if (agent_data != NULL) {
-		freeFunc = NULL;
 		NEARDAL_TRACEF("handoverAgent pid=%d, obj path is : %s\n"
 			      , agent_data->pid
 			      , agent_data->objPath);
