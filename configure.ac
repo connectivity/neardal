@@ -7,7 +7,7 @@ AC_CONFIG_HEADERS([config.h])
 m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
 
 ## Default values
-CFLAGS="-W -Wall"
+AM_CPPFLAGS="-W -Wall"
 ## Compiled in debug mode
 debug=yes
 ## Compiled with traces
@@ -29,10 +29,10 @@ AC_ARG_ENABLE(debug, AC_HELP_STRING([--disable-debug],
 ])
 
 if (test "${debug}" = "yes"); then
-	CFLAGS="$CFLAGS -g -O0 -DNEARDAL_DEBUG"
+	AM_CPPFLAGS="$AM_CPPFLAGS -g -O0 -DNEARDAL_DEBUG"
 	echo 'NEARDAL will be compiled in debug mode.(NEARDAL_DEBUG will be defined)'
 else
-	CFLAGS="$CFLAGS -O2"
+	AM_CPPFLAGS="$AM_CPPFLAGS -O2"
 	echo 'NEARDAL will not be compiled in debug mode. (NEARDAL_DEBUG will not be defined)'
 fi
 
@@ -44,7 +44,7 @@ AC_ARG_ENABLE(traces, AC_HELP_STRING([--enable-traces],
  	fi
 ])
 if (test "${traces}" = "yes"); then
-	CFLAGS="$CFLAGS -DNEARDAL_TRACES"
+	AM_CPPFLAGS="$AM_CPPFLAGS -DNEARDAL_TRACES"
  	echo "NEARDAL will be compiled with debugging traces...(NEARDAL_TRACES will be defined)"
 else
 	echo "NEARDAL will be compiled without debugging traces... (NEARDAL_TRACES will not be defined)"
