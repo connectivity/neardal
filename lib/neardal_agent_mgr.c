@@ -233,10 +233,10 @@ static gboolean on_RequestOOB(neardalHandoverAgent	*handoverAgent
 		g_free(blob);
 
 	if (err != NEARDAL_SUCCESS)
-		g_dbus_method_invocation_return_error(invocation
-						      , G_DBUS_ERROR_FAILED
-						      , G_DBUS_ERROR_FAILED
-						, neardal_error_get_text(err));
+		g_dbus_method_invocation_return_error(invocation,
+					G_DBUS_ERROR_FAILED,
+					G_DBUS_ERROR_FAILED,
+					"%s", neardal_error_get_text(err));
 
 	return TRUE;
 }
