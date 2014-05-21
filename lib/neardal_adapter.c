@@ -211,7 +211,7 @@ static void neardal_adp_prv_cb_property_changed(OrgNeardAdapter *proxy,
 	}
 
 	if (!strcmp(arg_unnamed_arg0, "Tags")) {
-		guint tmpLen;
+		gsize tmpLen;
 
 		array = g_variant_dup_objv(gvalue, &tmpLen);
 		adpProp->tagNb = tmpLen;
@@ -258,7 +258,7 @@ static void neardal_adp_prv_cb_property_changed(OrgNeardAdapter *proxy,
 	}
 
 	if (!strcmp(arg_unnamed_arg0, "Devices")) {
-		guint tmpLen;
+		gsize tmpLen;
 
 		array = g_variant_dup_objv(gvalue, &tmpLen);
 		adpProp->devNb = tmpLen;
