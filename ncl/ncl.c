@@ -46,8 +46,7 @@ static void ncl_trace_prv_dump_data_as_binary_format(char *bufToReadP,
 	int offset = 0;
 
 	while (offset < nbColumn && offset < remainingSize) {
-		g_string_append_printf(bufDestP, "%02hX ",
-				       ((unsigned char) bufToReadP[offset]));
+		g_string_append_printf(bufDestP, "%02hhX ", bufToReadP[offset]);
 		offset++;
 	}
 	/* Adding space to align ascii format */
