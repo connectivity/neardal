@@ -36,10 +36,6 @@
 		gValue = g_variant_new_string(value); \
 		 } while (0);
 
-#define NEARDAL_SET_BOOL_VALUE(gValue, value)  do { \
-		gValue = g_variant_new_boolean((gboolean) value); \
-		 } while (0);
-
 #define	ADP_MODE_INITIATOR		"Initiator"
 #define	ADP_MODE_TARGET			"Target"
 #define	ADP_MODE_DUAL			"Dual"
@@ -519,7 +515,7 @@ errorCode_t neardal_set_adapter_property(const char *adpName,
 	switch (adpPropId) {
 	case NEARD_ADP_PROP_POWERED:
 		propKey = "Powered";
-		NEARDAL_SET_BOOL_VALUE(variantTmp, value);
+		variantTmp = g_variant_new_boolean(GPOINTER_TO_UINT(value));
 		break;
 	default:
 		break;
