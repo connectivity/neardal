@@ -1,21 +1,26 @@
 
 lib_LTLIBRARIES = libneardal.la
+noinst_LTLIBRARIES = libgenerated.la
 
-libneardal_la_SOURCES =	$(generated_sources) \
+libneardal_la_SOURCES = \
 	neardal.c neardal_adapter.c neardal_agent_mgr.c neardal_device.c \
 	neardal_manager.c neardal_record.c neardal_tag.c neardal_tools.c \
 	neardal_traces.c
+libneardal_la_LIBADD = libgenerated.la
 libneardal_la_LDFLAGS = -version-info @VERSION_INFO@
 libneardal_la_includedir = $(includedir)/neardal
 libneardal_la_include_HEADERS = neardal.h neardal_errors.h
 
-generated_sources = \
+libgenerated_la_SOURCES = \
 	neard_manager_proxy.c neard_manager_proxy.h \
 	neard_record_proxy.c neard_record_proxy.h \
 	neard_tag_proxy.c neard_tag_proxy.h \
 	neard_device_proxy.c neard_device_proxy.h \
 	neard_adapter_proxy.c neard_adapter_proxy.h \
 	neardal_agent.c neardal_agent.h
+libgenerated_la_CFLAGS = -Wno-unused-parameter
+
+$(libneardal_la_SOURCES): $(libgenerated_la_SOURCES)
 
 neardal_agent.c neardal_agent.h: interface/org.neard.Agent.xml
 	$(AM_V_GEN)gdbus-codegen --generate-c-code $(basename $@) $< \
@@ -41,4 +46,4 @@ neard_manager_proxy.c neard_manager_proxy.h: interface/org.neard.Manager.xml
 neard_device_proxy.c neard_device_proxy.h: interface/org.neard.Device.xml
 	$(run-gdbus)
 
-CLEANFILES = $(generated_sources)
+CLEANFILES = $(libgenerated_la_SOURCES)
