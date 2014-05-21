@@ -992,8 +992,8 @@ static GOptionEntry options[] = {
 	adapterName = argv[1];
 	if (powered >= 0)
 		ec = neardal_set_adapter_property(adapterName,
-						  NEARD_ADP_PROP_POWERED,
-						  (void*) powered);
+						NEARD_ADP_PROP_POWERED,
+						GINT_TO_POINTER(powered));
 
 exit:
 	NCL_CMD_PRINT("\nExit with error code %d:%s\n", ec,
