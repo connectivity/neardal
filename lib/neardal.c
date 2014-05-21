@@ -62,8 +62,8 @@ void neardal_prv_construct(errorCode_t *ec)
 
 	NEARDAL_TRACEIN();
 	memset(&neardalMgr.conn, 0, sizeof(neardalCtx) - sizeof(neardalCb));
+
 	/* Create DBUS connection */
-	g_type_init();
 	neardalMgr.conn = g_bus_get_sync(NEARDAL_DBUS_TYPE, NULL,
 					   &neardalMgr.gerror);
 	if (neardalMgr.conn != NULL) {
