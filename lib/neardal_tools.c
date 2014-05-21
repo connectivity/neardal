@@ -106,7 +106,7 @@ errorCode_t neardal_tools_prv_add_dict_entry(GVariantBuilder *builder
 		tmp = g_variant_new_string(value);
 		break;
 	case G_TYPE_UINT:
-		tmp = g_variant_new_uint32((guint32) value);
+		tmp = g_variant_new_uint32(GPOINTER_TO_UINT(value));
 		break;
 	default:
 		/* if valueSize > 0, consider value as byte array
