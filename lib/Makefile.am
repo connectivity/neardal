@@ -20,7 +20,7 @@ libgenerated_la_SOURCES = \
 	neardal_agent.c neardal_agent.h
 libgenerated_la_CFLAGS = -Wno-unused-parameter
 
-$(libneardal_la_SOURCES): $(libgenerated_la_SOURCES)
+$(libneardal_la_SOURCES): libgenerated.la
 
 neardal_agent.c neardal_agent.h: interface/org.neard.Agent.xml
 	$(AM_V_GEN)gdbus-codegen --generate-c-code $(basename $@) $< \
