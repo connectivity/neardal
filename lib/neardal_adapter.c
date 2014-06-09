@@ -318,13 +318,62 @@ exit:
 	return;
 }
 
+static GVariant *neardal_adp_properties_get(char *name)
+{
+	char *s = NULL;
+	GVariant *path = NULL, *interface = NULL, *properties, *tmp;
+	GVariantIter iter;
+	int i;
+
+	g_variant_iter_init(&iter, neardalMgr.dbus_objs);
+
+	for (i = 0; g_variant_iter_loop(&iter, "{o*}", &s, NULL); i++) {
+		if (strcmp(s, name) != 0)
+			continue;
+		g_free(s);
+		s = NULL;
+		path = g_variant_get_child_value(neardalMgr.dbus_objs, i);
+		NEARDAL_TRACEF("Found path: %s\n", g_variant_print(path, TRUE));
+		break;
+	}
+
+	if (!path)
+		return NULL;
+
+	tmp = g_variant_get_child_value(path, i);
+	g_variant_unref(path);
+
+	g_variant_iter_init(&iter, tmp);
+
+	for (i = 0; g_variant_iter_loop(&iter, "{s*}", &s, NULL); i++) {
+		if (strcmp(s, "org.neard.Adapter") != 0)
+			continue;
+		g_free(s);
+		s = NULL;
+		interface = g_variant_get_child_value(tmp, i);
+		g_variant_unref(tmp);
+		NEARDAL_TRACEF("Found interface: %s\n",
+				g_variant_print(interface, TRUE));
+		continue;
+	}
+
+	if (!interface)
+		return NULL;
+
+	properties = g_variant_get_child_value(interface, 1);
+	g_variant_unref(interface);
+
+	NEARDAL_TRACEF("%s\n", g_variant_print(properties, TRUE));
+
+	return properties;
+}
+
 /*****************************************************************************
  * neardal_adp_prv_read_properties: Get Neard Adapter Properties
  ****************************************************************************/
 static errorCode_t neardal_adp_prv_read_properties(AdpProp *adpProp)
 {
 	errorCode_t	err	= NEARDAL_SUCCESS;
-	GError		*gerror	= NULL;
 	GVariant	*tmp	= NULL;
 	GVariant	*tmpOut	= NULL;
 	gchar		**array	= NULL;
@@ -335,14 +384,10 @@ static errorCode_t neardal_adp_prv_read_properties(AdpProp *adpProp)
 	NEARDAL_ASSERT_RET(adpProp->proxy != NULL
 			  , NEARDAL_ERROR_INVALID_PARAMETER);
 
-	org_neard_adapter_call_get_properties_sync(adpProp->proxy, &tmp,
-						NULL, &gerror);
-	if (gerror != NULL) {
-		err = NEARDAL_ERROR_DBUS_CANNOT_INVOKE_METHOD;
-		NEARDAL_TRACE_ERR(
-			"Unable to read adapter's properties (%d:%s)\n",
-				 gerror->code, gerror->message);
-		g_error_free(gerror);
+	if (!(tmp = neardal_adp_properties_get(adpProp->name))) {
+		err = NEARDAL_ERROR_GENERAL_ERROR;
+		NEARDAL_TRACE_ERR("Unable to read adapter's properties (%s)\n",
+					adpProp->name);
 		goto exit;
 	}
 
