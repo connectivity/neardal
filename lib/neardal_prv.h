@@ -1,7 +1,7 @@
 /*
  *     NEARDAL (Neard Abstraction Library)
  *
- *     Copyright 2012 Intel Corporation. All rights reserved.
+ *     Copyright 2012-2014 Intel Corporation. All rights reserved.
  *
  *     This program is free software; you can redistribute it and/or modify
  *     it under the terms of the GNU Lesser General Public License version 2
@@ -28,6 +28,7 @@
 #include "neardal_tools.h"
 #include "neardal_traces_prv.h"
 #include "neardal.h"
+#include "dbus-object-manager.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -86,6 +87,8 @@ typedef struct {
 	neardalCb	cb;			/* Neardal Callbacks */
 	GDBusConnection	*conn;			/* DBus connection */
 	OrgNeardManager	*proxy;			/* Neard Mgr dbus proxy */
+	ObjectManager	*dbus_om;
+	GVariant	*dbus_objs;
 	MgrProp		prop;			/* Mgr Properties
 							(adapter list) */
 	guint		OwnerId;		/* dbus Id server side */
