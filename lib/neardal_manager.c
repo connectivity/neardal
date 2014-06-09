@@ -107,6 +107,32 @@ static void neardal_mgr_prv_cb_adapter_removed(OrgNeardManager *proxy,
 		      g_list_length(neardalMgr.prop.adpList));
 }
 
+static void neardal_mgr_adapters_parse(GVariant *v, char ***adps, gsize *nadps)
+{
+	char *s = NULL;
+	GVariantIter iter;
+
+	*adps = g_new0(char *, g_variant_n_children(v) + 1);
+	*nadps = 0;
+
+	g_variant_iter_init(&iter, v);
+
+	while (g_variant_iter_loop(&iter, "{o*}", &s, NULL)) {
+		if (g_str_has_prefix(s, "/org/neard/nfc")) {
+			NEARDAL_TRACEF("Found adapter: %s\n", s);
+			(*adps)[(*nadps)++] = s;
+			s = NULL;
+		}
+	}
+
+	if (!*nadps) {
+		g_free(*adps);
+		return;
+	}
+
+	NEARDAL_TRACEF("Found %lu adapter(s)\n", *nadps);
+}
+
 /*****************************************************************************
  * neardal_mgr_prv_get_all_adapters: Check if neard has an adapter
  ****************************************************************************/
@@ -114,8 +140,6 @@ static errorCode_t neardal_mgr_prv_get_all_adapters(gchar ***adpArray,
 						    gsize *len)
 {
 	errorCode_t	err		= NEARDAL_ERROR_NO_ADAPTER;
-	GVariant	*tmp		= NULL;
-	GVariant	*tmpOut		= NULL;
 
 	NEARDAL_ASSERT_RET(adpArray != NULL, NEARDAL_ERROR_INVALID_PARAMETER);
 
@@ -125,13 +149,10 @@ static errorCode_t neardal_mgr_prv_get_all_adapters(gchar ***adpArray,
 				g_variant_print(neardalMgr.dbus_objs, TRUE));
 		NEARDAL_TRACEF("Parsing neard adapters...\n");
 
-		tmpOut = g_variant_lookup_value(tmp, NEARD_MGR_SECTION_ADAPTERS,
-						G_VARIANT_TYPE_ARRAY);
-		if (tmpOut != NULL) {
-			*adpArray = g_variant_dup_objv(tmpOut, len);
-			err = NEARDAL_SUCCESS;
-		} else
-			err = NEARDAL_ERROR_NO_ADAPTER;
+		neardal_mgr_adapters_parse(neardalMgr.dbus_objs, adpArray, len);
+
+		err = *len ? NEARDAL_SUCCESS : NEARDAL_ERROR_NO_ADAPTER;
+
 	} else {
 		err = NEARDAL_ERROR_DBUS_CANNOT_INVOKE_METHOD;
 		NEARDAL_TRACE_ERR("%d:%s\n", neardalMgr.gerror->code,
