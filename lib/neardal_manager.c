@@ -119,11 +119,10 @@ static errorCode_t neardal_mgr_prv_get_all_adapters(gchar ***adpArray,
 
 	NEARDAL_ASSERT_RET(adpArray != NULL, NEARDAL_ERROR_INVALID_PARAMETER);
 
-	/* Invoking method 'GetProperties' on Neard Manager */
-	if (org_neard_manager_call_get_properties_sync(neardalMgr.proxy, &tmp,
-						    NULL,
-					     &neardalMgr.gerror)) {
-		NEARDAL_TRACEF("Reading:\n%s\n", g_variant_print(tmp, TRUE));
+	if (object_manager_call_get_managed_objects_sync(neardalMgr.dbus_om,
+			&neardalMgr.dbus_objs, NULL, &neardalMgr.gerror)) {
+		NEARDAL_TRACEF("Reading:\n%s\n",
+				g_variant_print(neardalMgr.dbus_objs, TRUE));
 		NEARDAL_TRACEF("Parsing neard adapters...\n");
 
 		tmpOut = g_variant_lookup_value(tmp, NEARD_MGR_SECTION_ADAPTERS,
