@@ -17,7 +17,8 @@ libgenerated_la_SOURCES = \
 	neard_tag_proxy.c neard_tag_proxy.h \
 	neard_device_proxy.c neard_device_proxy.h \
 	neard_adapter_proxy.c neard_adapter_proxy.h \
-	neardal_agent.c neardal_agent.h
+	neardal_agent.c neardal_agent.h \
+	dbus-object-manager.c dbus-object-manager.h
 libgenerated_la_CFLAGS = -Wno-unused-parameter
 
 $(libneardal_la_SOURCES): libgenerated.la
@@ -45,5 +46,8 @@ neard_manager_proxy.c neard_manager_proxy.h: interface/org.neard.Manager.xml
 
 neard_device_proxy.c neard_device_proxy.h: interface/org.neard.Device.xml
 	$(run-gdbus)
+
+%.c: interface/%.xml
+	$(run-gdbus) --interface-prefix="org.freedesktop.DBus."
 
 CLEANFILES = $(libgenerated_la_SOURCES)
