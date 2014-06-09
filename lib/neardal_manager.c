@@ -326,6 +326,9 @@ void neardal_mgr_destroy(void)
 	g_object_unref(neardalMgr.proxy);
 	neardalMgr.proxy = NULL;
 
+	g_variant_unref(neardalMgr.dbus_objs);
+	neardalMgr.dbus_objs = NULL;
+
 	g_object_unref(neardalMgr.dbus_om);
 	neardalMgr.dbus_om = NULL;
 }
