@@ -1,7 +1,7 @@
 /*
  *     NEARDAL (Neard Abstraction Library)
  *
- *     Copyright 2012 Intel Corporation. All rights reserved.
+ *     Copyright 2012-2014 Intel Corporation. All rights reserved.
  *
  *     This program is free software; you can redistribute it and/or modify
  *     it under the terms of the GNU Lesser General Public License version 2
@@ -245,6 +245,20 @@ errorCode_t neardal_mgr_create(void)
 		return NEARDAL_ERROR_DBUS_CANNOT_CREATE_PROXY;
 	}
 
+	neardalMgr.gerror = NULL;
+
+	neardalMgr.dbus_om = object_manager_proxy_new_sync(neardalMgr.conn, 0,
+				NEARD_DBUS_SERVICE, NEARD_MGR_PATH, NULL,
+				&neardalMgr.gerror);
+	if (neardalMgr.gerror) {
+		NEARDAL_TRACE_ERR("Error creating ObjectManager proxy: %s\n",
+					neardalMgr.gerror->message);
+		neardal_tools_prv_free_gerror(&neardalMgr.gerror);
+		g_object_unref(neardalMgr.proxy);
+		neardalMgr.proxy = NULL;
+		return NEARDAL_ERROR_DBUS_CANNOT_CREATE_PROXY;
+	}
+
 	/* Get and store NFC adapters (is present) */
 	err = neardal_mgr_prv_get_all_adapters(&adpArray, &adpArrayLen);
 	if (adpArray != NULL && adpArrayLen > 0) {
@@ -311,4 +325,7 @@ void neardal_mgr_destroy(void)
 						NULL);
 	g_object_unref(neardalMgr.proxy);
 	neardalMgr.proxy = NULL;
+
+	g_object_unref(neardalMgr.dbus_om);
+	neardalMgr.dbus_om = NULL;
 }
