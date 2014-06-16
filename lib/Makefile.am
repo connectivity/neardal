@@ -18,7 +18,8 @@ libgenerated_la_SOURCES = \
 	neard_device_proxy.c neard_device_proxy.h \
 	neard_adapter_proxy.c neard_adapter_proxy.h \
 	neardal_agent.c neardal_agent.h \
-	dbus-object-manager.c dbus-object-manager.h
+	dbus-object-manager.c dbus-object-manager.h \
+	dbus-properties.c dbus-properties.h
 libgenerated_la_CFLAGS = -Wno-unused-parameter
 
 $(libneardal_la_SOURCES): libgenerated.la
