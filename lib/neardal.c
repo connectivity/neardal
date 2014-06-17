@@ -516,18 +516,19 @@ errorCode_t neardal_set_adapter_property(const char *adpName,
 	case NEARD_ADP_PROP_POWERED:
 		propKey = "Powered";
 		variantTmp = g_variant_new_boolean(GPOINTER_TO_UINT(value));
+		g_variant_ref_sink(variantTmp);
 		break;
 	default:
 		break;
 	}
 
 	propValue = g_variant_new_variant(variantTmp);
+	g_variant_ref_sink(propValue);
 	NEARDAL_TRACE_LOG("Sending:\n%s=%s\n", propKey,
 			  g_variant_print(propValue, TRUE));
-	org_neard_adapter_call_set_property_sync(adpProp->proxy, propKey,
-					      propValue, NULL,
-					      &neardalMgr.gerror);
 
+	properties_call_set_sync(adpProp->props, "org.neard.Adapter",
+				propKey, propValue, 0, &neardalMgr.gerror);
 
 	if (neardalMgr.gerror == NULL)
 		err = NEARDAL_SUCCESS;
