@@ -24,6 +24,7 @@
 #include "neard_adapter_proxy.h"
 #include "neardal_device.h"
 #include "neardal_tag.h"
+#include "dbus-properties.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -37,6 +38,7 @@ extern "C" {
 typedef struct {
 	OrgNeardAdapter		*proxy;		/* The proxy connected to Neard
 						Adapter interface */
+	Properties		*props;
 	gchar			*name;		/* DBus interface name
 						(as id) */
 	gchar			*mode;		/* NFC radio mode */

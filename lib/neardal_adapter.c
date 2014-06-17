@@ -567,6 +567,19 @@ static errorCode_t neardal_adp_prv_init(AdpProp *adpProp)
 		return NEARDAL_ERROR_DBUS_CANNOT_CREATE_PROXY;
 	}
 
+	adpProp->props = properties_proxy_new_sync(neardalMgr.conn, 0,
+				NEARD_DBUS_SERVICE, adpProp->name, NULL,
+				&neardalMgr.gerror);
+
+	if (neardalMgr.gerror) {
+		NEARDAL_TRACE_ERR("Error creating Properties proxy: %s\n",
+					neardalMgr.gerror->message);
+		neardal_tools_prv_free_gerror(&neardalMgr.gerror);
+		g_object_unref(adpProp->proxy);
+		adpProp->proxy = NULL;
+		return NEARDAL_ERROR_DBUS_CANNOT_CREATE_PROXY;
+	}
+
 	err = neardal_adp_prv_read_properties(adpProp);
 
 	NEARDAL_TRACEF("Register Neard-Adapter Signal ");
@@ -610,6 +623,8 @@ static void neardal_adp_prv_free(AdpProp **adpProp)
 		g_object_unref((*adpProp)->proxy);
 		(*adpProp)->proxy = NULL;
 	}
+	g_object_unref((*adpProp)->props);
+	(*adpProp)->props = NULL;
 	g_free((*adpProp)->name);
 	if ((*adpProp)->mode != NULL)
 		g_free((*adpProp)->mode);
