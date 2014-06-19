@@ -2,21 +2,10 @@
 "http://www.freedesktop.org/standards/dbus/1.0/introspect.dtd">
 <node>
 	<interface name="org.neard.Adapter">
-		<method name="GetProperties">
-			<arg name="properties" type="a{sv}" direction="out"/>
-		</method>
-		<method name="SetProperty">
-			<arg name="name" type="s" direction="in"/>
-			<arg name="value" type="v" direction="in"/>
-		</method>
 		<method name="StartPollLoop">
 			<arg name="name" type="s" direction="in"/>
 		</method>
 		<method name="StopPollLoop"/>
-		<signal name="PropertyChanged">
-			<arg name="name" type="s"/>
-			<arg name="value" type="v"/>
-		</signal>
 		<signal name="TagFound">
 			<arg name="address" type="o"/>
 		</signal>
