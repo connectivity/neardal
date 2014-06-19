@@ -1,7 +1,7 @@
 /*
  *     NEARDAL (Neard Abstraction Library)
  *
- *     Copyright 2012 Intel Corporation. All rights reserved.
+ *     Copyright 2012-2014 Intel Corporation. All rights reserved.
  *
  *     This program is free software; you can redistribute it and/or modify
  *     it under the terms of the GNU Lesser General Public License version 2
@@ -318,6 +318,39 @@ exit:
 	return;
 }
 
+static void neardal_adp_prv_cb_properties_changed(
+				Properties *props __attribute__ ((unused)),
+				const gchar *interface,
+				GVariant *changed,
+				const gchar *const *invalidated,
+				void *user_data)
+{
+	char *s = NULL;
+	GVariant *v = NULL;
+	GVariantIter iter;
+	AdpProp *adp;
+
+	neardal_mgr_prv_get_adapter_from_proxy(user_data, &adp);
+
+	NEARDAL_ASSERT(adp != NULL);
+	NEARDAL_ASSERT(g_strv_length((gchar **) invalidated) == 0);
+
+	NEARDAL_TRACEF("Interface: %s\n", interface);
+	NEARDAL_TRACEF("Adapter: %s\n", adp->name);
+	NEARDAL_TRACEF("Changed: %s\n", g_variant_print(changed, TRUE));
+
+	g_variant_iter_init(&iter, changed);
+
+	while (g_variant_iter_loop(&iter, "{sv}", &s, &v)) {
+		GVariant *vb = g_variant_new_variant(v);
+		g_variant_ref_sink(vb);
+		NEARDAL_TRACEF("Property: %s=%s\n", s,
+				g_variant_print(vb, TRUE));
+		neardal_adp_prv_cb_property_changed(user_data, s, vb, 0);
+		g_variant_unref(vb);
+	}
+}
+
 static GVariant *neardal_adp_properties_get(char *name)
 {
 	char *s = NULL;
@@ -535,9 +568,6 @@ static errorCode_t neardal_adp_prv_init(AdpProp *adpProp)
 
 	if (adpProp->proxy != NULL) {
 		g_signal_handlers_disconnect_by_func(adpProp->proxy,
-				G_CALLBACK(neardal_adp_prv_cb_property_changed),
-						     NULL);
-		g_signal_handlers_disconnect_by_func(adpProp->proxy,
 				G_CALLBACK(neardal_adp_prv_cb_tag_found),
 						     NULL);
 		g_signal_handlers_disconnect_by_func(adpProp->proxy,
@@ -567,6 +597,14 @@ static errorCode_t neardal_adp_prv_init(AdpProp *adpProp)
 		return NEARDAL_ERROR_DBUS_CANNOT_CREATE_PROXY;
 	}
 
+	if (adpProp->props) {
+		g_signal_handlers_disconnect_by_func(adpProp->props,
+			G_CALLBACK(neardal_adp_prv_cb_properties_changed),
+							adpProp->proxy);
+		g_object_unref(adpProp->props);
+		adpProp->props = NULL;
+	}
+
 	adpProp->props = properties_proxy_new_sync(neardalMgr.conn, 0,
 				NEARD_DBUS_SERVICE, adpProp->name, NULL,
 				&neardalMgr.gerror);
@@ -583,10 +621,10 @@ static errorCode_t neardal_adp_prv_init(AdpProp *adpProp)
 	err = neardal_adp_prv_read_properties(adpProp);
 
 	NEARDAL_TRACEF("Register Neard-Adapter Signal ");
-	NEARDAL_TRACE("'PropertyChanged'\n");
-	g_signal_connect(adpProp->proxy, NEARD_ADP_SIG_PROPCHANGED,
-			G_CALLBACK(neardal_adp_prv_cb_property_changed),
-			  NULL);
+	NEARDAL_TRACE("'PropertiesChanged'\n");
+	g_signal_connect(adpProp->props, NEARD_ADP_SIG_PROPCHANGED,
+			G_CALLBACK(neardal_adp_prv_cb_properties_changed),
+			adpProp->proxy);
 
 	/* Register 'TagFound', 'TagLost' */
 	NEARDAL_TRACEF("Register Neard-Adapter Signal ");
@@ -610,10 +648,14 @@ static errorCode_t neardal_adp_prv_init(AdpProp *adpProp)
 static void neardal_adp_prv_free(AdpProp **adpProp)
 {
 	NEARDAL_TRACEIN();
+	if ((*adpProp)->props) {
+		g_signal_handlers_disconnect_by_func((*adpProp)->props,
+			G_CALLBACK(neardal_adp_prv_cb_properties_changed),
+						     (*adpProp)->proxy);
+		g_object_unref((*adpProp)->props);
+		(*adpProp)->props = NULL;
+	}
 	if ((*adpProp)->proxy != NULL) {
-		g_signal_handlers_disconnect_by_func((*adpProp)->proxy,
-				G_CALLBACK(neardal_adp_prv_cb_property_changed),
-						     NULL);
 		g_signal_handlers_disconnect_by_func((*adpProp)->proxy,
 				G_CALLBACK(neardal_adp_prv_cb_tag_found),
 						     NULL);
@@ -623,8 +665,6 @@ static void neardal_adp_prv_free(AdpProp **adpProp)
 		g_object_unref((*adpProp)->proxy);
 		(*adpProp)->proxy = NULL;
 	}
-	g_object_unref((*adpProp)->props);
-	(*adpProp)->props = NULL;
 	g_free((*adpProp)->name);
 	if ((*adpProp)->mode != NULL)
 		g_free((*adpProp)->mode);

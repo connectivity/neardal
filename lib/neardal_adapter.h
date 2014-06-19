@@ -1,7 +1,7 @@
 /*
  *     NEARDAL (Neard Abstraction Library)
  *
- *     Copyright 2012 Intel Corporation. All rights reserved.
+ *     Copyright 2012-2014 Intel Corporation. All rights reserved.
  *
  *     This program is free software; you can redistribute it and/or modify
  *     it under the terms of the GNU Lesser General Public License version 2
@@ -30,7 +30,7 @@
 extern "C" {
 #endif	/* __cplusplus */
 
-#define NEARD_ADP_SIG_PROPCHANGED			"property-changed"
+#define NEARD_ADP_SIG_PROPCHANGED			"properties-changed"
 #define NEARD_ADP_SIG_TAG_FOUND				"tag-found"
 #define NEARD_ADP_SIG_TAG_LOST				"tag-lost"
 
