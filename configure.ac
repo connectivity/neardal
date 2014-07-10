@@ -7,7 +7,7 @@ AC_CONFIG_HEADERS([config.h])
 m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
 
 ## Default values
-AM_CPPFLAGS="-W -Wall"
+CFLAGS="-Wall"
 ## Compiled in debug mode
 debug=yes
 ## Compiled with traces
@@ -27,10 +27,10 @@ AC_ARG_ENABLE(debug, AC_HELP_STRING([--disable-debug],
 ])
 
 if (test "${debug}" = "yes"); then
-	AM_CPPFLAGS="$AM_CPPFLAGS -g -O0 -DNEARDAL_DEBUG"
+	CFLAGS="$CFLAGS -g -O0 -DNEARDAL_DEBUG"
 	echo 'NEARDAL will be compiled in debug mode.(NEARDAL_DEBUG will be defined)'
 else
-	AM_CPPFLAGS="$AM_CPPFLAGS -O2"
+	CFLAGS="$CFLAGS -O2"
 	echo 'NEARDAL will not be compiled in debug mode. (NEARDAL_DEBUG will not be defined)'
 fi
 
@@ -42,7 +42,7 @@ AC_ARG_ENABLE(traces, AC_HELP_STRING([--enable-traces],
  	fi
 ])
 if (test "${traces}" = "yes"); then
-	AM_CPPFLAGS="$AM_CPPFLAGS -DNEARDAL_TRACES"
+	CFLAGS="$CFLAGS -DNEARDAL_TRACES"
  	echo "NEARDAL will be compiled with debugging traces...(NEARDAL_TRACES will be defined)"
 else
 	echo "NEARDAL will be compiled without debugging traces... (NEARDAL_TRACES will not be defined)"
@@ -53,7 +53,7 @@ echo 'NEARDAL will be compiled with CFLAGS='${CFLAGS}
 VERSION_INFO=$(echo $VERSION | sed -e 's/\./\:/g')
 
 PKG_CHECK_MODULES(gio, gio-unix-2.0 >= 2.30,
-	AM_CPPFLAGS="$AM_CPPFLAGS $gio_CFLAGS" LIBS="$LIBS $gio_LIBS",
+	CFLAGS="$CFLAGS $gio_CFLAGS" LIBS="$LIBS $gio_LIBS",
 	AC_MSG_ERROR(gio-unix-2.0 >= 2.30 is required))
 
 AC_SUBST(AM_CPPFLAGS)
