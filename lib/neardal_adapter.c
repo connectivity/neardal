@@ -74,8 +74,7 @@ void neardal_adp_prv_cb_tag_lost(OrgNeardTag *proxy,
 	NEARDAL_TRACEIN();
 	(void) proxy; /* remove warning */
 	NEARDAL_ASSERT(arg_unnamed_arg0 != NULL);
-
-	neardal_mgr_prv_get_adapter((char *) arg_unnamed_arg0, &adpProp);
+	NEARDAL_ASSERT(adpProp != NULL);
 
 	NEARDAL_TRACEF("Removing tag '%s'\n", arg_unnamed_arg0);
 	/* Invoking Callback 'Tag Found' before adding it (otherwise
