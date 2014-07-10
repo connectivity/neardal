@@ -1,7 +1,7 @@
 /*
  *     NEARDAL Tester command line interpreter
  *
- *     Copyright 2012 Intel Corporation. All rights reserved.
+ *     Copyright 2012-2014 Intel Corporation. All rights reserved.
  *
  *     This program is free software; you can redistribute it and/or modify
  *     it under the terms of the GNU Lesser General Public License version 2
@@ -17,6 +17,9 @@
  *     Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  *
  */
+
+#define _GNU_SOURCE
+#define _POSIX_SOURCE
 
 #include <stdio.h>
 #include <string.h>

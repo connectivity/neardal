@@ -16,6 +16,8 @@ AC_ARG_ENABLE([optimization],
 AC_PROG_CC
 AC_PROG_LIBTOOL
 
+AC_CHECK_FUNCS([getline fileno])
+
 AC_ARG_ENABLE([debug],
 	[AC_HELP_STRING([--enable-debug],
 		[enable compiling with debugging information])],
