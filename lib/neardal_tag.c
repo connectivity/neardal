@@ -69,7 +69,6 @@ static void neardal_tag_prv_cb_property_changed(OrgNeardTag *proxy,
 static errorCode_t neardal_tag_prv_read_properties(TagProp *tagProp)
 {
 	errorCode_t	err		= NEARDAL_SUCCESS;
-	GError		*gerror		= NULL;
 	GVariant	*tmp		= NULL;
 	GVariant	*tmpOut		= NULL;
 	gsize		len;
@@ -80,14 +79,10 @@ static errorCode_t neardal_tag_prv_read_properties(TagProp *tagProp)
 	NEARDAL_ASSERT_RET(tagProp->proxy != NULL
 			  , NEARDAL_ERROR_GENERAL_ERROR);
 
-	org_neard_tag_call_get_properties_sync(tagProp->proxy, &tmp, NULL,
-						&gerror);
-	if (gerror != NULL) {
-		err = NEARDAL_ERROR_DBUS_CANNOT_INVOKE_METHOD;
-		NEARDAL_TRACE_ERR(
-			"Unable to read tag's properties (%d:%s)\n",
-				 gerror->code, gerror->message);
-		g_error_free(gerror);
+	tmp = g_datalist_get_data(&(neardalMgr.dbus_data), tagProp->name);
+	if (tmp == NULL) {
+		err = NEARDAL_ERROR_NO_TAG;
+		NEARDAL_TRACE_ERR("Unable to read tag's properties\n");
 		goto exit;
 	}
 	NEARDAL_TRACEF("Reading:\n%s\n", g_variant_print(tmp, TRUE));
