@@ -58,12 +58,15 @@ PKG_CHECK_MODULES(gio, gio-unix-2.0 >= 2.30,
 	AC_SUBST([gio_LIBS]),
 	AC_MSG_ERROR(gio-unix-2.0 >= 2.30 is required))
 
-AC_CHECK_PROGS([DOXYGEN], [doxygen])
-if test -z "$DOXYGEN";
-   then AC_MSG_WARN([Doxygen not found - continuing without Doxygen support])
-fi
-AM_CONDITIONAL([HAVE_DOXYGEN],
-[test -n "$DOXYGEN"])AM_COND_IF([HAVE_DOXYGEN], [AC_CONFIG_FILES([doxygen.cfg])])
+AC_ARG_ENABLE([doc],
+	AS_HELP_STRING([--enable-doc],
+		[Build API documentation using Doxygen]))
+AS_IF([test "$enable_doc" = "yes"],
+	[AS_UNSET([enable_doc])]
+	[AC_CHECK_PROG(enable_doc, doxygen, [yes], [no])]
+)
+AM_CONDITIONAL([HAVE_DOXYGEN], [test "$enable_doc" = "yes"])
+AM_COND_IF([HAVE_DOXYGEN], [AC_CONFIG_FILES([doxygen.cfg])])
 
 AC_CONFIG_FILES([Makefile lib/Makefile ncl/Makefile neardal.pc])
 AC_OUTPUT
