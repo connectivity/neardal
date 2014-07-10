@@ -6,8 +6,6 @@ AC_CONFIG_HEADERS([config.h])
 
 m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
 
-## Compiled in debug mode
-debug=yes
 ## Compiled with traces
 traces=no
 
@@ -21,22 +19,13 @@ AC_ARG_ENABLE([optimization],
 AC_PROG_CC
 AC_PROG_LIBTOOL
 
-## Compiler option
-## Debug ?
-AC_ARG_ENABLE(debug, AC_HELP_STRING([--disable-debug],
-			[disable compiling with debugging information]), [
-	if (test "${enableval}" = "no" &&
-				test "${ac_cv_prog_cc_g}" = "yes"); then
-		debug=no
-	fi
-])
+AC_ARG_ENABLE([debug],
+	[AC_HELP_STRING([--enable-debug],
+		[enable compiling with debugging information])],
+	[CFLAGS="-DNEARDAL_DEBUG $CFLAGS"])
 
-if (test "${debug}" = "yes"); then
-	CFLAGS="$CFLAGS -g -DNEARDAL_DEBUG"
-	echo 'NEARDAL will be compiled in debug mode.(NEARDAL_DEBUG will be defined)'
-else
-	echo 'NEARDAL will not be compiled in debug mode. (NEARDAL_DEBUG will not be defined)'
-fi
+AS_IF([test "$ac_cv_prog_cc_g" = "yes"] && [test "$cflags_set" = "no" ],
+	[CFLAGS="-g $CFLAGS"])
 
 ## Traces ?
 AC_ARG_ENABLE(traces, AC_HELP_STRING([--enable-traces],
