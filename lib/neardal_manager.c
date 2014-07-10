@@ -29,6 +29,25 @@
 #include "neardal.h"
 #include "neardal_prv.h"
 
+static void neardal_mgr_interfaces_added(ObjectManager *om,
+					const gchar *path, GVariant *interfaces)
+{
+	NEARDAL_TRACEF("path=%s\n", path);
+	NEARDAL_TRACEF("interfaces=%s\n", g_variant_print(interfaces, TRUE));
+}
+
+static void neardal_mgr_interfaces_removed(ObjectManager *om,
+						const gchar *path,
+						const gchar *const *interfaces)
+{
+	char *s = g_strjoinv("' '", (gchar **)interfaces);
+
+	NEARDAL_TRACEF("path=%s\n", path);
+	NEARDAL_TRACEF("interfaces='%s'\n", s);
+
+	g_free(s);
+}
+
 /*****************************************************************************
  * neardal_mgr_prv_cb_property_changed: Callback called when a NFC Manager
  * Property is changed
@@ -265,6 +284,15 @@ errorCode_t neardal_mgr_create(void)
 		return NEARDAL_ERROR_DBUS_CANNOT_CREATE_PROXY;
 	}
 
+	if (neardalMgr.dbus_om != NULL) {
+		g_signal_handlers_disconnect_by_func(neardalMgr.dbus_om,
+			NEARDAL_G_CALLBACK(neardal_mgr_interfaces_added), NULL);
+
+		g_signal_handlers_disconnect_by_func(neardalMgr.dbus_om,
+			NEARDAL_G_CALLBACK(neardal_mgr_interfaces_removed),
+							NULL);
+	}
+
 	neardalMgr.gerror = NULL;
 
 	neardalMgr.dbus_om = object_manager_proxy_new_sync(neardalMgr.conn, 0,
@@ -311,6 +339,12 @@ errorCode_t neardal_mgr_create(void)
 			 G_CALLBACK(neardal_mgr_prv_cb_adapter_removed),
 			 NULL);
 
+	g_signal_connect(neardalMgr.dbus_om, "interfaces-added",
+		G_CALLBACK(neardal_mgr_interfaces_added), NULL);
+
+	g_signal_connect(neardalMgr.dbus_om, "interfaces-removed",
+		G_CALLBACK(neardal_mgr_interfaces_removed), NULL);
+
 	return err;
 }
 
@@ -345,6 +379,12 @@ void neardal_mgr_destroy(void)
 						NULL);
 	g_object_unref(neardalMgr.proxy);
 	neardalMgr.proxy = NULL;
+
+	g_signal_handlers_disconnect_by_func(neardalMgr.dbus_om,
+		NEARDAL_G_CALLBACK(neardal_mgr_interfaces_added), NULL);
+
+	g_signal_handlers_disconnect_by_func(neardalMgr.dbus_om,
+		NEARDAL_G_CALLBACK(neardal_mgr_interfaces_removed), NULL);
 
 	g_variant_unref(neardalMgr.dbus_objs);
 	neardalMgr.dbus_objs = NULL;
