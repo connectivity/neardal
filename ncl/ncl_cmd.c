@@ -1,7 +1,7 @@
 /*
  *     NEARDAL Tester command line interpreter
  *
- *     Copyright 2012 Intel Corporation. All rights reserved.
+ *     Copyright 2012-2014 Intel Corporation. All rights reserved.
  *
  *     This program is free software; you can redistribute it and/or modify
  *     it under the terms of the GNU Lesser General Public License version 2
@@ -44,6 +44,7 @@ typedef struct {
 
 #define	DEFSTR(x)		(x, #x)
 
+NCLError ncl_cmd_list(int argc, char *argv[]);
 
 /* Local Utilities functions */
 /*****************************************************************************
@@ -113,31 +114,6 @@ static NCLError ncl_cmd_prv_parseOptions(int *argc, char **argv[],
 	}
 	g_option_context_free(context);
 	return err;
-}
-
-
-
-/* BEGIN : Interpretor commands array */
-static NCLCmdInterpretor itFunc[];
-
-/*****************************************************************************
- * Display Interpretor command list
- ****************************************************************************/
-NCLError ncl_cmd_list(int argc, char *argv[])
-{
-	int index;
-	int  nbCmd = ncl_cmd_get_nbCmd();
-
-	(void) argc; /* remove warning */
-	(void) argv; /* remove warning */
-
-	ncl_cmd_print(stdout, "\nCommand line list\n");
-	for (index = 0; index < nbCmd; index++) {
-		ncl_cmd_print(stdout, "%s :\n\t%s\n\n", itFunc[index].cmdName,
-			      itFunc[index].helpStr);
-	}
-
-	return 0;
 }
 
 
@@ -1561,6 +1537,27 @@ static NCLCmdInterpretor itFunc[] = {
 	"Creates and write a NDEF record to a NFC tag"}
 };
 #define NB_CL_FUNC		(sizeof(itFunc) / sizeof(NCLCmdInterpretor))
+
+
+/*****************************************************************************
+ * Display Interpretor command list
+ ****************************************************************************/
+NCLError ncl_cmd_list(int argc, char *argv[])
+{
+	int index;
+	int  nbCmd = ncl_cmd_get_nbCmd();
+
+	(void) argc; /* remove warning */
+	(void) argv; /* remove warning */
+
+	NCL_CMD_PRINT("\nCommand line list\n");
+	for (index = 0; index < nbCmd; index++) {
+		NCL_CMD_PRINT("%s :\n\t%s\n\n", itFunc[index].cmdName,
+			      itFunc[index].helpStr);
+	}
+
+	return 0;
+}
 
 
 /*****************************************************************************
