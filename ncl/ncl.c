@@ -21,12 +21,11 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include <glib.h>
-#include <glib-object.h>
 #include <signal.h>
 
+#include <glib.h>
+
 #include <neardal.h>
-#include "neardal_traces_prv.h"
 
 #include "ncl.h"
 #include "ncl_cmd.h"
