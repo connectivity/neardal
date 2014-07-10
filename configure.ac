@@ -53,7 +53,8 @@ echo 'NEARDAL will be compiled with CFLAGS='${CFLAGS}
 VERSION_INFO=$(echo $VERSION | sed -e 's/\./\:/g')
 
 PKG_CHECK_MODULES(gio, gio-unix-2.0 >= 2.30,
-	CFLAGS="$CFLAGS $gio_CFLAGS" LIBS="$LIBS $gio_LIBS",
+	AC_SUBST([gio_CFLAGS])
+	AC_SUBST([gio_LIBS]),
 	AC_MSG_ERROR(gio-unix-2.0 >= 2.30 is required))
 
 AC_SUBST(VERSION_INFO)

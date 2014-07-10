@@ -1,3 +1,4 @@
+AM_CFLAGS = @gio_CFLAGS@
 
 lib_LTLIBRARIES = libneardal.la
 noinst_LTLIBRARIES = libgenerated.la
@@ -6,7 +7,7 @@ libneardal_la_SOURCES = \
 	neardal.c neardal_adapter.c neardal_agent_mgr.c neardal_device.c \
 	neardal_manager.c neardal_record.c neardal_tag.c neardal_tools.c \
 	neardal_traces.c
-libneardal_la_LIBADD = libgenerated.la
+libneardal_la_LIBADD = @gio_LIBS@ libgenerated.la
 libneardal_la_LDFLAGS = -version-info @VERSION_INFO@
 libneardal_la_includedir = $(includedir)/neardal
 libneardal_la_include_HEADERS = neardal.h neardal_errors.h
@@ -20,7 +21,7 @@ libgenerated_la_SOURCES = \
 	neardal_agent.c neardal_agent.h \
 	dbus-object-manager.c dbus-object-manager.h \
 	dbus-properties.c dbus-properties.h
-libgenerated_la_CFLAGS = -Wno-unused-parameter
+libgenerated_la_CFLAGS = $(AM_CFLAGS) -Wno-unused-parameter
 
 $(libneardal_la_SOURCES): libgenerated.la
 
