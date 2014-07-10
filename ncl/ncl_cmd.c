@@ -1363,6 +1363,18 @@ static gboolean test_cb(const gchar *opt, const gchar *arg, gpointer data,
 	return success;
 }
 
+static inline gpointer ncl_g_callback(GCallback gc)
+{
+	union {
+		gpointer gp;
+		GCallback gc;
+	} p;
+	p.gc = gc;
+	return p.gp;
+}
+
+#define NCL_G_CALLBACK(cb) ncl_g_callback(G_CALLBACK(cb))
+
 /* Parameters Command line test */
 static NCLError ncl_cmd_test_parameters(int argc, char *argv[])
 {
@@ -1371,7 +1383,7 @@ static NCLError ncl_cmd_test_parameters(int argc, char *argv[])
 	static double		doubleTmp;
 	static long long	int64Tmp;
 	NCLError		err		= NCLERR_NOERROR;
-static GOptionEntry options[] = {
+	GOptionEntry options[] = {
 		{ "int"	, 'i', 0, G_OPTION_ARG_INT		, &intTmp
 				  , "Integer parameter", "9999" },
 
@@ -1383,7 +1395,7 @@ static GOptionEntry options[] = {
 
 		{ "int64"	, 'l', 0, G_OPTION_ARG_INT64 , &int64Tmp
 				, "Integer64 parameter", "9999" },
-		{ "cb"	, 'c', 0, G_OPTION_ARG_CALLBACK	, test_cb
+		{ "cb"	, 'c', 0, G_OPTION_ARG_CALLBACK, NCL_G_CALLBACK(test_cb)
 				, "Callback test", "9999" },
 		{ NULL, 0, 0, 0, NULL, NULL, NULL} /* End of List */
 	};
