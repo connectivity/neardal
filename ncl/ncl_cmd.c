@@ -308,7 +308,7 @@ static void ncl_cmd_cb_adapter_prop_changed(char *adpName, char *propName,
 		NCL_CMD_PRINTF("Polling=%d\n", polling);
 	} else
 		NCL_CMD_PRINTF("Adapter '%s' -> Property=%s=0x%X\n", adpName,
-			       propName, value);
+				propName, GPOINTER_TO_UINT(value));
 
 	NCL_CMD_PRINT("\n");
 }
@@ -1110,13 +1110,13 @@ void ncl_cmd_ndef_agent_cb(unsigned char **rcdArray, unsigned int rcdLen
 	NCL_CMD_DUMP(ndefArray, ndefLen);
 	NCL_CMD_PRINT("\n");
 
-	NCL_CMD_PRINTF("user_data= %s\n", user_data);
+	NCL_CMD_PRINTF("user_data= %s\n", (char *) user_data);
 
 }
 
 void ncl_cmd_ndef_agent_release_cb(void *user_data)
 {
-	NCL_CMD_PRINTF("Release user_data=%s\n", user_data);
+	NCL_CMD_PRINTF("Release user_data=%s\n", (char *) user_data);
 	g_free(user_data);
 }
 
@@ -1244,7 +1244,7 @@ void ncl_cmd_handover_req_agent_cb(unsigned char *blobEIR
 	NCL_CMD_PRINTF("Received blobEIR = \n");
 	NCL_CMD_DUMP(blobEIR, blobSize);
 
-	NCL_CMD_PRINTF("user_data= %s\n", user_data);
+	NCL_CMD_PRINTF("user_data= %s\n", (char *) user_data);
 
 	*oobData = g_try_malloc0(sizeof(test_data));
 	memcpy(*oobData , test_data, sizeof(test_data));
@@ -1267,7 +1267,7 @@ void ncl_cmd_handover_push_agent_cb (unsigned char *blobEIR
 
 void ncl_cmd_handover_release_agent_cb(void *user_data)
 {
-	NCL_CMD_PRINTF("Release user_data= %s\n", user_data);
+	NCL_CMD_PRINTF("Release user_data= %s\n", (char *) user_data);
 	g_free(user_data);
 }
 
@@ -1338,8 +1338,8 @@ static gboolean test_cb(const gchar *opt, const gchar *arg, gpointer data,
 	NCL_CMD_PRINT("Callback invoked from g_option_context_parse()\n");
 	NCL_CMD_PRINT("opt = '%s'\n", opt);
 	NCL_CMD_PRINT("arg = '%s'\n", arg);
-	NCL_CMD_PRINT("data = 0x%08X\n", data);
-	NCL_CMD_PRINT("err = 0x%08X\n", err);
+	NCL_CMD_PRINT("data = 0x%08X\n", GPOINTER_TO_UINT(data));
+	NCL_CMD_PRINT("err = 0x%08X\n", GPOINTER_TO_UINT(err));
 	if (*err) {
 		NCL_CMD_PRINT("*err->domain = %d\n", (*err)->domain);
 		NCL_CMD_PRINT("*err->code = %d\n", (*err)->code);
