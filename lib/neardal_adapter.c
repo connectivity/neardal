@@ -574,10 +574,10 @@ static errorCode_t neardal_adp_prv_init(AdpProp *adpProp)
 
 	if (adpProp->proxy != NULL) {
 		g_signal_handlers_disconnect_by_func(adpProp->proxy,
-				G_CALLBACK(neardal_adp_prv_cb_tag_found),
+			NEARDAL_G_CALLBACK(neardal_adp_prv_cb_tag_found),
 						     NULL);
 		g_signal_handlers_disconnect_by_func(adpProp->proxy,
-				G_CALLBACK(neardal_adp_prv_cb_tag_lost),
+			NEARDAL_G_CALLBACK(neardal_adp_prv_cb_tag_lost),
 						     NULL);
 		g_object_unref(adpProp->proxy);
 	}
@@ -605,7 +605,8 @@ static errorCode_t neardal_adp_prv_init(AdpProp *adpProp)
 
 	if (adpProp->props) {
 		g_signal_handlers_disconnect_by_func(adpProp->props,
-			G_CALLBACK(neardal_adp_prv_cb_properties_changed),
+			NEARDAL_G_CALLBACK(
+				neardal_adp_prv_cb_properties_changed),
 							adpProp->proxy);
 		g_object_unref(adpProp->props);
 		adpProp->props = NULL;
@@ -656,18 +657,17 @@ static void neardal_adp_prv_free(AdpProp **adpProp)
 	NEARDAL_TRACEIN();
 	if ((*adpProp)->props) {
 		g_signal_handlers_disconnect_by_func((*adpProp)->props,
-			G_CALLBACK(neardal_adp_prv_cb_properties_changed),
+			NEARDAL_G_CALLBACK(
+				neardal_adp_prv_cb_properties_changed),
 						     (*adpProp)->proxy);
 		g_object_unref((*adpProp)->props);
 		(*adpProp)->props = NULL;
 	}
 	if ((*adpProp)->proxy != NULL) {
 		g_signal_handlers_disconnect_by_func((*adpProp)->proxy,
-				G_CALLBACK(neardal_adp_prv_cb_tag_found),
-						     NULL);
+			NEARDAL_G_CALLBACK(neardal_adp_prv_cb_tag_found), NULL);
 		g_signal_handlers_disconnect_by_func((*adpProp)->proxy,
-				G_CALLBACK(neardal_adp_prv_cb_tag_lost),
-						     NULL);
+			NEARDAL_G_CALLBACK(neardal_adp_prv_cb_tag_lost), NULL);
 		g_object_unref((*adpProp)->proxy);
 		(*adpProp)->proxy = NULL;
 	}

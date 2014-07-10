@@ -1,7 +1,7 @@
 /*
  *     NEARDAL (Neard Abstraction Library)
  *
- *     Copyright 2012 Intel Corporation. All rights reserved.
+ *     Copyright 2012-2014 Intel Corporation. All rights reserved.
  *
  *     This program is free software; you can redistribute it and/or modify
  *     it under the terms of the GNU Lesser General Public License version 2
@@ -128,7 +128,7 @@ static errorCode_t neardal_dev_prv_init(DevProp *devProp)
 
 	if (devProp->proxy != NULL) {
 		g_signal_handlers_disconnect_by_func(devProp->proxy,
-				G_CALLBACK(neardal_dev_prv_cb_property_changed),
+			NEARDAL_G_CALLBACK(neardal_dev_prv_cb_property_changed),
 						     NULL);
 		g_object_unref(devProp->proxy);
 		devProp->proxy = NULL;
@@ -171,7 +171,7 @@ static void neardal_dev_prv_free(DevProp **devProp)
 	NEARDAL_TRACEIN();
 	if ((*devProp)->proxy != NULL) {
 		g_signal_handlers_disconnect_by_func((*devProp)->proxy,
-				G_CALLBACK(neardal_dev_prv_cb_property_changed),
+			NEARDAL_G_CALLBACK(neardal_dev_prv_cb_property_changed),
 						     NULL);
 		g_object_unref((*devProp)->proxy);
 		(*devProp)->proxy = NULL;

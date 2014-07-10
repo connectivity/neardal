@@ -237,13 +237,13 @@ errorCode_t neardal_mgr_create(void)
 	NEARDAL_TRACEIN();
 	if (neardalMgr.proxy != NULL) {
 		g_signal_handlers_disconnect_by_func(neardalMgr.proxy,
-				G_CALLBACK(neardal_mgr_prv_cb_property_changed),
+			NEARDAL_G_CALLBACK(neardal_mgr_prv_cb_property_changed),
 							NULL);
 		g_signal_handlers_disconnect_by_func(neardalMgr.proxy,
-				G_CALLBACK(neardal_mgr_prv_cb_adapter_added),
+			NEARDAL_G_CALLBACK(neardal_mgr_prv_cb_adapter_added),
 							NULL);
 		g_signal_handlers_disconnect_by_func(neardalMgr.proxy,
-				G_CALLBACK(neardal_mgr_prv_cb_adapter_removed),
+			NEARDAL_G_CALLBACK(neardal_mgr_prv_cb_adapter_removed),
 							NULL);
 		g_object_unref(neardalMgr.proxy);
 		neardalMgr.proxy = NULL;
@@ -335,13 +335,13 @@ void neardal_mgr_destroy(void)
 		return;
 
 	g_signal_handlers_disconnect_by_func(neardalMgr.proxy,
-			G_CALLBACK(neardal_mgr_prv_cb_property_changed),
+			NEARDAL_G_CALLBACK(neardal_mgr_prv_cb_property_changed),
 						NULL);
 	g_signal_handlers_disconnect_by_func(neardalMgr.proxy,
-			G_CALLBACK(neardal_mgr_prv_cb_adapter_added),
+			NEARDAL_G_CALLBACK(neardal_mgr_prv_cb_adapter_added),
 						NULL);
 	g_signal_handlers_disconnect_by_func(neardalMgr.proxy,
-			G_CALLBACK(neardal_mgr_prv_cb_adapter_removed),
+			NEARDAL_G_CALLBACK(neardal_mgr_prv_cb_adapter_removed),
 						NULL);
 	g_object_unref(neardalMgr.proxy);
 	neardalMgr.proxy = NULL;

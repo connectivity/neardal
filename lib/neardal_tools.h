@@ -69,6 +69,18 @@ errorCode_t neardal_tools_prv_add_dict_entry(GVariantBuilder *builder
 					     , gsize valueSize
 					     , int gVariantType);
 
+static inline gpointer neardal_g_callback(GCallback gc)
+{
+	union {
+		gpointer gp;
+		GCallback gc;
+	} p;
+	p.gc = gc;
+	return p.gp;
+}
+
+#define NEARDAL_G_CALLBACK(cb) neardal_g_callback(G_CALLBACK(cb))
+
 #ifdef __cplusplus
 }
 #endif	/* __cplusplus */
