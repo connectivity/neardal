@@ -29,11 +29,41 @@
 #include "neardal.h"
 #include "neardal_prv.h"
 
+void neardal_adp_prv_cb_tag_found(OrgNeardTag *proxy,
+			const gchar *arg_unnamed_arg0, void *user_data);
+void neardal_adp_prv_cb_tag_lost(OrgNeardTag *proxy,
+			const gchar *arg_unnamed_arg0, void *user_data);
+
 static void neardal_mgr_interfaces_added(ObjectManager *om,
 					const gchar *path, GVariant *interfaces)
 {
+	GVariant *v = NULL;
+	char *adapter = NULL;
+	AdpProp *adpProp = NULL;
+
 	NEARDAL_TRACEF("path=%s\n", path);
 	NEARDAL_TRACEF("interfaces=%s\n", g_variant_print(interfaces, TRUE));
+
+	if (!g_variant_lookup(interfaces, "org.neard.Tag", "*", (void *) &v))
+		return;
+
+	g_variant_ref(v);
+
+	NEARDAL_TRACEF("Tag's objects: %s\n", g_variant_print(v, TRUE));
+
+	if (!g_variant_lookup(v, "Adapter", "o", &adapter) ||
+			neardal_mgr_prv_get_adapter(adapter, &adpProp) !=
+				NEARDAL_SUCCESS)
+		return;
+
+	NEARDAL_TRACEF("Adapter: %s=%p\n", adapter, (void *) adpProp);
+
+	g_datalist_set_data_full(&(neardalMgr.dbus_data), path, v,
+					(GDestroyNotify) g_variant_unref);
+
+	neardal_adp_prv_cb_tag_found(NULL, path, adpProp);
+
+	g_free(adapter);
 }
 
 static void neardal_mgr_interfaces_removed(ObjectManager *om,
@@ -41,11 +71,39 @@ static void neardal_mgr_interfaces_removed(ObjectManager *om,
 						const gchar *const *interfaces)
 {
 	char *s = g_strjoinv("' '", (gchar **)interfaces);
+	char *adapter = NULL;
+	AdpProp *adpProp = NULL;
+	int i = 0;
+	GVariant *v;
 
 	NEARDAL_TRACEF("path=%s\n", path);
 	NEARDAL_TRACEF("interfaces='%s'\n", s);
 
 	g_free(s);
+
+	while ((s = (char *) interfaces[i++])) {
+		if (strcmp(s, "org.neard.Tag") != 0)
+			continue;
+
+		v = g_datalist_get_data(&(neardalMgr.dbus_data), path);
+
+		NEARDAL_TRACEF("Tag's objects: %s\n", g_variant_print(v, TRUE));
+
+		if (!g_variant_lookup(v, "Adapter", "o", &adapter) ||
+				neardal_mgr_prv_get_adapter(adapter, &adpProp)
+					!= NEARDAL_SUCCESS)
+			return;
+
+		NEARDAL_TRACEF("Adapter: %s=%p\n", adapter, (void *) adpProp);
+
+		neardal_adp_prv_cb_tag_lost(NULL, path, adpProp);
+
+		g_datalist_remove_data(&(neardalMgr.dbus_data), path);
+
+		g_free(adapter);
+
+		break;
+	}
 }
 
 /*****************************************************************************
