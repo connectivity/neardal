@@ -11,6 +11,13 @@ debug=yes
 ## Compiled with traces
 traces=no
 
+AS_IF([test -n "${CFLAGS+set}"], [cflags_set=yes], [cflags_set=no])
+
+AC_ARG_ENABLE([optimization],
+	[AC_HELP_STRING([--disable-optimization], [disable optimization])],
+	[AS_IF([test "$cflags_set" = "no" ], [CFLAGS="-O0 $CFLAGS"])],
+	[AS_IF([test "$cflags_set" = "no" ], [CFLAGS="-O2 $CFLAGS"])])
+
 AC_PROG_CC
 AC_PROG_LIBTOOL
 
@@ -25,10 +32,9 @@ AC_ARG_ENABLE(debug, AC_HELP_STRING([--disable-debug],
 ])
 
 if (test "${debug}" = "yes"); then
-	CFLAGS="$CFLAGS -g -O0 -DNEARDAL_DEBUG"
+	CFLAGS="$CFLAGS -g -DNEARDAL_DEBUG"
 	echo 'NEARDAL will be compiled in debug mode.(NEARDAL_DEBUG will be defined)'
 else
-	CFLAGS="$CFLAGS -O2"
 	echo 'NEARDAL will not be compiled in debug mode. (NEARDAL_DEBUG will not be defined)'
 fi
 
