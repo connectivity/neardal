@@ -407,7 +407,7 @@ static void ncl_prv_parse_script_file(char *scriptFileStr)
 			cmdLineStr = NULL;
 		}
 	} while (nbRead > 0 && gNclCtx.errOnExit == NCLERR_NOERROR);
-	g_free(scriptFile);
+	fclose(scriptFile);
 }
 
 int main(int argc, char *argv[])
