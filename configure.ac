@@ -1,4 +1,4 @@
-AC_INIT([neardal], 0.8.0, Neardal for Neard v0.8)
+AC_INIT([neardal], [0.8.0], [Neardal for Neard v0.8])
 AC_CONFIG_AUX_DIR([.])
 AM_INIT_AUTOMAKE([foreign])
 
