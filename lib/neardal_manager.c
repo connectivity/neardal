@@ -284,6 +284,8 @@ errorCode_t neardal_mgr_create(void)
 		return NEARDAL_ERROR_DBUS_CANNOT_CREATE_PROXY;
 	}
 
+	g_datalist_init(&(neardalMgr.dbus_data));
+
 	if (neardalMgr.dbus_om != NULL) {
 		g_signal_handlers_disconnect_by_func(neardalMgr.dbus_om,
 			NEARDAL_G_CALLBACK(neardal_mgr_interfaces_added), NULL);
@@ -385,6 +387,9 @@ void neardal_mgr_destroy(void)
 
 	g_signal_handlers_disconnect_by_func(neardalMgr.dbus_om,
 		NEARDAL_G_CALLBACK(neardal_mgr_interfaces_removed), NULL);
+
+	g_datalist_clear(&(neardalMgr.dbus_data));
+	neardalMgr.dbus_data = NULL;
 
 	g_variant_unref(neardalMgr.dbus_objs);
 	neardalMgr.dbus_objs = NULL;

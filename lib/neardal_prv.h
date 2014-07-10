@@ -89,6 +89,7 @@ typedef struct {
 	OrgNeardManager	*proxy;			/* Neard Mgr dbus proxy */
 	ObjectManager	*dbus_om;
 	GVariant	*dbus_objs;
+	GData		*dbus_data;
 	MgrProp		prop;			/* Mgr Properties
 							(adapter list) */
 	guint		OwnerId;		/* dbus Id server side */
