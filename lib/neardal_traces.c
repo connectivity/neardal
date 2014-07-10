@@ -1,7 +1,7 @@
 /*
  *     NEARDAL (Neard Abstraction Library)
  *
- *     Copyright 2012 Intel Corporation. All rights reserved.
+ *     Copyright 2012-2014 Intel Corporation. All rights reserved.
  *
  *     This program is free software; you can redistribute it and/or modify
  *     it under the terms of the GNU Lesser General Public License version 2
@@ -35,7 +35,7 @@
  */
 
 
-void neardal_trace(FILE *stream, char *format, ...)
+void neardal_trace(const char *func, FILE *stream, char *format, ...)
 {
 	va_list ap;
 	gchar	*bufTrace;
@@ -44,7 +44,10 @@ void neardal_trace(FILE *stream, char *format, ...)
 
 	bufTrace = g_strdup_vprintf(format, ap);
 	if (bufTrace != NULL) {
-		fprintf(stream, "%s", bufTrace);
+		if (func)
+			fprintf(stream, "%s() : %s", func, bufTrace);
+		else
+			fprintf(stream, "%s", bufTrace);
 		fflush(stream);
 	}
 	va_end(ap);

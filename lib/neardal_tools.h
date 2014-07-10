@@ -1,7 +1,7 @@
 /*
  *     NEARDAL (Neard Abstraction Library)
  *
- *     Copyright 2012 Intel Corporation. All rights reserved.
+ *     Copyright 2012-2014 Intel Corporation. All rights reserved.
  *
  *     This program is free software; you can redistribute it and/or modify
  *     it under the terms of the GNU Lesser General Public License version 2
@@ -31,7 +31,7 @@ extern "C" {
  *****************************************************************************/
 #define NEARDAL_ASSERT(cond) do { \
 	if (!(cond)) { \
-		neardal_trace(stderr, "\nASSERT!! %s -> %s():l%d: cond=(%s)\n\n" \
+		neardal_trace(NULL, stderr, "\nASSERT!! %s -> %s():l%d: cond=(%s)\n\n" \
 			, __FILE__, __func__, __LINE__, #cond); \
 		return; \
 	} \
@@ -39,7 +39,7 @@ extern "C" {
 
 #define NEARDAL_ASSERT_RET(cond, val) do { \
 	if (!(cond)) { \
-		neardal_trace(stderr, "\nASSERT!! %s -> %s():l%d: cond=(%s)\n\n" \
+		neardal_trace(NULL, stderr, "\nASSERT!! %s -> %s():l%d: cond=(%s)\n\n" \
 			, __FILE__, __func__, __LINE__, #cond); \
 		return val; \
 	} \

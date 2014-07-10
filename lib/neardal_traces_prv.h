@@ -1,7 +1,7 @@
 /*
  *     NEARDAL (Neard Abstraction Library)
  *
- *     Copyright 2012 Intel Corporation. All rights reserved.
+ *     Copyright 2012-2014 Intel Corporation. All rights reserved.
  *
  *     This program is free software; you can redistribute it and/or modify
  *     it under the terms of the GNU Lesser General Public License version 2
@@ -29,31 +29,27 @@ extern "C" {
 
 /* a debug output macro */
 #ifdef NEARDAL_TRACES
-	#define NEARDAL_TRACE(msg, ...)	neardal_trace(stdout, \
-						msg, ##__VA_ARGS__)
-	#define NEARDAL_TRACEDUMP(adr, size)	neardal_trace_dump_mem(adr, \
-						size)
+	#define NEARDAL_TRACE(...)	neardal_trace(NULL, stdout, __VA_ARGS__)
+	#define NEARDAL_TRACEDUMP(...)	neardal_trace_dump_mem(__VA_ARGS__)
 
 	/* Macro including function name before traces */
-	#define NEARDAL_TRACEF(msg, ...)	neardal_trace(stdout, \
-				"%s() : " msg, __func__, ## __VA_ARGS__)
-	#define NEARDAL_TRACEIN()		neardal_trace(stdout, \
-	"%s() : Processing...\n", __func__)
+	#define NEARDAL_TRACEF(...)	neardal_trace(__func__, stdout, \
+							__VA_ARGS__)
+	#define NEARDAL_TRACEIN()	neardal_trace(__func__, stdout, \
+							"Processing...\n")
 #else
-
-	#define NEARDAL_TRACE(msg, ...)	(void)0
-	#define NEARDAL_TRACEDUMP(adr, size)	(void)0
-
-	#define NEARDAL_TRACEF(msg, ...)	(void)0
-	#define NEARDAL_TRACEIN()		(void)0
+	#define NEARDAL_TRACE(...)
+	#define NEARDAL_TRACEDUMP(...)
+	#define NEARDAL_TRACEF(...)
+	#define NEARDAL_TRACEIN(...)
 #endif /* NEARDAL_DEBUG */
 /* always defined */
-#define NEARDAL_TRACE_LOG(msg, ...)		neardal_trace(stdout, \
-				"%s() : " msg, __func__, ##__VA_ARGS__)
-#define NEARDAL_TRACE_ERR(msg, ...)		neardal_trace(stderr, \
-				"%s(ERR) : " msg, __func__, ##__VA_ARGS__)
+#define NEARDAL_TRACE_LOG(...)	neardal_trace(__func__, stdout,	__VA_ARGS__)
+#define NEARDAL_TRACE_ERR(...)	neardal_trace(__func__, stderr, \
+						"Error: " __VA_ARGS__)
 
-void neardal_trace(FILE *stream, char *format, ...);
+void neardal_trace(const char *func, FILE *stream, char *format, ...)
+	__attribute__((format(printf, 3, 4)));
 void neardal_trace_dump_mem(char *dataP, int size);
 
 #ifdef __cplusplus
