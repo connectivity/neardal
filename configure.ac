@@ -49,15 +49,14 @@ else
 fi
 echo 'NEARDAL will be compiled with CFLAGS='${CFLAGS}
 
-	
+AC_PROG_SED	
 VERSION_INFO=$(echo $VERSION | sed -e 's/\./\:/g')
+AC_SUBST(VERSION_INFO)
 
 PKG_CHECK_MODULES(gio, gio-unix-2.0 >= 2.30,
 	AC_SUBST([gio_CFLAGS])
 	AC_SUBST([gio_LIBS]),
 	AC_MSG_ERROR(gio-unix-2.0 >= 2.30 is required))
-
-AC_SUBST(VERSION_INFO)
 
 AC_CHECK_PROGS([DOXYGEN], [doxygen])
 if test -z "$DOXYGEN";
