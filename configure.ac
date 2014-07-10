@@ -56,8 +56,6 @@ PKG_CHECK_MODULES(gio, gio-unix-2.0 >= 2.30,
 	CFLAGS="$CFLAGS $gio_CFLAGS" LIBS="$LIBS $gio_LIBS",
 	AC_MSG_ERROR(gio-unix-2.0 >= 2.30 is required))
 
-AC_SUBST(AM_CPPFLAGS)
-AC_SUBST(LIBS)
 AC_SUBST(VERSION_INFO)
 
 AC_CHECK_PROGS([DOXYGEN], [doxygen])
