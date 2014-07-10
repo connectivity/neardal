@@ -1,7 +1,7 @@
 /*
  *     NEARDAL Tester command line interpreter
  *
- *     Copyright 2012 Intel Corporation. All rights reserved.
+ *     Copyright 2012-2014 Intel Corporation. All rights reserved.
  *
  *     This program is free software; you can redistribute it and/or modify
  *     it under the terms of the GNU Lesser General Public License version 2
@@ -56,22 +56,21 @@ int			ncl_cmd_get_nbCmd(void);
 NCLCmdContext		*ncl_cmd_get_ctx(void);
 
 /* Print out used by command line functions (and prompt) */
-void			ncl_cmd_print(FILE *fprintout, char *format, ...);
+void			ncl_cmd_print(const char *func, FILE *fprintout,
+					char *format, ...)
+				__attribute__((format(printf, 3, 4)));
 
-#define		NCL_CMD_PRINT(format, ...) \
-			ncl_cmd_print(stdout, format, ## __VA_ARGS__)
+#define		NCL_CMD_PRINT(...) \
+			ncl_cmd_print(NULL, stdout, __VA_ARGS__)
 
-#define		NCL_CMD_PRINTF(format, ...) \
-			ncl_cmd_print(stdout, "%s(): " format, __func__, \
-			## __VA_ARGS__)
+#define		NCL_CMD_PRINTF(...) \
+			ncl_cmd_print(__func__, stdout, __VA_ARGS__);
 
 #define		NCL_CMD_PRINTIN() \
-			ncl_cmd_print(stdout, "%s(): Processing...\n", \
-			__func__)
+			ncl_cmd_print(__func__, stdout, "Processing...\n")
 
-#define		NCL_CMD_PRINTERR(format, ...) \
-			ncl_cmd_print(stderr, "ERR in %s(): " format, \
-			__func__, ## __VA_ARGS__)
+#define		NCL_CMD_PRINTERR(...) \
+	ncl_cmd_print(__func__, stderr, "Error: " __VA_ARGS__)
 
 #define		NCL_CMD_DUMP(mem, size) \
 			ncl_trace_dump_mem((char *) mem, size)

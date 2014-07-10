@@ -59,7 +59,7 @@ static void ncl_cmd_prv_dumpOptions(GOptionEntry *options)
 		snprintf(long_nameTmp, sizeof(long_nameTmp), "--%s",
 			 optP->long_name);
 
-		ncl_cmd_print(stdout, "-%c,\t%s=%s\t%20s\n", optP->short_name,
+		NCL_CMD_PRINT("-%c,\t%s=%s\t%20s\n", optP->short_name,
 			      long_nameTmp, optP->arg_description,
 			      optP->description);
 		optP++;
@@ -785,14 +785,14 @@ static GOptionEntry options[] = {
 		nclErr = NCLERR_PARSING_PARAMETERS;
 
 	if (nclErr != NCLERR_NOERROR) {
-		ncl_cmd_print(stdout, "Sample (Type 'Text'):");
-		ncl_cmd_print(stdout, "e.g. < push --type Text --lang en-US \
+		NCL_CMD_PRINT("Sample (Type 'Text'):");
+		NCL_CMD_PRINT("e.g. < push --type Text --lang en-US \
 --encoding UTF-8 --rep \"Simple text\" --dev /org/neard/nfc0/device0 >\n");
-		ncl_cmd_print(stdout, "Sample (Type 'URI'):");
-		ncl_cmd_print(stdout, "e.g. < push --type URI \
+		NCL_CMD_PRINT("Sample (Type 'URI'):");
+		NCL_CMD_PRINT("e.g. < push --type URI \
 --uri=http://www.nfc-forum.com  --dev /org/neard/nfc0/device0 >\n");
-		ncl_cmd_print(stdout, "Sample (Type 'SmartPoster'):");
-		ncl_cmd_print(stdout, "e.g. < push --type=SmartPoster \
+		NCL_CMD_PRINT("Sample (Type 'SmartPoster'):");
+		NCL_CMD_PRINT("e.g. < push --type=SmartPoster \
 --uri=http://www.nfc-forum.com > --dev /org/neard/nfc0/device0 >\n");
 	}
 
@@ -883,14 +883,14 @@ static GOptionEntry options[] = {
 		nclErr = NCLERR_PARSING_PARAMETERS;
 
 	if (nclErr != NCLERR_NOERROR) {
-		ncl_cmd_print(stdout, "Sample (Type 'Text'):");
-		ncl_cmd_print(stdout, "e.g. < write --type Text --lang en-US \
+		NCL_CMD_PRINT("Sample (Type 'Text'):");
+		NCL_CMD_PRINT("e.g. < write --type Text --lang en-US \
 --encoding UTF-8 --rep \"Simple text\" --tag /org/neard/nfc0/tag0 >\n");
-		ncl_cmd_print(stdout, "Sample (Type 'URI'):");
-		ncl_cmd_print(stdout, "e.g. < write --type URI \
+		NCL_CMD_PRINT("Sample (Type 'URI'):");
+		NCL_CMD_PRINT("e.g. < write --type URI \
 --uri=http://www.nfc-forum.com  --tag /org/neard/nfc0/tag0 >\n");
-		ncl_cmd_print(stdout, "Sample (Type 'SmartPoster'):");
-		ncl_cmd_print(stdout, "e.g. < write --type=SmartPoster \
+		NCL_CMD_PRINT("Sample (Type 'SmartPoster'):");
+		NCL_CMD_PRINT("e.g. < write --type=SmartPoster \
 --uri=http://www.nfc-forum.com > --tag /org/neard/nfc0/tag0 >\n");
 	}
 
@@ -954,7 +954,7 @@ static GOptionEntry options[] = {
 		nclErr = NCLERR_PARSING_PARAMETERS;
 
 	if (nclErr != NCLERR_NOERROR) {
-		ncl_cmd_print(stdout, "e.g. < %s /org/neard/nfc0 --powered=1 \
+		NCL_CMD_PRINT("e.g. < %s /org/neard/nfc0 --powered=1 \
 >\n", argv[0]);
 	}
 
@@ -1143,8 +1143,8 @@ static GOptionEntry options[] = {
 		nclErr = NCLERR_PARSING_PARAMETERS;
 
 	if (nclErr != NCLERR_NOERROR) {
-		ncl_cmd_print(stdout, "Sample (Type 'URI'):");
-		ncl_cmd_print(stdout, "e.g. < %s --tagType urn:nfc:wkt:U >\n"
+		NCL_CMD_PRINT("Sample (Type 'URI'):");
+		NCL_CMD_PRINT("e.g. < %s --tagType urn:nfc:wkt:U >\n"
 			     , argv[0]);
 	}
 	if (nclErr != NCLERR_NOERROR)
@@ -1563,7 +1563,7 @@ NCLError ncl_cmd_list(int argc, char *argv[])
 /*****************************************************************************
  *
  ****************************************************************************/
-void ncl_cmd_print(FILE *stream, char *format, ...)
+void ncl_cmd_print(const char *func, FILE *stream, char *format, ...)
 {
 	gchar	*bufTrace;
 	va_list ap;
@@ -1572,7 +1572,10 @@ void ncl_cmd_print(FILE *stream, char *format, ...)
 
 	bufTrace = g_strdup_vprintf(format, ap);
 	if (bufTrace != NULL) {
-		fprintf(stream, "%s", bufTrace);
+		if (func)
+			fprintf(stream, "%s(): %s", func, bufTrace);
+		else
+			fprintf(stream, "%s", bufTrace);
 		fflush(stream);
 	}
 	va_end(ap);

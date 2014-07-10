@@ -310,7 +310,7 @@ static gboolean ncl_prv_kbinput_cb(GIOChannel *source, GIOCondition condition,
 
 void ncl_prompt(void)
 {
-	ncl_cmd_print(stdout, PROMPT_PREFIX);
+	NCL_CMD_PRINT(PROMPT_PREFIX);
 }
 
 NCLContext *ncl_get_ctx(void)
@@ -390,12 +390,9 @@ static void ncl_prv_parse_script_file(char *scriptFileStr)
 					cmdLineStr[cmdLineSize - 1] = '\0';
 
 				/* Executing command line */
-				ncl_cmd_print(stdout,
-					      "$$$$$$$$$$$$$$$$$$$$$$$$$'\n");
-				ncl_cmd_print(stdout,
-					      "Executing '%s'\n", cmdLineStr);
-				ncl_cmd_print(stdout,
-					      "$$$$$$$$$$$$$$$$$$$$$$$$$'\n");
+				NCL_CMD_PRINT("$$$$$$$$$$$$$$$$$$$$$$$$$'\n");
+				NCL_CMD_PRINT("Executing '%s'\n", cmdLineStr);
+				NCL_CMD_PRINT("$$$$$$$$$$$$$$$$$$$$$$$$$'\n");
 				gNclCtx.errOnExit = ncl_exec(cmdLineStr);
 
 				/* Main loop */
