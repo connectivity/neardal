@@ -31,6 +31,18 @@ AC_ARG_ENABLE([trace],
 	AC_MSG_NOTICE([NEARDAL will be compiled with tracing enabled])
 	[NEARDAL_EXTRA_FLAGS="-DNEARDAL_TRACES $NEARDAL_EXTRA_FLAGS"]) 
 
+AC_ARG_ENABLE([pedantic],
+	AC_HELP_STRING([--disable-pedantic],
+		[disable compiling with -Wpedantic]))
+
+AS_IF([test "$enable_pedantic" != "no"],
+	[ac_saved_cflags="$CFLAGS"]
+	[CFLAGS="-Wpedantic $CFLAGS"]
+	[AC_COMPILE_IFELSE([AC_LANG_PROGRAM([])],
+		[NEARDAL_EXTRA_FLAGS="-Wpedantic $NEARDAL_EXTRA_FLAGS"]
+		[AC_MSG_NOTICE([NEARDAL will be compiled with -Wpedantic])])]
+	[CFLAGS=$ac_saved_cflags])
+
 AC_MSG_NOTICE([NEARDAL will be compiled with CFLAGS=${CFLAGS}])
 
 AC_MSG_NOTICE([NEARDAL will be compiled with extra flags ]\

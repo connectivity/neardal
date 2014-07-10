@@ -21,7 +21,7 @@ libgenerated_la_SOURCES = \
 	neardal_agent.c neardal_agent.h \
 	dbus-object-manager.c dbus-object-manager.h \
 	dbus-properties.c dbus-properties.h
-libgenerated_la_CFLAGS = $(AM_CFLAGS) -Wno-unused-parameter
+libgenerated_la_CFLAGS = $(AM_CFLAGS) -Wno-unused-parameter -Wno-pedantic
 
 $(libneardal_la_SOURCES): libgenerated.la
 
