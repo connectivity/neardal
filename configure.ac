@@ -19,7 +19,7 @@ AC_PROG_LIBTOOL
 AC_ARG_ENABLE([debug],
 	[AC_HELP_STRING([--enable-debug],
 		[enable compiling with debugging information])],
-	[CFLAGS="-DNEARDAL_DEBUG $CFLAGS"])
+	[NEARDAL_EXTRA_FLAGS="-DNEARDAL_TRACES $NEARDAL_EXTRA_FLAGS"])	
 
 AS_IF([test "$ac_cv_prog_cc_g" = "yes"] && [test "$cflags_set" = "no" ],
 	[CFLAGS="-g $CFLAGS"])
@@ -27,9 +27,14 @@ AS_IF([test "$ac_cv_prog_cc_g" = "yes"] && [test "$cflags_set" = "no" ],
 AC_ARG_ENABLE([trace],
 	AC_HELP_STRING([--enable-trace], [compile with tracing enabled]),
 	AC_MSG_NOTICE([NEARDAL will be compiled with tracing enabled])
-	CFLAGS="-DNEARDAL_TRACES $CFLAGS") 
+	[NEARDAL_EXTRA_FLAGS="-DNEARDAL_TRACES $NEARDAL_EXTRA_FLAGS"]) 
 
 AC_MSG_NOTICE([NEARDAL will be compiled with CFLAGS=${CFLAGS}])
+
+AC_MSG_NOTICE([NEARDAL will be compiled with extra flags ]\
+[NEARDAL_EXTRA_FLAGS=${NEARDAL_EXTRA_FLAGS}])
+
+AC_SUBST([NEARDAL_EXTRA_FLAGS])
 
 AC_PROG_SED	
 VERSION_INFO=$(echo $VERSION | sed -e 's/\./\:/g')

@@ -1,4 +1,4 @@
-AM_CFLAGS = @gio_CFLAGS@
+AM_CFLAGS = @gio_CFLAGS@ @NEARDAL_EXTRA_FLAGS@
 
 lib_LTLIBRARIES = libneardal.la
 noinst_LTLIBRARIES = libgenerated.la
