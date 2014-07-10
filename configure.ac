@@ -31,6 +31,13 @@ AC_ARG_ENABLE([trace],
 	AC_MSG_NOTICE([NEARDAL will be compiled with tracing enabled])
 	[NEARDAL_EXTRA_FLAGS="-DNEARDAL_TRACES $NEARDAL_EXTRA_FLAGS"]) 
 
+AC_ARG_ENABLE([c99],
+	AC_HELP_STRING([--disable-c99], [disable compiling in c99 mode]))
+
+AS_IF([test "$ac_cv_prog_cc_c99" != "no" ] && [test "$enable_c99" != "no"],
+	AC_MSG_NOTICE([NEARDAL will be compiled in C99 mode])
+	[CC="$CC -std=c99"])
+
 AC_ARG_ENABLE([pedantic],
 	AC_HELP_STRING([--disable-pedantic],
 		[disable compiling with -Wpedantic]))
