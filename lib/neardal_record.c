@@ -1,7 +1,7 @@
 /*
  *     NEARDAL (Neard Abstraction Library)
  *
- *     Copyright 2012 Intel Corporation. All rights reserved.
+ *     Copyright 2012-2014 Intel Corporation. All rights reserved.
  *
  *     This program is free software; you can redistribute it and/or modify
  *     it under the terms of the GNU Lesser General Public License version 2
@@ -23,11 +23,8 @@
 #include <glib.h>
 #include <glib-object.h>
 
-#include "neard_record_proxy.h"
-
 #include "neardal.h"
 #include "neardal_prv.h"
-
 
 /*****************************************************************************
  * neardal_rcd_prv_read_properties: Get Neard Record Properties
