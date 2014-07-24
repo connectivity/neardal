@@ -22,7 +22,7 @@ AC_CHECK_FUNCS([getline fileno])
 AC_ARG_ENABLE([debug],
 	[AC_HELP_STRING([--enable-debug],
 		[enable compiling with debugging information])],
-	[NEARDAL_EXTRA_FLAGS="-DNEARDAL_TRACES $NEARDAL_EXTRA_FLAGS"])	
+	[NEARDAL_EXTRA_FLAGS="-DNEARDAL_DEBUG $NEARDAL_EXTRA_FLAGS"])	
 
 AS_IF([test "$ac_cv_prog_cc_g" = "yes"] && [test "$cflags_set" = "no" ],
 	[CFLAGS="-g $CFLAGS"])
