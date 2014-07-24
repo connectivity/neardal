@@ -1340,7 +1340,7 @@ static gboolean test_cb(const gchar *opt, const gchar *arg, gpointer data,
 	NCL_CMD_PRINT("arg = '%s'\n", arg);
 	NCL_CMD_PRINT("data = 0x%08X\n", GPOINTER_TO_UINT(data));
 	NCL_CMD_PRINT("err = 0x%08X\n", GPOINTER_TO_UINT(err));
-	if (*err) {
+	if (err && *err) {
 		NCL_CMD_PRINT("*err->domain = %d\n", (*err)->domain);
 		NCL_CMD_PRINT("*err->code = %d\n", (*err)->code);
 		NCL_CMD_PRINT("*err->message = '%s'\n", (*err)->message);
