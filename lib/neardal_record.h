@@ -1,7 +1,7 @@
 /*
  *     NEARDAL (Neard Abstraction Library)
  *
- *     Copyright 2012 Intel Corporation. All rights reserved.
+ *     Copyright 2012-2014 Intel Corporation. All rights reserved.
  *
  *     This program is free software; you can redistribute it and/or modify
  *     it under the terms of the GNU Lesser General Public License version 2
@@ -21,7 +21,7 @@
 #ifndef NEARDAL_RECORD_H
 #define NEARDAL_RECORD_H
 
-#include "neard_record_proxy.h"
+#include "dbus-properties.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -29,11 +29,10 @@ extern "C" {
 
 /* NEARDAL Record Properties */
 typedef struct {
-	OrgNeardRecord	*proxy;	/* proxy to Neard NFC Record interface */
+	Properties	*proxy;	/* proxy to Neard NFC Record interface */
 	gchar		*name;	/* DBus interface name (as identifier) */
 	void		*parent; /* parent (tag) */
 	gboolean	notified; /* Already notified to client? */
-
 	gchar		*encoding;
 	gboolean	handOver;
 	gchar		*language;

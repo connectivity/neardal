@@ -40,28 +40,24 @@ static void neardal_rcd_notify(RcdProp *rcd)
 static errorCode_t neardal_rcd_prv_read_properties(RcdProp *rcd)
 {
 	errorCode_t	err		= NEARDAL_SUCCESS;
-	GError		*gerror		= NULL;
 	GVariant	*tmp		= NULL;
 	GVariant	*tmpOut		= NULL;
 
 	NEARDAL_TRACEIN();
 	NEARDAL_ASSERT_RET(rcd != NULL, NEARDAL_ERROR_INVALID_PARAMETER);
+	NEARDAL_ASSERT_RET(rcd->proxy != NULL,
+				NEARDAL_ERROR_INVALID_PARAMETER);
 
 	if ((tmp = g_datalist_get_data(&(neardalMgr.dbus_data), rcd->name)))
 		goto parse_properties;
 
-	NEARDAL_ASSERT_RET(rcd->proxy != NULL
-			   , NEARDAL_ERROR_INVALID_PARAMETER);
-
-	org_neard_record_call_get_properties_sync(rcd->proxy, &tmp, NULL,
-						&gerror);
-	if (gerror != NULL) {
-		err = NEARDAL_ERROR_DBUS;
-		NEARDAL_TRACE_ERR(
-			"Unable to read record's properties (%d:%s)\n",
-				   gerror->code, gerror->message);
-		g_error_free(gerror);
-		return err;
+	if (properties_call_get_all_sync(rcd->proxy,
+				"org.freedesktop.DBus.Properties", &tmp, NULL,
+					&neardalMgr.gerror) == FALSE) {
+		NEARDAL_TRACE_ERR("Can't read properties on path=%s: %s\n",
+					rcd->name, neardalMgr.gerror->message);
+		neardal_tools_prv_free_gerror(&neardalMgr.gerror);
+		return NEARDAL_ERROR_DBUS_CANNOT_INVOKE_METHOD;
 	}
 parse_properties:
 	NEARDAL_TRACEF("Reading:\n%s\n", g_variant_print(tmp, TRUE));
@@ -117,30 +113,20 @@ static errorCode_t neardal_rcd_prv_init(RcdProp *rcd)
 {
 	NEARDAL_TRACEIN();
 	NEARDAL_ASSERT_RET(rcd != NULL, NEARDAL_ERROR_INVALID_PARAMETER);
+	NEARDAL_ASSERT_RET(rcd->proxy == NULL,
+				NEARDAL_ERROR_DBUS_CANNOT_CREATE_PROXY);
 
-	if (g_datalist_get_data(&(neardalMgr.dbus_data), rcd->name))
-		goto read_properties;
+	rcd->proxy = properties_proxy_new_sync(neardalMgr.conn, 0,
+				NEARD_DBUS_SERVICE, rcd->name, NULL,
+				&neardalMgr.gerror);
 
-	if (rcd->proxy != NULL)
-		g_object_unref(rcd->proxy);
-	rcd->proxy = NULL;
-
-	rcd->proxy = org_neard_record_proxy_new_sync(neardalMgr.conn,
-					G_DBUS_OBJECT_MANAGER_CLIENT_FLAGS_NONE,
-							NEARD_DBUS_SERVICE,
-							rcd->name,
-							NULL, /* GCancellable */
-							&neardalMgr.gerror);
 	if (neardalMgr.gerror != NULL) {
-		NEARDAL_TRACE_ERR(
-			"Unable to create Neard Record Proxy (%d:%s)\n",
-				 neardalMgr.gerror->code,
-				neardalMgr.gerror->message);
+		NEARDAL_TRACE_ERR("Error creating proxy for path=%s: %s\n",
+					rcd->name, neardalMgr.gerror->message);
 		neardal_tools_prv_free_gerror(&neardalMgr.gerror);
 		return NEARDAL_ERROR_DBUS_CANNOT_CREATE_PROXY;
 	}
 
-read_properties:
 	return neardal_rcd_prv_read_properties(rcd);
 }
 
