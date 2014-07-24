@@ -418,11 +418,14 @@ int main(int argc, char *argv[])
 	GError		*error		= NULL;
 	static char	*execCmdLineStr;
 	static char	*scriptFileStr;
-static GOptionEntry	options[] = {
+	gboolean	opt_keep_running = FALSE;
+GOptionEntry	options[] = {
 		{ "exec"	, 'e', 0, G_OPTION_ARG_STRING, &execCmdLineStr,
 		"Execute specific command line function", "Command Line" },
 		{ "script", 's', 0, G_OPTION_ARG_STRING	, &scriptFileStr
 				  , "Script file to execute", "filename" },
+		{ "keep", 'k', 0, G_OPTION_ARG_NONE, &opt_keep_running,
+		  "Keep running after command execution" },
 		{ NULL, 0, 0, 0, NULL, NULL, NULL} /* End of List */
 	};
 
@@ -454,6 +457,7 @@ static GOptionEntry	options[] = {
 		/* No, test application executed without a command line in
 		parameter. Do we have a command in parameters list ? */
 		if (execCmdLineStr == NULL) {
+		keep_running:
 			/* No, test application executed without a command
 			line in parameter */
 
@@ -493,6 +497,9 @@ static GOptionEntry	options[] = {
 			NCL_CMD_PRINTF("All events have been processed (%d).\n",
 				       eventsCount);
 			g_free(execCmdLineStr);
+			execCmdLineStr = NULL;
+			if (opt_keep_running)
+				goto keep_running;
 		}
 	} else
 		ncl_prv_parse_script_file(scriptFileStr);
