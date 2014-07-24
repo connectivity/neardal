@@ -1,7 +1,7 @@
 /*
  *     NEARDAL (Neard Abstraction Library)
  *
- *     Copyright 2012 Intel Corporation. All rights reserved.
+ *     Copyright 2012-2014 Intel Corporation. All rights reserved.
  *
  *     This program is free software; you can redistribute it and/or modify
  *     it under the terms of the GNU Lesser General Public License version 2
@@ -22,19 +22,14 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <string.h>
+
 #include <glib.h>
-#include <glib-object.h>
 
 #include "neard_manager_proxy.h"
 #include "neard_adapter_proxy.h"
 
 #include "neardal.h"
 #include "neardal_prv.h"
-
-
-#define NEARDAL_SET_STRING_VALUE(gValue, value) do { \
-		gValue = g_variant_new_string(value); \
-		 } while (0);
 
 #define	ADP_MODE_INITIATOR		"Initiator"
 #define	ADP_MODE_TARGET			"Target"
