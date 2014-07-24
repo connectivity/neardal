@@ -21,8 +21,6 @@
 #ifndef NEARDAL_TRACES_PRV_H
 #define NEARDAL_TRACES_PRV_H
 
-#include <stdio.h>
-
 #ifdef __cplusplus
 extern "C" {
 #endif	/* __cplusplus */
