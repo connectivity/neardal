@@ -23,7 +23,6 @@ libneardal_la_include_HEADERS = neardal.h neardal_errors.h
 
 nodist_libgenerated_la_SOURCES = \
 	$(builddir)/neard_manager_proxy.c $(builddir)/neard_manager_proxy.h \
-	$(builddir)/neard_record_proxy.c $(builddir)/neard_record_proxy.h \
 	$(builddir)/neard_tag_proxy.c $(builddir)/neard_tag_proxy.h \
 	$(builddir)/neard_device_proxy.c $(builddir)/neard_device_proxy.h \
 	$(builddir)/neard_adapter_proxy.c $(builddir)/neard_adapter_proxy.h \
@@ -46,9 +45,6 @@ endef
 neard_adapter_proxy.c neard_adapter_proxy.h: interface/org.neard.Adapter.xml
 	$(run-gdbus)
 
-neard_record_proxy.c neard_record_proxy.h: interface/org.neard.Record.xml
-	$(run-gdbus)
-
 neard_tag_proxy.c neard_tag_proxy.h: interface/org.neard.Tag.xml
 	$(run-gdbus)
 
@@ -68,7 +64,6 @@ EXTRA_DIST = \
 	interface/org.neard.Agent.xml \
 	interface/org.neard.Device.xml \
 	interface/org.neard.Manager.xml \
-	interface/org.neard.Record.xml \
 	interface/org.neard.Tag.xml \
 	interface/dbus-object-manager.xml \
 	interface/dbus-properties.xml
