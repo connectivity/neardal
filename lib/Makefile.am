@@ -1,27 +1,36 @@
-AM_CFLAGS = @gio_CFLAGS@ @NEARDAL_EXTRA_FLAGS@
+AM_CPPFLAGS = @gio_CFLAGS@ -I$(builddir) -I$(srcdir) @NEARDAL_EXTRA_FLAGS@
 
 lib_LTLIBRARIES = libneardal.la
 noinst_LTLIBRARIES = libgenerated.la
 
 libneardal_la_SOURCES = \
-	neardal.c neardal_adapter.c neardal_agent_mgr.c neardal_device.c \
-	neardal_manager.c neardal_record.c neardal_tag.c neardal_tools.c \
-	neardal_traces.c
+	$(srcdir)/neardal.c \
+	$(srcdir)/neardal_adapter.c $(srcdir)/neardal_adapter.h \
+	$(srcdir)/neardal_agent_mgr.c $(srcdir)/neardal_agent_mgr.h \
+	$(srcdir)/neardal_device.c $(srcdir)/neardal_device.h \
+	$(srcdir)/neardal_manager.c $(srcdir)/neardal_manager.h \
+	$(srcdir)/neardal_prv.h \
+	$(srcdir)/neardal_record.c $(srcdir)/neardal_record.h \
+	$(srcdir)/neardal_tag.c $(srcdir)/neardal_tag.h \
+	$(srcdir)/neardal_tools.c $(srcdir)/neardal_tools.h \
+	$(srcdir)/neardal_traces.c \
+	$(srcdir)/neardal_traces_prv.h
+
 libneardal_la_LIBADD = @gio_LIBS@ libgenerated.la
 libneardal_la_LDFLAGS = -version-info @VERSION_INFO@
 libneardal_la_includedir = $(includedir)/neardal
 libneardal_la_include_HEADERS = neardal.h neardal_errors.h
 
-libgenerated_la_SOURCES = \
-	neard_manager_proxy.c neard_manager_proxy.h \
-	neard_record_proxy.c neard_record_proxy.h \
-	neard_tag_proxy.c neard_tag_proxy.h \
-	neard_device_proxy.c neard_device_proxy.h \
-	neard_adapter_proxy.c neard_adapter_proxy.h \
-	neardal_agent.c neardal_agent.h \
-	dbus-object-manager.c dbus-object-manager.h \
-	dbus-properties.c dbus-properties.h
-libgenerated_la_CFLAGS = $(AM_CFLAGS) -Wno-unused-parameter -Wno-pedantic
+nodist_libgenerated_la_SOURCES = \
+	$(builddir)/neard_manager_proxy.c $(builddir)/neard_manager_proxy.h \
+	$(builddir)/neard_record_proxy.c $(builddir)/neard_record_proxy.h \
+	$(builddir)/neard_tag_proxy.c $(builddir)/neard_tag_proxy.h \
+	$(builddir)/neard_device_proxy.c $(builddir)/neard_device_proxy.h \
+	$(builddir)/neard_adapter_proxy.c $(builddir)/neard_adapter_proxy.h \
+	$(builddir)/neardal_agent.c $(builddir)/neardal_agent.h \
+	$(builddir)/dbus-object-manager.c $(builddir)/dbus-object-manager.h \
+	$(builddir)/dbus-properties.c $(builddir)/dbus-properties.h
+libgenerated_la_CFLAGS = -Wno-unused-parameter -Wno-pedantic
 
 $(libneardal_la_SOURCES): libgenerated.la
 
@@ -52,4 +61,14 @@ neard_device_proxy.c neard_device_proxy.h: interface/org.neard.Device.xml
 %.c: interface/%.xml
 	$(run-gdbus) --interface-prefix="org.freedesktop.DBus."
 
-CLEANFILES = $(libgenerated_la_SOURCES)
+CLEANFILES = $(nodist_libgenerated_la_SOURCES)
+
+EXTRA_DIST = \
+	interface/org.neard.Adapter.xml \
+	interface/org.neard.Agent.xml \
+	interface/org.neard.Device.xml \
+	interface/org.neard.Manager.xml \
+	interface/org.neard.Record.xml \
+	interface/org.neard.Tag.xml \
+	interface/dbus-object-manager.xml \
+	interface/dbus-properties.xml

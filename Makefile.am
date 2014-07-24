@@ -1,4 +1,4 @@
-EXTRA_DIST = neardal.pc.in
+EXTRA_DIST = neardal.pc.in org.neardal.conf
 
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = neardal.pc
