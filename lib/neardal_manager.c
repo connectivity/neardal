@@ -214,6 +214,11 @@ static void neardal_mgr_interfaces_removed(ObjectManager *om,
 			continue;
 		}
 
+		if (strcmp(s, "org.freedesktop.DBus.Properties") == 0)
+			continue;
+		if (strcmp(s, "org.freedesktop.DBus.Introspectable") == 0)
+			continue;
+
 		NEARDAL_TRACE_ERR("Unsupported interface change: "
 					"path=%s, data=%s\n", path, s);
 	}
