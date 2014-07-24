@@ -26,6 +26,14 @@
 #include "neardal.h"
 #include "neardal_prv.h"
 
+static void neardal_rcd_notify(RcdProp *rcd)
+{
+	if (!rcd->notified) {
+		neardalMgr.cb.rcd_found(rcd->name, neardalMgr.cb.rcd_found_ud);
+		rcd->notified = TRUE;
+	}
+}
+
 /*****************************************************************************
  * neardal_rcd_prv_read_properties: Get Neard Record Properties
  ****************************************************************************/
@@ -38,6 +46,10 @@ static errorCode_t neardal_rcd_prv_read_properties(RcdProp *rcd)
 
 	NEARDAL_TRACEIN();
 	NEARDAL_ASSERT_RET(rcd != NULL, NEARDAL_ERROR_INVALID_PARAMETER);
+
+	if ((tmp = g_datalist_get_data(&(neardalMgr.dbus_data), rcd->name)))
+		goto parse_properties;
+
 	NEARDAL_ASSERT_RET(rcd->proxy != NULL
 			   , NEARDAL_ERROR_INVALID_PARAMETER);
 
@@ -51,6 +63,7 @@ static errorCode_t neardal_rcd_prv_read_properties(RcdProp *rcd)
 		g_error_free(gerror);
 		return err;
 	}
+parse_properties:
 	NEARDAL_TRACEF("Reading:\n%s\n", g_variant_print(tmp, TRUE));
 
 	tmpOut = g_variant_lookup_value(tmp, "Type", G_VARIANT_TYPE_STRING);
@@ -87,6 +100,8 @@ static errorCode_t neardal_rcd_prv_read_properties(RcdProp *rcd)
 	if (tmpOut != NULL)
 		rcd->uri = g_variant_dup_string(tmpOut, NULL);
 
+	neardal_rcd_notify(rcd);
+
 	return err;
 error:
 	/* due to error, record content will be destroyed later */
@@ -102,6 +117,9 @@ static errorCode_t neardal_rcd_prv_init(RcdProp *rcd)
 {
 	NEARDAL_TRACEIN();
 	NEARDAL_ASSERT_RET(rcd != NULL, NEARDAL_ERROR_INVALID_PARAMETER);
+
+	if (g_datalist_get_data(&(neardalMgr.dbus_data), rcd->name))
+		goto read_properties;
 
 	if (rcd->proxy != NULL)
 		g_object_unref(rcd->proxy);
@@ -122,6 +140,7 @@ static errorCode_t neardal_rcd_prv_init(RcdProp *rcd)
 		return NEARDAL_ERROR_DBUS_CANNOT_CREATE_PROXY;
 	}
 
+read_properties:
 	return neardal_rcd_prv_read_properties(rcd);
 }
 
@@ -234,6 +253,8 @@ errorCode_t neardal_rcd_add(char *rcdName, void *parent)
 	rcd->parent = tagProp;
 
 	tagProp->rcdList = g_list_prepend(tagProp->rcdList, (gpointer) rcd);
+	tagProp->rcdLen++;
+
 	err = neardal_rcd_prv_init(rcd);
 	if (err != NEARDAL_SUCCESS)
 		goto exit;
