@@ -66,6 +66,51 @@ void *neardal_g_variant_get(GVariant *data, const char *key, const char *fmt)
 	return out;
 }
 
+void *neardal_data_search(const char *name)
+{
+	GData **l = &(neardalMgr.dbus_data);
+	return g_datalist_get_data(l, name);
+}
+
+void **neardal_arrayv_append(void **array, void *data)
+{
+	guint len = array ? g_strv_length((gchar **) array) : 0;
+	void **out = g_realloc(array, sizeof(void *) * (len + 2));
+	out[len] = data;
+	out[len + 1] = NULL;
+	return out;
+}
+
+static void neardal_data_cb(GQuark id, gpointer data, gpointer user_data)
+{
+	void ***array = user_data;
+	*array = neardal_arrayv_append(*array, data);
+}
+
+guint neardal_data_to_arrayv(void ***array)
+{
+	GData **l = &(neardalMgr.dbus_data);
+	g_datalist_foreach(l, neardal_data_cb, array);
+	return *array ? g_strv_length((gchar **) *array) : 0;
+}
+
+GVariant *neardal_data_insert(const char *name, const char *type, GVariant *in)
+{
+	GVariant *out = in;
+	GData **l = &(neardalMgr.dbus_data);
+	neardal_g_variant_add_parsed(&out, "{'NeardalType', <%s>}", type);
+	neardal_g_variant_add_parsed(&out, "{'Name', <%s>}", name);
+	g_datalist_set_data_full(l, name, g_variant_ref(out),
+					(GDestroyNotify) g_variant_unref);
+	return out;
+}
+
+void neardal_data_remove(GVariant *data)
+{
+	GData **l = &(neardalMgr.dbus_data);
+	g_datalist_remove_data(l, neardal_g_variant_get(data, "Name", "&s"));
+}
+
 char *neardal_dirname(const char *path)
 {
 	char *tmp = strrchr(path, '/');

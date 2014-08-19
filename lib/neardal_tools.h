@@ -68,6 +68,11 @@ errorCode_t neardal_tools_prv_add_dict_entry(GVariantBuilder *builder
 void neardal_g_variant_add_parsed(GVariant **v, const char *format, ...);
 void neardal_g_variant_dump(GVariant *data);
 void *neardal_g_variant_get(GVariant *data, const char *key, const char *fmt);
+void *neardal_data_search(const char *name);
+GVariant *neardal_data_insert(const char *name, const char *type, GVariant *in);
+void neardal_data_remove(GVariant *data);
+guint neardal_data_to_arrayv(void ***array);
+void **neardal_arrayv_append(void **array, void *data);
 char *neardal_dirname(const char *path);
 
 static inline gpointer neardal_g_callback(GCallback gc)
