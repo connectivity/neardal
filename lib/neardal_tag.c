@@ -71,7 +71,6 @@ static errorCode_t neardal_tag_prv_read_properties(TagProp *tagProp)
 	GVariant	*tmp		= NULL;
 	GVariant	*tmpOut		= NULL;
 	gsize		len;
-	gchar		**rcdArray	= NULL;
 
 	NEARDAL_TRACEIN();
 	NEARDAL_ASSERT_RET(tagProp != NULL, NEARDAL_ERROR_INVALID_PARAMETER);
@@ -85,24 +84,6 @@ static errorCode_t neardal_tag_prv_read_properties(TagProp *tagProp)
 		goto exit;
 	}
 	NEARDAL_TRACEF("Reading:\n%s\n", g_variant_print(tmp, TRUE));
-	tmpOut = g_variant_lookup_value(tmp, "Records", G_VARIANT_TYPE_ARRAY);
-	if (tmpOut != NULL) {
-		rcdArray = g_variant_dup_objv(tmpOut, &len);
-		tagProp->rcdLen = len;
-		if (len == 0) {
-			g_strfreev(rcdArray);
-			rcdArray = NULL;
-		} else {
-			guint len = 0;
-			char *rcdName;
-
-			while (len < tagProp->rcdLen &&
-				err == NEARDAL_SUCCESS) {
-				rcdName = rcdArray[len++];
-				err = neardal_rcd_add(rcdName, tagProp);
-			}
-		}
-	}
 
 	tmpOut = g_variant_lookup_value(tmp, "TagType", G_VARIANT_TYPE_ARRAY);
 	if (tmpOut != NULL) {
