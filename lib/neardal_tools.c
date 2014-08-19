@@ -66,6 +66,13 @@ void *neardal_g_variant_get(GVariant *data, const char *key, const char *fmt)
 	return out;
 }
 
+char *neardal_dirname(const char *path)
+{
+	char *tmp = strrchr(path, '/');
+
+	return tmp ? g_strndup(path, tmp - path) : NULL;
+}
+
 /*****************************************************************************
  * neardal_tools_prv_free_gerror: freeing gerror in neardal context
  ****************************************************************************/

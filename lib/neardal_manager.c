@@ -34,13 +34,6 @@ void neardal_adp_prv_cb_tag_found(OrgNeardTag *proxy,
 void neardal_adp_prv_cb_tag_lost(OrgNeardTag *proxy,
 			const gchar *arg_unnamed_arg0, void *user_data);
 
-static char *neardal_dirname(const char *path)
-{
-	char *tmp = strrchr(path, '/');
-
-	return tmp ? g_strndup(path, tmp - path) : NULL;
-}
-
 TagProp *neardal_mgr_tag_search(const gchar *tag)
 {
 	char *adapter = NULL;
