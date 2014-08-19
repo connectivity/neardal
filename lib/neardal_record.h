@@ -36,4 +36,6 @@ void neardal_record_remove(GVariant *record);
 GVariant *neardal_record_to_g_variant(neardal_record *in);
 neardal_record *neardal_g_variant_to_record(GVariant *in);
 
+void neardal_record_free(neardal_record *record);
+
 #endif /* NEARDAL_RECORD_H */
