@@ -193,69 +193,6 @@ static void neardal_rcd_prv_free(RcdProp **rcd)
 	(*rcd) = NULL;
 }
 
-/*****************************************************************************
- * neardal_rcd_prv_format: Insert key/value in a GHashTable
- ****************************************************************************/
-errorCode_t neardal_rcd_prv_format(GVariantBuilder *builder, RcdProp *rcd)
-{
-	errorCode_t	err		= NEARDAL_SUCCESS;
-
-
-	NEARDAL_TRACEIN();
-	NEARDAL_ASSERT_RET(rcd != NULL, NEARDAL_ERROR_INVALID_PARAMETER);
-
-	/* Type */
-	if (rcd->type != NULL)
-		neardal_tools_prv_add_dict_entry(builder, "Type", rcd->type
-						 , 0, (int) G_TYPE_STRING);
-
-	/* Encoding */
-	if (rcd->encoding != NULL)
-		neardal_tools_prv_add_dict_entry(builder, "Encoding"
-						 , rcd->encoding, 0
-						 , (int) G_TYPE_STRING);
-
-	/* Language */
-	if (rcd->language != NULL)
-		neardal_tools_prv_add_dict_entry(builder, "Language"
-						 , rcd->language, 0
-						 , (int) G_TYPE_STRING);
-
-	/* Representation */
-	if (rcd->representation != NULL)
-		neardal_tools_prv_add_dict_entry(builder, "Representation"
-						 , rcd->representation, 0
-						 , (int) G_TYPE_STRING);
-
-	/* URI */
-	if (rcd->uri != NULL) {
-		neardal_tools_prv_add_dict_entry(builder, "URI", rcd->uri, 0
-						 , (int) G_TYPE_STRING);
-		neardal_tools_prv_add_dict_entry(builder, "Size"
-						 , (void *) rcd->uriObjSize, 0
-						 , (int) G_TYPE_UINT);
-	}
-	/* MIME */
-	if (rcd->mime != NULL)
-		neardal_tools_prv_add_dict_entry(builder, "MIME", rcd->mime
-						 ,0 , (int) G_TYPE_STRING);
-
-	/* Action */
-	if (rcd->action != NULL)
-		neardal_tools_prv_add_dict_entry(builder, "Action"
-						 , rcd->action, 0
-						 , (int) G_TYPE_STRING);
-
-	/* Carrier */
-	if (rcd->carrier != NULL)
-		neardal_tools_prv_add_dict_entry(builder, "Carrier"
-						 , rcd->carrier
-						 , 0, (int) G_TYPE_STRING);
-
-	return err;
-}
-
-
 /******************************************************************************
  * neardal_rcd_add: add new NFC record, initialize DBus Proxy connection,
  * register record signal
