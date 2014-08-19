@@ -67,10 +67,7 @@ PKG_CHECK_MODULES(gio, gio-unix-2.0 >= 2.30,
 	AC_SUBST([gio_LIBS]),
 	AC_MSG_ERROR(gio-unix-2.0 >= 2.30 is required))
 
-AC_ARG_ENABLE([doc],
-	[AC_HELP_STRING([--enable-doc],
-		[Build API documentation using Doxygen])],
-	[AC_CHECK_PROGS([DOXYGEN], [doxygen])])
+AC_PATH_TOOL([DOXYGEN], [doxygen])
 AM_CONDITIONAL([HAVE_DOXYGEN], [test ! -z "$DOXYGEN"])
 AM_COND_IF([HAVE_DOXYGEN], [AC_CONFIG_FILES([doxygen.cfg])])
 
