@@ -21,6 +21,12 @@
 #ifndef NEARDAL_TOOLS_H
 #define NEARDAL_TOOLS_H
 
+#define BUG(...)						\
+do {								\
+	fprintf(stderr, "%s:%d BUG:",	__FILE__, __LINE__);	\
+	fprintf(stderr, " " __VA_ARGS__);			\
+	abort();						\
+} while (0)
 
 /*****************************************************************************
  * Debugging macro to manage assertion.
@@ -85,7 +91,7 @@ static inline gpointer neardal_g_callback(GCallback gc)
 	return p.gp;
 }
 
-#define NEARDAL_G_CALLBACK(cb) neardal_g_callback(G_CALLBACK(cb))
+#define NEARDAL_G_CALLBACK(_cb) neardal_g_callback(G_CALLBACK((_cb)))
 
 #define NEARDAL_G_VARIANT_IN(_builder, _format, _data)			\
 do {									\
