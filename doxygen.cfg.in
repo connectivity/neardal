@@ -1,0 +1,7 @@
+PROJECT_NAME           = "neardAL library"
+PROJECT_BRIEF          = "Neard Abstraction Library"
+OUTPUT_DIRECTORY       = doc
+INPUT                  = lib/neardal.h lib/neardal_errors.h
+QUIET                  = YES
+EXTRACT_ALL            = YES
+BRIEF_MEMBER_DESC      = NO
