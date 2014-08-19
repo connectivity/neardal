@@ -67,6 +67,23 @@ neardal_record *neardal_g_variant_to_record(GVariant *in)
 	return out;
 }
 
+void neardal_record_add(GVariant *record)
+{
+	NEARDAL_TRACEIN();
+
+	neardal_g_variant_dump(record);
+
+	neardalMgr.cb.rcd_found(neardal_g_variant_get(record, "Name", "&s"),
+				neardalMgr.cb.rcd_found_ud);
+}
+
+void neardal_record_remove(GVariant *record)
+{
+	NEARDAL_TRACEIN();
+
+	neardal_g_variant_dump(record);
+}
+
 static void neardal_rcd_notify(RcdProp *rcd)
 {
 	if (!rcd->notified) {
