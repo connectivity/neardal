@@ -957,49 +957,6 @@ exit:
 	return err;
 }
 
-/*****************************************************************************
- * neardal_dev_push: Push NDEF record to an NFC dev
- ****************************************************************************/
-errorCode_t neardal_dev_push(neardal_record *record)
-{
-	errorCode_t	err	= NEARDAL_SUCCESS;
-	AdpProp		*adpProp;
-	DevProp		*devProp;
-	RcdProp		rcd;
-
-
-	if (neardalMgr.proxy == NULL)
-		neardal_prv_construct(&err);
-
-	if (err != NEARDAL_SUCCESS || record == NULL)
-		goto exit;
-
-	err = neardal_mgr_prv_get_adapter((gchar *) record->name, &adpProp);
-	if (err != NEARDAL_SUCCESS)
-		goto exit;
-	err = neardal_adp_prv_get_dev(adpProp, (gchar *) record->name,
-				      &devProp);
-	if (err != NEARDAL_SUCCESS)
-		goto exit;
-
-	rcd.name		= (gchar *) record->name;
-	rcd.action		= (gchar *) record->action;
-	rcd.encoding		= (gchar *) record->encoding;
-	rcd.language		= (gchar *) record->language;
-	rcd.type		= (gchar *) record->type;
-	rcd.carrier		= (gchar *) record->carrier;
-	rcd.representation	= (gchar *) record->representation;
-	rcd.uri			= (gchar *) record->uri;
-	rcd.uriObjSize		= record->uriObjSize;
-	rcd.mime		= (gchar *) record->mime;
-
-	neardal_dev_prv_push(devProp, &rcd);
-exit:
-	return err;
-}
-
-
-
 /*---------------------------------------------------------------------------
  * NFC Record Management
  ---------------------------------------------------------------------------*/

@@ -55,12 +55,4 @@ errorCode_t neardal_dev_prv_add(gchar *devName, void *parent);
  *****************************************************************************/
 void neardal_dev_prv_remove(DevProp *devProp);
 
-/******************************************************************************
- * neardal_dev_prv_push: Creates and write NDEF record to be written to
- * an NFC dev
- *****************************************************************************/
-errorCode_t neardal_dev_prv_push(DevProp *devProp, RcdProp *rcd);
-
-
-
 #endif /* NEARDAL_DEV_H */

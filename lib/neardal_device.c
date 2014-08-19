@@ -210,40 +210,35 @@ void neardal_dev_notify_dev_found(DevProp *devProp)
 		}
 }
 
-/*****************************************************************************
- * neardal_dev_prv_push: Creates and write NDEF record to be pushed to
- * an NFC device
- ****************************************************************************/
-errorCode_t neardal_dev_prv_push(DevProp *devProp, RcdProp *rcd)
+errorCode_t neardal_dev_push(neardal_record *record)
 {
-	GVariantBuilder	*dictBuilder = NULL;
-	GVariant	*in;
-	errorCode_t	err;
 	GError		*gerror	= NULL;
+	errorCode_t	err;
+	AdpProp		*adpProp;
+	DevProp		*devProp;
+	GVariant	*in;
 
-	NEARDAL_ASSERT_RET(devProp != NULL, NEARDAL_ERROR_INVALID_PARAMETER);
-
-	dictBuilder = g_variant_builder_new(G_VARIANT_TYPE_ARRAY);
-	if (dictBuilder == NULL)
-		return NEARDAL_ERROR_NO_MEMORY;
-
-	err = neardal_rcd_prv_format(dictBuilder, rcd);
+	neardal_prv_construct(&err);
 	if (err != NEARDAL_SUCCESS)
 		goto exit;
 
-	in = g_variant_builder_end(dictBuilder);
-	NEARDAL_TRACE_LOG("Sending:\n%s\n", g_variant_print(in, TRUE));
-	org_neard_device_call_push_sync(devProp->proxy, in, NULL, &gerror);
+	err = neardal_mgr_prv_get_adapter((gchar *) record->name, &adpProp);
+	if (err != NEARDAL_SUCCESS)
+		goto exit;
+	err = neardal_adp_prv_get_dev(adpProp, (gchar *) record->name,
+				      &devProp);
+	if (err != NEARDAL_SUCCESS)
+		goto exit;
 
-exit:
-	if (gerror != NULL) {
-		NEARDAL_TRACE_ERR("Unable to write dev record (%d:%s)\n",
-				 gerror->code, gerror->message);
+	in = neardal_record_to_g_variant(record);
+
+	if (org_neard_device_call_push_sync(devProp->proxy, in, NULL,
+						&gerror) == FALSE) {
+		NEARDAL_TRACE_ERR("Can't write record: %s\n", gerror->message);
 		g_error_free(gerror);
 		err = NEARDAL_ERROR_DBUS;
 	}
-	g_variant_builder_unref(dictBuilder);
-
+exit:
 	return err;
 }
 
