@@ -982,18 +982,7 @@ void neardal_free_record(neardal_record *record)
 		return;
 	}
 
-	/* Freeing record properties */
-	g_free((gpointer) record->name);
-	g_free((gpointer) record->encoding);
-	g_free((gpointer) record->language);
-	g_free((gpointer) record->action);
-	g_free((gpointer) record->type);
-	g_free((gpointer) record->representation);
-	g_free((gpointer) record->uri);
-	g_free((gpointer) record->mime);
-
-	/* Freeing record struct */
-	g_free(record);
+	neardal_record_free(record);
 }
 
 errorCode_t neardal_get_record_properties(const char *name,
