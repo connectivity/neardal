@@ -29,17 +29,8 @@ typedef struct {
 	gchar		*name;	/* DBus interface name (as identifier) */
 	void		*parent; /* parent (tag) */
 	gboolean	notified; /* Already notified to client? */
-	gchar		*encoding;
 	gboolean	handOver;
-	gchar		*language;
 	gboolean	smartPoster;
-	gchar		*action;
-	gchar		*carrier;
-	gchar		*type;
-	gchar		*representation;
-	gchar		*uri;
-	gsize		uriObjSize;
-	gchar		*mime;
 } RcdProp;
 
 /*****************************************************************************

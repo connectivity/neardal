@@ -144,14 +144,6 @@ static void neardal_rcd_prv_free(RcdProp **rcd)
 		g_object_unref((*rcd)->proxy);
 	(*rcd)->proxy = NULL;
 	g_free((*rcd)->name);
-	g_free((*rcd)->language);
-	g_free((*rcd)->encoding);
-	g_free((*rcd)->mime);
-	g_free((*rcd)->representation);
-	g_free((*rcd)->type);
-	g_free((*rcd)->carrier);
-	g_free((*rcd)->uri);
-	g_free((*rcd));
 	(*rcd) = NULL;
 }
 
