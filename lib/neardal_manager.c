@@ -122,7 +122,9 @@ static void neardal_mgr_interfaces_added(ObjectManager *om,
 
 	if (g_variant_lookup(interfaces, "org.neard.Record", "*",
 				(void *) &v)) {
-		neardal_mgr_record_add(path, v);
+		GVariant *record;
+		if ((record = neardal_data_insert(path, "Record", v)))
+			neardal_record_add(record);
 		return;
 	}
 
@@ -208,7 +210,11 @@ static void neardal_mgr_interfaces_removed(ObjectManager *om,
 
 	while ((s = (char *) interfaces[i++])) {
 		if (strcmp(s, "org.neard.Record") == 0) {
-			neardal_mgr_record_remove(path);
+			GVariant *record;
+			if ((record = neardal_data_search(path))) {
+				neardal_record_remove(record);
+				neardal_data_remove(record);
+			}
 			continue;
 		}
 
