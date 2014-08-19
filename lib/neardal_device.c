@@ -28,154 +28,9 @@
 #include "neardal.h"
 #include "neardal_prv.h"
 
-
-/*****************************************************************************
- * neardal_dev_prv_cb_property_changed: Callback called when a NFC device
- * property is changed
- ****************************************************************************/
-static void neardal_dev_prv_cb_property_changed(OrgNeardDevice *proxy,
-						const gchar *arg_unnamed_arg0,
-						GVariant *arg_unnamed_arg1,
-						void		*user_data)
-{
-	errorCode_t	err		= NEARDAL_SUCCESS;
-	DevProp		*devProp	= user_data;
-
-	(void) proxy; /* remove warning */
-	(void) arg_unnamed_arg1; /* remove warning */
-
-	NEARDAL_TRACEIN();
-
-	if (devProp == NULL || arg_unnamed_arg0 == NULL)
-		return;
-
-	NEARDAL_TRACEF("str0='%s'\n", arg_unnamed_arg0);
-	NEARDAL_TRACEF("arg_unnamed_arg1=%s (%s)\n",
-		       g_variant_print (arg_unnamed_arg1, TRUE),
-		       g_variant_get_type_string(arg_unnamed_arg1));
-
-
-	if (err != NEARDAL_SUCCESS) {
-		NEARDAL_TRACE_ERR("Exit with error code %d:%s\n", err,
-				neardal_error_get_text(err));
-	}
-
-	return;
-}
-
-/*****************************************************************************
- * neardal_dev_prv_read_properties: Get Neard Dev Properties
- ****************************************************************************/
-static errorCode_t neardal_dev_prv_read_properties(DevProp *devProp)
-{
-	errorCode_t	err		= NEARDAL_SUCCESS;
-	GError		*gerror		= NULL;
-	GVariant	*tmp		= NULL;
-	GVariant	*tmpOut		= NULL;
-	gsize		len;
-	gchar		**rcdArray	= NULL;
-
-	NEARDAL_TRACEIN();
-	NEARDAL_ASSERT_RET(devProp != NULL, NEARDAL_ERROR_INVALID_PARAMETER);
-	NEARDAL_ASSERT_RET(devProp->proxy != NULL
-			  , NEARDAL_ERROR_GENERAL_ERROR);
-
-	org_neard_device_call_get_properties_sync(devProp->proxy, &tmp, NULL,
-						&gerror);
-	if (gerror != NULL) {
-		err = NEARDAL_ERROR_DBUS_CANNOT_INVOKE_METHOD;
-		NEARDAL_TRACE_ERR(
-			"Unable to read dev's properties (%d:%s)\n",
-				 gerror->code, gerror->message);
-		g_error_free(gerror);
-		goto exit;
-	}
-	NEARDAL_TRACEF("Reading:\n%s\n", g_variant_print(tmp, TRUE));
-	tmpOut = g_variant_lookup_value(tmp, "Records", G_VARIANT_TYPE_ARRAY);
-	if (tmpOut != NULL) {
-		rcdArray = g_variant_dup_objv(tmpOut, &len);
-		devProp->rcdLen = len;
-		if (len == 0) {
-			g_strfreev(rcdArray);
-			rcdArray = NULL;
-		} else {
-			guint len = 0;
-			char *rcdName;
-
-			while (len < devProp->rcdLen &&
-				err == NEARDAL_SUCCESS) {
-				rcdName = rcdArray[len++];
-				err = neardal_rcd_add(rcdName, devProp);
-			}
-		}
-	}
-
-exit:
-	return err;
-}
-
-/*****************************************************************************
- * neardal_dev_init: Get Neard Manager Properties = NFC Devs list.
- * Create a DBus proxy for the first one NFC device if present
- * Register Neard Manager signals ('PropertyChanged')
- ****************************************************************************/
-static errorCode_t neardal_dev_prv_init(DevProp *devProp)
-{
-	errorCode_t	err = NEARDAL_SUCCESS;
-
-	NEARDAL_TRACEIN();
-	NEARDAL_ASSERT_RET(devProp != NULL, NEARDAL_ERROR_INVALID_PARAMETER);
-
-	if (devProp->proxy != NULL) {
-		g_signal_handlers_disconnect_by_func(devProp->proxy,
-			NEARDAL_G_CALLBACK(neardal_dev_prv_cb_property_changed),
-						     NULL);
-		g_object_unref(devProp->proxy);
-		devProp->proxy = NULL;
-	}
-	devProp->proxy = NULL;
-
-	devProp->proxy = org_neard_device_proxy_new_sync(neardalMgr.conn,
-					G_DBUS_OBJECT_MANAGER_CLIENT_FLAGS_NONE,
-							NEARD_DBUS_SERVICE,
-							devProp->name,
-							NULL, /* GCancellable */
-							&neardalMgr.gerror);
-	if (neardalMgr.gerror != NULL) {
-		NEARDAL_TRACE_ERR(
-			"Unable to create Neard Dev Proxy (%d:%s)\n",
-				  neardalMgr.gerror->code,
-				  neardalMgr.gerror->message);
-		neardal_tools_prv_free_gerror(&neardalMgr.gerror);
-		return NEARDAL_ERROR_DBUS_CANNOT_CREATE_PROXY;
-	}
-
-	/* Populate Dev datas... */
-	err = neardal_dev_prv_read_properties(devProp);
-	if (err != NEARDAL_SUCCESS)
-		return err;
-
-	NEARDAL_TRACEF("Register Neard-Dev Signal 'PropertyChanged'\n");
-	g_signal_connect(devProp->proxy, NEARD_DEV_SIG_PROPCHANGED,
-			G_CALLBACK(neardal_dev_prv_cb_property_changed),
-			  devProp);
-
-	return err;
-}
-
-/*****************************************************************************
- * neardal_dev_prv_free: unref DBus proxy, disconnect Neard Dev signals
- ****************************************************************************/
 static void neardal_dev_prv_free(DevProp **devProp)
 {
 	NEARDAL_TRACEIN();
-	if ((*devProp)->proxy != NULL) {
-		g_signal_handlers_disconnect_by_func((*devProp)->proxy,
-			NEARDAL_G_CALLBACK(neardal_dev_prv_cb_property_changed),
-						     NULL);
-		g_object_unref((*devProp)->proxy);
-		(*devProp)->proxy = NULL;
-	}
 	g_free((*devProp)->name);
 	g_free((*devProp));
 	(*devProp) = NULL;
@@ -214,29 +69,29 @@ errorCode_t neardal_dev_push(neardal_record *record)
 {
 	GError		*gerror	= NULL;
 	errorCode_t	err;
-	AdpProp		*adpProp;
-	DevProp		*devProp;
 	GVariant	*in;
 
 	neardal_prv_construct(&err);
 	if (err != NEARDAL_SUCCESS)
 		goto exit;
 
-	err = neardal_mgr_prv_get_adapter((gchar *) record->name, &adpProp);
-	if (err != NEARDAL_SUCCESS)
-		goto exit;
-	err = neardal_adp_prv_get_dev(adpProp, (gchar *) record->name,
-				      &devProp);
-	if (err != NEARDAL_SUCCESS)
-		goto exit;
-
 	in = neardal_record_to_g_variant(record);
 
-	if (org_neard_device_call_push_sync(devProp->proxy, in, NULL,
-						&gerror) == FALSE) {
-		NEARDAL_TRACE_ERR("Can't write record: %s\n", gerror->message);
+	g_dbus_connection_call_sync(neardalMgr.conn,
+					"org.neard",
+                                        record->name,
+                                        "org.neard.Device",
+                                        "Push",
+					g_variant_new("(@a{sv})", in),
+					NULL,
+                                        G_DBUS_CALL_FLAGS_NONE,
+                                        3000, /* 3 secs */
+                                        NULL,
+                                        &gerror);
+	if (gerror) {
+		NEARDAL_TRACE_ERR("Can't push record: %s\n", gerror->message);
 		g_error_free(gerror);
-		err = NEARDAL_ERROR_DBUS;
+		err = NEARDAL_ERROR_DBUS_CANNOT_INVOKE_METHOD;
 	}
 exit:
 	return err;
@@ -264,12 +119,11 @@ errorCode_t neardal_dev_prv_add(gchar *devName, void *parent)
 	devProp->parent	= adpProp;
 
 	adpProp->devList = g_list_prepend(adpProp->devList, devProp);
-	err = neardal_dev_prv_init(devProp);
 
 	NEARDAL_TRACEF("NEARDAL LIB devList contains %d elements\n",
 		      g_list_length(adpProp->devList));
 
-	return err;
+	return NEARDAL_SUCCESS;
 
 error:
 	if (devProp->name != NULL)
