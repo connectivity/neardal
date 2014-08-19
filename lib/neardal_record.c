@@ -83,7 +83,6 @@ static errorCode_t neardal_rcd_prv_read_properties(RcdProp *rcd)
 {
 	errorCode_t	err		= NEARDAL_SUCCESS;
 	GVariant	*tmp		= NULL;
-	GVariant	*tmpOut		= NULL;
 
 	NEARDAL_TRACEIN();
 	NEARDAL_ASSERT_RET(rcd != NULL, NEARDAL_ERROR_INVALID_PARAMETER);
@@ -91,7 +90,7 @@ static errorCode_t neardal_rcd_prv_read_properties(RcdProp *rcd)
 				NEARDAL_ERROR_INVALID_PARAMETER);
 
 	if ((tmp = g_datalist_get_data(&(neardalMgr.dbus_data), rcd->name)))
-		goto parse_properties;
+		goto notify;
 
 	if (properties_call_get_all_sync(rcd->proxy,
 				"org.freedesktop.DBus.Properties", &tmp, NULL,
@@ -101,49 +100,12 @@ static errorCode_t neardal_rcd_prv_read_properties(RcdProp *rcd)
 		neardal_tools_prv_free_gerror(&neardalMgr.gerror);
 		return NEARDAL_ERROR_DBUS_CANNOT_INVOKE_METHOD;
 	}
-parse_properties:
-	NEARDAL_TRACEF("Reading:\n%s\n", g_variant_print(tmp, TRUE));
-
-	tmpOut = g_variant_lookup_value(tmp, "Type", G_VARIANT_TYPE_STRING);
-	if (tmpOut != NULL)
-		rcd->type = g_variant_dup_string(tmpOut, NULL);
-	else
-		goto error;
-
-	tmpOut = g_variant_lookup_value(tmp, "Carrier", G_VARIANT_TYPE_STRING);
-	if (tmpOut != NULL)
-		rcd->type = g_variant_dup_string(tmpOut, NULL);
-	
-	tmpOut = g_variant_lookup_value(tmp, "Representation",
-					G_VARIANT_TYPE_STRING);
-	if (tmpOut != NULL)
-		rcd->representation = g_variant_dup_string(tmpOut,
-								NULL);
-
-	tmpOut = g_variant_lookup_value(tmp, "Encoding", G_VARIANT_TYPE_STRING);
-	if (tmpOut != NULL)
-		rcd->encoding = g_variant_dup_string(tmpOut, NULL);
-
-	tmpOut = g_variant_lookup_value(tmp, "Language", G_VARIANT_TYPE_STRING);
-	if (tmpOut != NULL)
-		rcd->language = g_variant_dup_string(tmpOut, NULL);
-
-	tmpOut = g_variant_lookup_value(tmp, "MIME",
-					G_VARIANT_TYPE_STRING);
-	if (tmpOut != NULL)
-		rcd->mime = g_variant_dup_string(tmpOut, NULL);
-
-	tmpOut = g_variant_lookup_value(tmp, "URI",
-					G_VARIANT_TYPE_STRING);
-	if (tmpOut != NULL)
-		rcd->uri = g_variant_dup_string(tmpOut, NULL);
+notify:
+	NEARDAL_TRACEF("Record %s=%s\n", rcd->name, g_variant_print(tmp, TRUE));
 
 	neardal_rcd_notify(rcd);
 
 	return err;
-error:
-	/* due to error, record content will be destroyed later */
-	return NEARDAL_ERROR_INVALID_RECORD;
 }
 
 /*****************************************************************************
