@@ -21,23 +21,13 @@
 #ifndef NEARDAL_RECORD_H
 #define NEARDAL_RECORD_H
 
-/* NEARDAL Record Properties */
 typedef struct {
 	gchar		*name;	/* DBus interface name (as identifier) */
 	void		*parent; /* parent (tag) */
 	gboolean	notified; /* Already notified to client? */
 } RcdProp;
 
-/*****************************************************************************
- * neardal_rcd_add: add new NFC record, initialize DBus Proxy connection,
- * register record signal
- *****************************************************************************/
 errorCode_t neardal_rcd_add(char *rcdName, void *parent);
-
-/*****************************************************************************
- * neardal_rcd_remove: remove NFC record, unref DBus Proxy connection,
- * unregister record signal
- *****************************************************************************/
 void neardal_rcd_remove(RcdProp *rcdProp);
 
 void neardal_record_add(GVariant *record);
