@@ -28,7 +28,6 @@
 #include "neardal.h"
 #include "neardal_prv.h"
 
-
 /*****************************************************************************
  * neardal_tag_prv_cb_property_changed: Callback called when a NFC tag
  * property is changed
@@ -147,7 +146,6 @@ static errorCode_t neardal_tag_prv_init(TagProp *tagProp)
 		g_object_unref(tagProp->proxy);
 		tagProp->proxy = NULL;
 	}
-	tagProp->proxy = NULL;
 
 	tagProp->proxy = org_neard_tag_proxy_new_sync(neardalMgr.conn,
 					G_DBUS_OBJECT_MANAGER_CLIENT_FLAGS_NONE,
