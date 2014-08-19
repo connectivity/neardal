@@ -4,4 +4,6 @@ OUTPUT_DIRECTORY       = doc
 INPUT                  = lib/neardal.h lib/neardal_errors.h
 QUIET                  = YES
 EXTRACT_ALL            = YES
-BRIEF_MEMBER_DESC      = NO
+BRIEF_MEMBER_DESC      = YES
+REPEAT_BRIEF           = NO
+JAVADOC_AUTOBRIEF      = YES
