@@ -733,7 +733,6 @@ errorCode_t neardal_get_tag_properties(const char *tagName,
 					  neardal_tag **tag)
 {
 	errorCode_t	err		= NEARDAL_SUCCESS;
-	AdpProp		*adpProp	= NULL;
 	TagProp		*tagProp	= NULL;
 	neardal_tag	*tagClient	= NULL;
 	int		ct		= 0;	/* counter */
@@ -755,13 +754,11 @@ errorCode_t neardal_get_tag_properties(const char *tagName,
 
 	tagClient->records	= NULL;
 	tagClient->tagType	= NULL;
-	err = neardal_mgr_prv_get_adapter((gchar *) tagName, &adpProp);
-	if (err != NEARDAL_SUCCESS)
-		goto exit;
 
-	err = neardal_adp_prv_get_tag(adpProp, (gchar *) tagName, &tagProp);
-	if (err != NEARDAL_SUCCESS)
+	if (!(tagProp = neardal_mgr_tag_search(tagName))) {
+		err = NEARDAL_ERROR_NO_TAG;
 		goto exit;
+	}
 
 	tagClient->name		= g_strdup(tagProp->name);
 	tagClient->type		= g_strdup(tagProp->type);
@@ -820,25 +817,18 @@ exit:
  ****************************************************************************/
 errorCode_t neardal_tag_write(neardal_record *record)
 {
-	errorCode_t	err	= NEARDAL_SUCCESS;
-	AdpProp		*adpProp;
+	errorCode_t	err;
 	TagProp		*tagProp;
 	RcdProp		rcd;
 
+	NEARDAL_ASSERT_RET(record != NULL, NEARDAL_ERROR_INVALID_PARAMETER);
 
-	if (neardalMgr.proxy == NULL)
-		neardal_prv_construct(&err);
-
-	if (err != NEARDAL_SUCCESS || record == NULL)
-		goto exit;
-
-	err = neardal_mgr_prv_get_adapter((gchar *) record->name, &adpProp);
+	neardal_prv_construct(&err);
 	if (err != NEARDAL_SUCCESS)
-		goto exit;
-	err = neardal_adp_prv_get_tag(adpProp, (gchar *) record->name,
-				      &tagProp);
-	if (err != NEARDAL_SUCCESS)
-		goto exit;
+		return err;
+
+	if (!(tagProp = neardal_mgr_tag_search(record->name)))
+		return NEARDAL_ERROR_NO_TAG;
 
 	rcd.name		= (gchar *) record->name;
 	rcd.action		= (gchar *) record->action;
@@ -851,9 +841,7 @@ errorCode_t neardal_tag_write(neardal_record *record)
 	rcd.uriObjSize		= record->uriObjSize;
 	rcd.mime		= (gchar *) record->mime;
 
-	neardal_tag_prv_write(tagProp, &rcd);
-exit:
-	return err;
+	return neardal_tag_prv_write(tagProp, &rcd);
 }
 
 /*---------------------------------------------------------------------------
@@ -1053,8 +1041,7 @@ exit:
 errorCode_t neardal_get_records(char *tagName, char ***array, int *len)
 {
 	errorCode_t	err		= NEARDAL_SUCCESS;
-	AdpProp		*adpProp	= NULL;
-	TagProp		*tagProp	= NULL;
+	TagProp		*tagProp;
 	int		rcdLen		= 0;
 	int		ct		= 0;	/* counter */
 	char		**rcds		= NULL;
@@ -1067,13 +1054,10 @@ errorCode_t neardal_get_records(char *tagName, char ***array, int *len)
 	if (err != NEARDAL_SUCCESS || tagName == NULL || array == NULL)
 		return NEARDAL_ERROR_INVALID_PARAMETER;
 
-	err = neardal_mgr_prv_get_adapter(tagName, &adpProp);
-	if (err != NEARDAL_SUCCESS)
+	if (!(tagProp = neardal_mgr_tag_search(tagName))) {
+		err = NEARDAL_ERROR_NO_TAG;
 		goto exit;
-
-	err = neardal_adp_prv_get_tag(adpProp, tagName, &tagProp);
-	if (err != NEARDAL_SUCCESS)
-		goto exit;
+	}
 
 	err		= NEARDAL_ERROR_NO_RECORD;
 	rcdLen = g_list_length(tagProp->rcdList);
@@ -1131,8 +1115,7 @@ errorCode_t neardal_get_record_properties(const char *recordName,
 					  neardal_record **record)
 {
 	errorCode_t	err		= NEARDAL_SUCCESS;
-	AdpProp		*adpProp	= NULL;
-	TagProp		*tagProp	= NULL;
+	TagProp		*tagProp;
 	RcdProp		*rcdProp	= NULL;
 	neardal_record *rcdClient	= NULL;
 
@@ -1145,14 +1128,10 @@ errorCode_t neardal_get_record_properties(const char *recordName,
 	if (err != NEARDAL_SUCCESS)
 		goto exit;
 
-	err = neardal_mgr_prv_get_adapter((gchar *) recordName, &adpProp);
-	if (err != NEARDAL_SUCCESS)
+	if (!(tagProp = neardal_mgr_tag_search_by_record(recordName))) {
+		err = NEARDAL_ERROR_NO_TAG;
 		goto exit;
-
-	err = neardal_adp_prv_get_tag(adpProp, (gchar *) recordName,
-					 &tagProp);
-	if (err != NEARDAL_SUCCESS)
-		goto exit;
+	}
 
 	err = neardal_tag_prv_get_record(tagProp, (gchar *) recordName,
 					 &rcdProp);
