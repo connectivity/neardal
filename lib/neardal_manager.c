@@ -41,14 +41,13 @@ static char *neardal_dirname(const char *path)
 	return tmp ? g_strndup(path, tmp - path) : NULL;
 }
 
-static TagProp *neardal_mgr_record_get_tag(const gchar *record)
+TagProp *neardal_mgr_tag_search(const gchar *tag)
 {
-	char *adapter = NULL, *tag = NULL;
+	char *adapter = NULL;
 	AdpProp *adpProp = NULL;
 	TagProp *tagProp = NULL;
 
-	if (!(tag = neardal_dirname(record)) ||
-			!(adapter = neardal_dirname(tag)))
+	if (!(adapter = neardal_dirname(tag)))
 		goto error;
 
 	if (neardal_mgr_prv_get_adapter(adapter, &adpProp) != NEARDAL_SUCCESS) {
@@ -56,14 +55,27 @@ static TagProp *neardal_mgr_record_get_tag(const gchar *record)
 		goto error;
 	}
 
-	if (neardal_adp_prv_get_tag(adpProp, tag, &tagProp)
+	if (neardal_adp_prv_get_tag(adpProp, (gchar *) tag, &tagProp)
 			!= NEARDAL_SUCCESS) {
 		NEARDAL_TRACE_ERR("Tag %s not found\n", tag);
 		goto error;
 	}
 error:
 	g_free(adapter);
-	g_free(tag);
+	return tagProp;
+}
+
+TagProp *neardal_mgr_tag_search_by_record(const gchar *record)
+{
+	char *tag = NULL;
+	TagProp *tagProp = NULL;
+
+	if ((tag = neardal_dirname(record))) {
+		tagProp = neardal_mgr_tag_search(tag);
+		g_free(tag);
+	} else
+		NEARDAL_TRACE_ERR("No tag found for record=%s\n", record);
+
 	return tagProp;
 }
 
@@ -73,10 +85,8 @@ static void neardal_mgr_record_add(const gchar *record, GVariant *data)
 
 	NEARDAL_TRACEF("Record: %s=%s\n", record, g_variant_print(data, TRUE));
 
-	if (!(tagProp = neardal_mgr_record_get_tag(record))) {
-		NEARDAL_TRACE_ERR("No tag found for record %s\n", record);
+	if (!(tagProp = neardal_mgr_tag_search_by_record(record)))
 		return;
-	}
 
 	g_datalist_set_data_full(&(neardalMgr.dbus_data), record,
 		g_variant_ref(data), (GDestroyNotify) g_variant_unref);
@@ -134,14 +144,14 @@ static void neardal_mgr_interfaces_added(ObjectManager *om,
 
 static void neardal_mgr_record_remove(const gchar *record)
 {
-	TagProp *tagProp = NULL;
+	TagProp *tagProp;
 	GVariant *v;
 	GList *l;
 
 	NEARDAL_TRACEF("record=%s\n", record);
 
-	if (!(tagProp = neardal_mgr_record_get_tag(record))) {
-		NEARDAL_TRACE_ERR("Record: %s, no tag found\n", record);
+	if (!(tagProp = neardal_mgr_tag_search_by_record(record))) {
+		NEARDAL_TRACE_ERR("No tag found for record=%s\n", record);
 		return;
 	}
 

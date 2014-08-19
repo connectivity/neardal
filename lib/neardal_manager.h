@@ -59,6 +59,9 @@ errorCode_t neardal_tag_prv_get_record(TagProp *tagProp, gchar *rcdName,
  ****************************************************************************/
 errorCode_t neardal_mgr_create(void);
 
+TagProp *neardal_mgr_tag_search(const gchar *tag);
+TagProp *neardal_mgr_tag_search_by_record(const gchar *record);
+
 /*****************************************************************************
  * neardal_mgr_destroy: unref DBus proxy, disconnect Neard Manager signals
  ****************************************************************************/
