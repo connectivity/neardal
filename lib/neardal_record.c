@@ -28,17 +28,9 @@
 
 void neardal_record_free(neardal_record *r)
 {
-	g_free(r->action);
-	g_free(r->carrier);
-	g_free(r->encoding);
-	g_free(r->language);
-	g_free(r->mime);
-	g_free(r->name);
-	g_free(r->representation);
-	g_free(r->type);
-	g_free(r->uri);
-
-	g_free(r);
+	/* let's use uri as sentinel for g_strfreev() */
+	g_clear_pointer(&r->uri, g_free);
+	g_strfreev((char **) r);
 }
 
 GVariant *neardal_record_to_g_variant(neardal_record *in)
