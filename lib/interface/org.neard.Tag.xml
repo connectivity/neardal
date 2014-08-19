@@ -2,23 +2,11 @@
 "http://www.freedesktop.org/standards/dbus/1.0/introspect.dtd">
 <node>
 	<interface name="org.neard.Tag">
-		<method name="GetProperties">
-			<arg name="properties" type="a{sv}" direction="out"/>
-		</method>
-		<method name="SetProperty">
-			<arg name="name" type="s" direction="in"/>
-			<arg name="value" type="v" direction="in"/>
-		</method>
 		<method name="Write">
 			<arg name="attributes" type="a{sv}" direction="in"/>
 		</method>
 		<method name="GetRawNDEF">
 			<arg name="NDEF" type="ay" direction="out"/>
 		</method>
-		<signal name="PropertyChanged">
-			<arg name="name" type="s"/>
-			<arg name="value" type="v"/>
-		</signal>
 	</interface>
-	<node name="record0"/>
 </node>
