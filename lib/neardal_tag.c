@@ -256,39 +256,30 @@ void neardal_tag_notify_tag_found(TagProp *tagProp)
 		}
 }
 
-/*****************************************************************************
- * neardal_tag_prv_write: Creates and write NDEF record to be written to a NFC
- * tag
- ****************************************************************************/
-errorCode_t neardal_tag_prv_write(TagProp *tagProp, RcdProp *rcd)
+errorCode_t neardal_tag_write(neardal_record *record)
 {
-	GVariantBuilder	*dictBuilder = NULL;
-	GVariant	*in;
-	errorCode_t	err;
 	GError		*gerror	= NULL;
+	errorCode_t	err;
+	TagProp		*tag;
+	GVariant	*in;
 
-	NEARDAL_ASSERT_RET(tagProp != NULL, NEARDAL_ERROR_INVALID_PARAMETER);
+	NEARDAL_ASSERT_RET(record != NULL, NEARDAL_ERROR_INVALID_PARAMETER);
 
-	dictBuilder = g_variant_builder_new(G_VARIANT_TYPE_ARRAY);
-	if (dictBuilder == NULL)
-		return NEARDAL_ERROR_NO_MEMORY;
-
-	err = neardal_rcd_prv_format(dictBuilder, rcd);
+	neardal_prv_construct(&err);
 	if (err != NEARDAL_SUCCESS)
-		goto exit;
+		return err;
 
-	in = g_variant_builder_end(dictBuilder);
-	NEARDAL_TRACEF("Sending:\n%s\n", g_variant_print(in, TRUE));
-	org_neard_tag_call_write_sync(tagProp->proxy, in, NULL, &gerror);
+	if (!(tag = neardal_mgr_tag_search(record->name)))
+		return NEARDAL_ERROR_NO_TAG;
 
-exit:
-	if (gerror != NULL) {
-		NEARDAL_TRACE_ERR("Unable to write tag record (%d:%s)\n",
-				 gerror->code, gerror->message);
+	in = neardal_record_to_g_variant(record);
+
+	if (org_neard_tag_call_write_sync(tag->proxy, in, NULL, &gerror)
+			== FALSE) {
+		NEARDAL_TRACE_ERR("Can't write record: %s\n", gerror->message);
 		g_error_free(gerror);
 		err = NEARDAL_ERROR_DBUS;
 	}
-	g_variant_builder_unref(dictBuilder);
 
 	return err;
 }

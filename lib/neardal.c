@@ -812,38 +812,6 @@ exit:
 	return err;
 }
 
-/*****************************************************************************
- * neardal_tag_write: Write NDEF record to an NFC tag
- ****************************************************************************/
-errorCode_t neardal_tag_write(neardal_record *record)
-{
-	errorCode_t	err;
-	TagProp		*tagProp;
-	RcdProp		rcd;
-
-	NEARDAL_ASSERT_RET(record != NULL, NEARDAL_ERROR_INVALID_PARAMETER);
-
-	neardal_prv_construct(&err);
-	if (err != NEARDAL_SUCCESS)
-		return err;
-
-	if (!(tagProp = neardal_mgr_tag_search(record->name)))
-		return NEARDAL_ERROR_NO_TAG;
-
-	rcd.name		= (gchar *) record->name;
-	rcd.action		= (gchar *) record->action;
-	rcd.carrier		= (gchar *) record->carrier;
-	rcd.encoding		= (gchar *) record->encoding;
-	rcd.language		= (gchar *) record->language;
-	rcd.type		= (gchar *) record->type;
-	rcd.representation	= (gchar *) record->representation;
-	rcd.uri			= (gchar *) record->uri;
-	rcd.uriObjSize		= record->uriObjSize;
-	rcd.mime		= (gchar *) record->mime;
-
-	return neardal_tag_prv_write(tagProp, &rcd);
-}
-
 /*---------------------------------------------------------------------------
  * NFC Dev Management
  ---------------------------------------------------------------------------*/
