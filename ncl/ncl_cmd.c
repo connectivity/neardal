@@ -1468,6 +1468,14 @@ static NCLError ncl_cmd_exit(int argc, char *argv[])
  ****************************************************************************/
 /* Array of command line functions interpretor (alphabetical order) */
 static NCLCmdInterpretor itFunc[] = {
+	{ "q",
+	ncl_cmd_exit,
+	"Exit from command line interpretor" },
+
+	{ "quit",
+	ncl_cmd_exit,
+	"Exit from command line interpretor" },
+
 	{ "exit",
 	ncl_cmd_exit,
 	"Exit from command line interpretor" },
