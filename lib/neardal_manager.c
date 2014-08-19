@@ -138,8 +138,8 @@ static void neardal_mgr_interfaces_added(ObjectManager *om,
 		return;
 	}
 
-	NEARDAL_TRACE_ERR("Unsupported interface change: path=%s, data=%s\n",
-				path, g_variant_print(interfaces, TRUE));
+	NEARDAL_TRACE_ERR("Unsupported interface change: path=%s, "
+		"interface=%s\n", path, g_variant_print(interfaces, TRUE));
 }
 
 static void neardal_mgr_record_remove(const gchar *record)

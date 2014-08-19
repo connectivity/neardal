@@ -1155,7 +1155,6 @@ errorCode_t neardal_get_record_properties(const char *recordName,
 	rcdClient->uri			= g_strdup(rcdProp->uri);
 	rcdClient->uriObjSize		= (unsigned int) rcdProp->uriObjSize;
 	rcdClient->mime			= g_strdup(rcdProp->mime);
-
 exit:
 	if (err != NEARDAL_SUCCESS) {
 		neardal_free_record(rcdClient);
