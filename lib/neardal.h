@@ -109,26 +109,26 @@ typedef struct {
 */
 typedef struct {
 /*! @brief DBus interface name (as identifier) */
-	const char	*name;
+	char	*name;
 /*! @brief The character encoding */
-	const char	*encoding;
+	char	*encoding;
 /*! @brief The ISO/IANA language code (For example "en" or "jp") */
-	const char	*language;
+	char	*language;
 /*! @brief 'Action' Save, Edit, Download... */
-	const char	*action;
+	char	*action;
 /*! @brief The NDEF record type name ("SmartPoster", "Text", "URI",
  * "HandoverRequest", "HandoverSelect", "HandoverCarrier" */
-	const char	*type;
+	char	*type;
 /*! @brief human readable representation of a text or title record. */
-	const char	*representation;
+	char	*representation;
 /*! @brief the complete URI, including the scheme and the resource */
-	const char	*uri;
+	char	*uri;
 /*! @brief URI object size */
 	unsigned int	uriObjSize;
 /*! @brief The URI object MIME type */
-	const char	*mime;
+	char	*mime;
 /*! @brief The Handover Carrier (e.g. bluetooth) */
- 	const char	*carrier;
+ 	char	*carrier;
 } neardal_record;
 
 /* @}*/
