@@ -96,9 +96,9 @@ error:
 	g_free(adapter);
 }
 
-void neardal_adp_prv_cb_dev_found(OrgNeardDevice *proxy,
+void neardal_adp_prv_cb_dev_found(void *proxy,
 				const gchar *arg_unnamed_arg0, void *user_data);
-void neardal_adp_prv_cb_dev_lost(OrgNeardDevice *proxy,
+void neardal_adp_prv_cb_dev_lost(void *proxy,
 				const gchar *arg_unnamed_arg0, void *user_data);
 
 static AdpProp *neardal_adapter_find_by_child(const char *path)

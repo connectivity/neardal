@@ -21,14 +21,12 @@
 #ifndef NEARDAL_DEV_H
 #define NEARDAL_DEV_H
 
-#include "neard_device_proxy.h"
 #include "neardal_record.h"
 
 #define NEARD_DEV_SIG_PROPCHANGED	"property-changed"
 
 /* NEARDAL Dev Properties */
 typedef struct {
-	OrgNeardDevice	*proxy;	  /* proxy to Neard NEARDAL Dev interface */
 	gchar		*name;	  /* DBus interface name (as identifier) */
 	void		*parent;  /* parent (adapter ) */
 	gboolean	notified; /* Already notified to client? */

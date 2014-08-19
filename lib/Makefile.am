@@ -24,7 +24,6 @@ libneardal_la_include_HEADERS = neardal.h neardal_errors.h
 nodist_libgenerated_la_SOURCES = \
 	$(builddir)/neard_manager_proxy.c $(builddir)/neard_manager_proxy.h \
 	$(builddir)/neard_tag_proxy.c $(builddir)/neard_tag_proxy.h \
-	$(builddir)/neard_device_proxy.c $(builddir)/neard_device_proxy.h \
 	$(builddir)/neard_adapter_proxy.c $(builddir)/neard_adapter_proxy.h \
 	$(builddir)/neardal_agent.c $(builddir)/neardal_agent.h \
 	$(builddir)/dbus-object-manager.c $(builddir)/dbus-object-manager.h \
@@ -51,9 +50,6 @@ neard_tag_proxy.c neard_tag_proxy.h: interface/org.neard.Tag.xml
 neard_manager_proxy.c neard_manager_proxy.h: interface/org.neard.Manager.xml
 	$(run-gdbus)
 
-neard_device_proxy.c neard_device_proxy.h: interface/org.neard.Device.xml
-	$(run-gdbus)
-
 %.c: interface/%.xml
 	$(run-gdbus) --interface-prefix="org.freedesktop.DBus."
 
@@ -62,7 +58,6 @@ CLEANFILES = $(nodist_libgenerated_la_SOURCES)
 EXTRA_DIST = \
 	interface/org.neard.Adapter.xml \
 	interface/org.neard.Agent.xml \
-	interface/org.neard.Device.xml \
 	interface/org.neard.Manager.xml \
 	interface/org.neard.Tag.xml \
 	interface/dbus-object-manager.xml \

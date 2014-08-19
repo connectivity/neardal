@@ -23,8 +23,6 @@
 #include <glib.h>
 #include <glib-object.h>
 
-#include "neard_device_proxy.h"
-
 #include "neardal.h"
 #include "neardal_prv.h"
 

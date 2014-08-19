@@ -95,7 +95,7 @@ void neardal_adp_prv_cb_tag_lost(OrgNeardTag *proxy,
  * neardal_adp_prv_cb_dev_found: Callback called when a NFC dev is
  * found
  ****************************************************************************/
-void  neardal_adp_prv_cb_dev_found(OrgNeardDevice *proxy,
+void  neardal_adp_prv_cb_dev_found(void *proxy,
 					     const gchar *arg_unnamed_arg0,
 					     void        *user_data)
 {
@@ -125,7 +125,7 @@ void  neardal_adp_prv_cb_dev_found(OrgNeardDevice *proxy,
  * neardal_adp_prv_cb_dev_lost: Callback called when a NFC dev is
  * lost (removed)
  ****************************************************************************/
-void neardal_adp_prv_cb_dev_lost(OrgNeardDevice *proxy,
+void neardal_adp_prv_cb_dev_lost(void *proxy,
 					   const gchar *arg_unnamed_arg0,
 					   void *user_data)
 {
@@ -274,7 +274,7 @@ static void neardal_adp_prv_cb_property_changed(OrgNeardAdapter *proxy,
 			while (g_list_length(adpProp->devList)) {
 				node = g_list_first(adpProp->devList);
 				devProp = (DevProp *) node->data;
-				neardal_adp_prv_cb_dev_lost(devProp->proxy,
+				neardal_adp_prv_cb_dev_lost(NULL,
 							       devProp->name,
 							       devProp->parent);
 			}
