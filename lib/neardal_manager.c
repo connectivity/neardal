@@ -72,22 +72,6 @@ TagProp *neardal_mgr_tag_search_by_record(const gchar *record)
 	return tagProp;
 }
 
-static void neardal_mgr_record_add(const gchar *record, GVariant *data)
-{
-	TagProp *tagProp = NULL;
-
-	NEARDAL_TRACEF("Record: %s=%s\n", record, g_variant_print(data, TRUE));
-
-	if (!(tagProp = neardal_mgr_tag_search_by_record(record)))
-		return;
-
-	g_datalist_set_data_full(&(neardalMgr.dbus_data), record,
-		g_variant_ref(data), (GDestroyNotify) g_variant_unref);
-
-	if (neardal_rcd_add((char *) record, tagProp) != NEARDAL_SUCCESS)
-		g_datalist_remove_data(&(neardalMgr.dbus_data), record);
-}
-
 static void neardal_mgr_tag_add(const gchar *path, GVariant *tag)
 {
 	char *adapter = NULL;
@@ -135,38 +119,6 @@ static void neardal_mgr_interfaces_added(ObjectManager *om,
 
 	NEARDAL_TRACE_ERR("Unsupported interface change: path=%s, "
 		"interface=%s\n", path, g_variant_print(interfaces, TRUE));
-}
-
-static void neardal_mgr_record_remove(const gchar *record)
-{
-	TagProp *tagProp;
-	GVariant *v;
-	GList *l;
-
-	NEARDAL_TRACEF("record=%s\n", record);
-
-	if (!(tagProp = neardal_mgr_tag_search_by_record(record))) {
-		NEARDAL_TRACE_ERR("No tag found for record=%s\n", record);
-		return;
-	}
-
-	for (l = tagProp->rcdList; l != NULL; l = l->next) {
-		RcdProp *rcdProp = l->data;
-		if (g_strcmp0(rcdProp->name, record) != 0)
-			continue;
-
-		NEARDAL_TRACEF("Record found: %s\n", rcdProp->name);
-
-		neardal_rcd_remove(rcdProp);
-
-		v = g_datalist_get_data(&(neardalMgr.dbus_data), record);
-
-		NEARDAL_ASSERT(v != NULL);
-
-		g_datalist_remove_data(&(neardalMgr.dbus_data), record);
-
-		tagProp->rcdLen--;
-	}
 }
 
 static void neardal_mgr_tag_remove(const gchar *tag)
