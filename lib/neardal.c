@@ -963,50 +963,29 @@ exit:
 /******************************************************************************
  * neardal_get_records: get an array of tag records
  *****************************************************************************/
-errorCode_t neardal_get_records(char *tagName, char ***array, int *len)
+errorCode_t neardal_get_records(char *tag, char ***array, int *len)
 {
-	errorCode_t	err		= NEARDAL_SUCCESS;
-	TagProp		*tagProp;
-	int		rcdLen		= 0;
-	int		ct		= 0;	/* counter */
-	char		**rcds		= NULL;
-	RcdProp		*rcd		= NULL;
+	GVariant **data = NULL;
+	guint data_len, i;
+	char *prefix;
 
-
-	if (neardalMgr.proxy == NULL)
-		neardal_prv_construct(&err);
-
-	if (err != NEARDAL_SUCCESS || tagName == NULL || array == NULL)
+	if (tag == NULL || array == NULL || len == NULL)
 		return NEARDAL_ERROR_INVALID_PARAMETER;
 
-	if (!(tagProp = neardal_mgr_tag_search(tagName))) {
-		err = NEARDAL_ERROR_NO_TAG;
-		goto exit;
+	prefix = g_strconcat(tag, "/", NULL);
+	data_len = neardal_data_to_arrayv((void ***) &data);
+
+	for (*len = i = 0; i < data_len; i++) {
+		char *name = neardal_g_variant_get(data[i], "Name", "&s");
+		if (g_str_has_prefix(name, prefix) == FALSE)
+			continue;
+		*array = (char **) neardal_arrayv_append((void **) *array,
+								g_strdup(name));
+		(*len)++;
 	}
-
-	err		= NEARDAL_ERROR_NO_RECORD;
-	rcdLen = g_list_length(tagProp->rcdList);
-	if (rcdLen <= 0)
-		goto exit;
-
-	err = NEARDAL_ERROR_NO_MEMORY;
-	rcds = g_try_malloc0((rcdLen + 1) * sizeof(char *));
-	if (rcds == NULL)
-		goto exit;
-
-	while (ct < rcdLen) {
-		rcd = g_list_nth_data(tagProp->rcdList, ct);
-		if (rcd != NULL)
-			rcds[ct++] = g_strdup(rcd->name);
-	}
-	err = NEARDAL_SUCCESS;
-
-exit:
-	if (len != NULL)
-		*len = rcdLen;
-	*array	= rcds;
-
-	return err;
+	g_free(data);
+	g_free(prefix);
+	return *len ? NEARDAL_SUCCESS : NEARDAL_ERROR_NO_RECORD;
 }
 
 /*****************************************************************************
