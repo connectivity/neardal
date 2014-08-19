@@ -96,6 +96,20 @@ error:
 	g_free(adapter);
 }
 
+void neardal_adp_prv_cb_dev_found(OrgNeardDevice *proxy,
+				const gchar *arg_unnamed_arg0, void *user_data);
+void neardal_adp_prv_cb_dev_lost(OrgNeardDevice *proxy,
+				const gchar *arg_unnamed_arg0, void *user_data);
+
+static AdpProp *neardal_adapter_find_by_child(const char *path)
+{
+	char *name = neardal_dirname(path);
+	AdpProp *adapter = NULL;
+	neardal_mgr_prv_get_adapter((char *) path, &adapter);
+	g_free(name);
+	return adapter;
+}
+
 static void neardal_mgr_interfaces_added(ObjectManager *om,
 					const gchar *path, GVariant *interfaces)
 {
@@ -109,6 +123,14 @@ static void neardal_mgr_interfaces_added(ObjectManager *om,
 		GVariant *record;
 		if ((record = neardal_data_insert(path, "Record", v)))
 			neardal_record_add(record);
+		return;
+	}
+
+	if (g_variant_lookup(interfaces, "org.neard.Device", "*",
+				(void *) &v)) {
+		AdpProp *adp = neardal_adapter_find_by_child(path);
+		if (adp)
+			neardal_adp_prv_cb_dev_found(NULL, path, adp);
 		return;
 	}
 
@@ -172,6 +194,13 @@ static void neardal_mgr_interfaces_removed(ObjectManager *om,
 
 		if (strcmp(s, "org.neard.Tag") == 0) {
 			neardal_mgr_tag_remove(path);
+			continue;
+		}
+
+		if (strcmp(s, "org.neard.Device") == 0) {
+			AdpProp *adp = neardal_adapter_find_by_child(path);
+			if (adp)
+				neardal_adp_prv_cb_dev_lost(NULL, path, adp);
 			continue;
 		}
 
