@@ -49,7 +49,7 @@ void neardal_prv_construct(errorCode_t *ec)
 	errorCode_t	err = NEARDAL_SUCCESS;
 
 	if (neardalMgr.proxy != NULL)
-		return;
+		goto exit;
 
 	NEARDAL_TRACEIN();
 	memset(&neardalMgr.conn, 0, sizeof(neardalCtx) - sizeof(neardalCb));
