@@ -103,32 +103,26 @@ typedef struct {
 	char		**records;
 } neardal_dev;
 
-/*!
- * @brief NEARDAL Record client properties.
- * release with (@link neardal_free_record @endlink)
-*/
+/**
+ * NFC record. Release with neardal_free_record().
+ */
 typedef struct {
-/*! @brief DBus interface name (as identifier) */
-	char	*name;
-/*! @brief The character encoding */
-	char	*encoding;
-/*! @brief The ISO/IANA language code (For example "en" or "jp") */
-	char	*language;
-/*! @brief 'Action' Save, Edit, Download... */
-	char	*action;
-/*! @brief The NDEF record type name ("SmartPoster", "Text", "URI",
- * "HandoverRequest", "HandoverSelect", "HandoverCarrier" */
-	char	*type;
-/*! @brief human readable representation of a text or title record. */
-	char	*representation;
-/*! @brief the complete URI, including the scheme and the resource */
-	char	*uri;
-/*! @brief URI object size */
-	unsigned int	uriObjSize;
-/*! @brief The URI object MIME type */
-	char	*mime;
-/*! @brief The Handover Carrier (e.g. bluetooth) */
- 	char	*carrier;
+	char *action;		/**< Action. Save, Edit, Download. */
+	char *carrier;		/**< Handover carrier. Bluetooth. */
+	char *encoding;		/**< Encoding. */
+	char *language;		/**< Language. ISO/IANA: en, jp, etc. */
+	char *mime;		/**< MIME type. */
+	char *name;		/**< Identifier. DBus path. */
+	char *representation;	/**< Human readable representation. */
+	char *type;		/**< NDEF record type.
+					Text,
+					URI,
+					SmartPoster,
+					HandoverCarrier,
+					HandoverRequest,
+					HandoverSelect. */
+	char *uri;		/**< URI including scheme and resource. */
+	unsigned int uriObjSize;/**< URI object size. */
 } neardal_record;
 
 /* @}*/
