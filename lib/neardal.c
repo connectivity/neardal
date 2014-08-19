@@ -1076,60 +1076,26 @@ void neardal_free_record(neardal_record *record)
 	g_free(record);
 }
 
-/*****************************************************************************
- * neardal_get_record_properties: Get values of a specific tag record
- ****************************************************************************/
-errorCode_t neardal_get_record_properties(const char *recordName,
-					  neardal_record **record)
+errorCode_t neardal_get_record_properties(const char *name,
+						neardal_record **record)
 {
-	errorCode_t	err		= NEARDAL_SUCCESS;
-	TagProp		*tagProp;
-	RcdProp		*rcdProp	= NULL;
-	neardal_record *rcdClient	= NULL;
+	errorCode_t err = NEARDAL_SUCCESS;
+	GVariant *data;
 
-	if (recordName == NULL || record == NULL)
-		goto exit;
+	NEARDAL_ASSERT_RET(name != NULL, NEARDAL_ERROR_INVALID_PARAMETER);
+	NEARDAL_ASSERT_RET(record != NULL, NEARDAL_ERROR_INVALID_PARAMETER);
 
-	if (neardalMgr.proxy == NULL)
-		neardal_prv_construct(&err);
-
+	neardal_prv_construct(&err);
 	if (err != NEARDAL_SUCCESS)
 		goto exit;
 
-	if (!(tagProp = neardal_mgr_tag_search_by_record(recordName))) {
-		err = NEARDAL_ERROR_NO_TAG;
+	if (!(data = g_datalist_get_data(&(neardalMgr.dbus_data), name))) {
+		err = NEARDAL_ERROR_NO_RECORD;
 		goto exit;
 	}
 
-	err = neardal_tag_prv_get_record(tagProp, (gchar *) recordName,
-					 &rcdProp);
-	if (err != NEARDAL_SUCCESS)
-		goto exit;
-
-	rcdClient = g_try_malloc0(sizeof(neardal_record));
-	if (rcdClient == NULL) {
-		err = NEARDAL_ERROR_NO_MEMORY;
-		goto exit;
-	}
-	*record = rcdClient;
-
-	rcdClient->name			= g_strdup(rcdProp->name);
-	rcdClient->encoding		= g_strdup(rcdProp->encoding);
-	rcdClient->language		= g_strdup(rcdProp->language);
-	rcdClient->action		= g_strdup(rcdProp->action);
-
-	rcdClient->type			= g_strdup(rcdProp->type);
-	rcdClient->representation	= g_strdup(rcdProp->representation);
-	rcdClient->uri			= g_strdup(rcdProp->uri);
-	rcdClient->uriObjSize		= (unsigned int) rcdProp->uriObjSize;
-	rcdClient->mime			= g_strdup(rcdProp->mime);
+	*record = neardal_g_variant_to_record(data);
 exit:
-	if (err != NEARDAL_SUCCESS) {
-		neardal_free_record(rcdClient);
-		if (record != NULL)
-			*record = NULL;
-	}
-
 	return err;
 }
 
