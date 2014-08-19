@@ -65,6 +65,10 @@ errorCode_t neardal_tools_prv_add_dict_entry(GVariantBuilder *builder
 					     , gsize valueSize
 					     , int gVariantType);
 
+void neardal_g_variant_add_parsed(GVariant **v, const char *format, ...);
+void neardal_g_variant_dump(GVariant *data);
+void *neardal_g_variant_get(GVariant *data, const char *key, const char *fmt);
+
 static inline gpointer neardal_g_callback(GCallback gc)
 {
 	union {

@@ -29,6 +29,42 @@
 #include "neardal.h"
 #include "neardal_prv.h"
 
+void neardal_g_variant_add_parsed(GVariant **v, const char *format, ...)
+{
+	GVariantBuilder b;
+	GVariantIter iter;
+	GVariant *i = NULL;
+	va_list ap;
+
+	g_variant_builder_init(&b, G_VARIANT_TYPE_ARRAY);
+
+	va_start(ap, format);
+	g_variant_builder_add_value(&b, g_variant_new_parsed_va(format, &ap));
+	va_end(ap);
+
+	g_variant_iter_init(&iter, *v);
+	while (g_variant_iter_loop(&iter, "*", &i))
+		g_variant_builder_add_value(&b, i);
+
+	*v = g_variant_builder_end(&b);
+}
+
+void neardal_g_variant_dump(GVariant *data)
+{
+	GVariantIter iter;
+	char *s = NULL;
+	GVariant *v = NULL;
+	g_variant_iter_init(&iter, data);
+	while (g_variant_iter_loop(&iter, "{sv}", &s, &v))
+		NEARDAL_TRACEF(".. %s = %s\n", s, g_variant_print(v, 0));
+}
+
+void *neardal_g_variant_get(GVariant *data, const char *key, const char *fmt)
+{
+	char *out = NULL;
+	g_variant_lookup(data, key, fmt, &out);
+	return out;
+}
 
 /*****************************************************************************
  * neardal_tools_prv_free_gerror: freeing gerror in neardal context
