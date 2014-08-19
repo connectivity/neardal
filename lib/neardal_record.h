@@ -21,11 +21,8 @@
 #ifndef NEARDAL_RECORD_H
 #define NEARDAL_RECORD_H
 
-#include "dbus-properties.h"
-
 /* NEARDAL Record Properties */
 typedef struct {
-	Properties	*proxy;	/* proxy to Neard NFC Record interface */
 	gchar		*name;	/* DBus interface name (as identifier) */
 	void		*parent; /* parent (tag) */
 	gboolean	notified; /* Already notified to client? */
