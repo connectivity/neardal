@@ -176,36 +176,6 @@ static errorCode_t neardal_tag_prv_init(TagProp *tagProp)
 }
 
 /*****************************************************************************
- * neardal_tag_prv_get_record: Get specific record from tag
- ****************************************************************************/
-errorCode_t neardal_tag_prv_get_record(TagProp *tagProp, gchar *rcdName,
-				       RcdProp **rcdProp)
-{
-	errorCode_t	err	= NEARDAL_ERROR_NO_RECORD;
-	guint		len;
-	RcdProp	*rcd	= NULL;
-
-	NEARDAL_ASSERT_RET((tagProp != NULL) && (rcdName != NULL)
-			   && (rcdProp != NULL)
-			   , NEARDAL_ERROR_INVALID_PARAMETER);
-	
-	len = 0;
-	while (len < g_list_length(tagProp->rcdList)) {
-		rcd = g_list_nth_data(tagProp->rcdList, len);
-		if (neardal_tools_prv_cmp_path(rcd->name, rcdName)) {
-			*rcdProp = rcd;
-			err = NEARDAL_SUCCESS;
-			break;
-		}
-		len++;
-	}
-
-	return err;
-}
-
-
-
-/*****************************************************************************
  * neardal_tag_prv_free: unref DBus proxy, disconnect Neard Tag signals
  ****************************************************************************/
 static void neardal_tag_prv_free(TagProp **tagProp)

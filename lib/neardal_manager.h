@@ -47,12 +47,6 @@ errorCode_t neardal_mgr_prv_get_adapter_from_proxy(OrgNeardAdapter *adpProxy,
 							AdpProp **adpProp);
 
 /*****************************************************************************
- * neardal_tag_prv_get_record: Get specific record from tag
- *****************************************************************************/
-errorCode_t neardal_tag_prv_get_record(TagProp *tagProp, gchar *rcdName,
-				       RcdProp **rcdProp);
-
-/*****************************************************************************
  * neardal_mgr_create: Get Neard Manager Properties = NEARDAL Adapters list.
  * Create a DBus proxy for the first one NEARDAL adapter if present
  * Register Neard Manager signals ('PropertyChanged')

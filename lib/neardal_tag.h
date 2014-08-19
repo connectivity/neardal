@@ -61,10 +61,4 @@ errorCode_t neardal_tag_prv_add(gchar *tagName, void *parent);
  *****************************************************************************/
 void neardal_tag_prv_remove(TagProp *tagProp);
 
-/*****************************************************************************
- * neardal_tag_prv_get_record: Get specific record from tag
- ****************************************************************************/
-errorCode_t neardal_tag_prv_get_record(TagProp *tagProp, gchar *rcdName,
-				       RcdProp **rcdProp);
-
 #endif /* NEARDAL_TAG_H */
