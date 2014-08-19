@@ -26,6 +26,48 @@
 #include "neardal.h"
 #include "neardal_prv.h"
 
+GVariant *neardal_record_to_g_variant(neardal_record *in)
+{
+	GVariantBuilder b;
+	GVariant *out;
+
+	g_variant_builder_init(&b, G_VARIANT_TYPE_ARRAY);
+
+	NEARDAL_G_VARIANT_IN(&b, "{'Action', <%s>}", in->action);
+	NEARDAL_G_VARIANT_IN(&b, "{'Carrier', <%s>}", in->carrier);
+	NEARDAL_G_VARIANT_IN(&b, "{'Encoding', <%s>}", in->encoding);
+	NEARDAL_G_VARIANT_IN(&b, "{'Language', <%s>}", in->language);
+	NEARDAL_G_VARIANT_IN(&b, "{'MIME', <%s>}", in->mime);
+	NEARDAL_G_VARIANT_IN(&b, "{'Name', <%s>}", in->name);
+	NEARDAL_G_VARIANT_IN(&b, "{'Representation', <%s>}",
+				in->representation);
+	NEARDAL_G_VARIANT_IN(&b, "{'Size', <%u>}", in->uriObjSize);
+	NEARDAL_G_VARIANT_IN(&b, "{'Type', <%s>}", in->type);
+	NEARDAL_G_VARIANT_IN(&b, "{'URI', <%s>}", in->uri);
+
+	out = g_variant_builder_end(&b);
+
+	return out;
+}
+
+neardal_record *neardal_g_variant_to_record(GVariant *in)
+{
+	neardal_record *out = g_new0(neardal_record, 1);
+
+	NEARDAL_G_VARIANT_OUT(in, "Action", "s", &out->action);
+	NEARDAL_G_VARIANT_OUT(in, "Carrier", "s", &out->carrier);
+	NEARDAL_G_VARIANT_OUT(in, "Encoding", "s", &out->encoding);
+	NEARDAL_G_VARIANT_OUT(in, "Language", "s", &out->language);
+	NEARDAL_G_VARIANT_OUT(in, "MIME", "s", &out->mime);
+	NEARDAL_G_VARIANT_OUT(in, "Name", "s", &out->name);
+	NEARDAL_G_VARIANT_OUT(in, "Representation", "s", &out->representation);
+	NEARDAL_G_VARIANT_OUT(in, "Size", "u", &out->uriObjSize);
+	NEARDAL_G_VARIANT_OUT(in, "Type", "s", &out->type);
+	NEARDAL_G_VARIANT_OUT(in, "URI", "s", &out->uri);
+
+	return out;
+}
+
 static void neardal_rcd_notify(RcdProp *rcd)
 {
 	if (!rcd->notified) {

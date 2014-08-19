@@ -77,4 +77,20 @@ static inline gpointer neardal_g_callback(GCallback gc)
 
 #define NEARDAL_G_CALLBACK(cb) neardal_g_callback(G_CALLBACK(cb))
 
+#define NEARDAL_G_VARIANT_IN(_builder, _format, _data)			\
+do {									\
+	if ((_data))							\
+		g_variant_builder_add_parsed((_builder),		\
+						(_format), (_data));	\
+} while (0)
+
+#define NEARDAL_G_VARIANT_OUT(_dictionary, _key, _format, _data)	\
+do {									\
+	if (g_variant_lookup((_dictionary), (_key), (_format),		\
+			(_data)) == TRUE) {				\
+		NEARDAL_TRACEF("%s = '%" _format "'\n",			\
+				(_key), *(_data));			\
+	}								\
+} while (0)
+
 #endif /* NEARDAL_TOOLS_H */

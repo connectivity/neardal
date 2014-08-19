@@ -59,4 +59,7 @@ void neardal_rcd_remove(RcdProp *rcdProp);
  *****************************************************************************/
 errorCode_t neardal_rcd_prv_format(GVariantBuilder *builder, RcdProp *rcd);
 
+GVariant *neardal_record_to_g_variant(neardal_record *in);
+neardal_record *neardal_g_variant_to_record(GVariant *in);
+
 #endif /* NEARDAL_RECORD_H */
