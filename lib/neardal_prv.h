@@ -30,10 +30,6 @@
 #include "neardal.h"
 #include "dbus-object-manager.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif	/* __cplusplus */
-
 
 /* NEARDAL Callbacks */
 typedef struct {
@@ -115,9 +111,5 @@ extern neardalCtx neardalMgr;
 *  \return the NEARDAL context
 */
 void neardal_prv_construct(errorCode_t *ec);
-
-#ifdef __cplusplus
-}
-#endif	/* __cplusplus */
 
 #endif /* NEARDAL_PRV_H */

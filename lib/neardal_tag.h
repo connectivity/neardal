@@ -24,10 +24,6 @@
 #include "neard_tag_proxy.h"
 #include "neardal_record.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif	/* __cplusplus */
-
 #define NEARD_TAG_SIG_PROPCHANGED	"property-changed"
 
 /* NEARDAL Tag Properties */
@@ -76,9 +72,5 @@ errorCode_t neardal_tag_prv_write(TagProp *tagProp, RcdProp *rcd);
  ****************************************************************************/
 errorCode_t neardal_tag_prv_get_record(TagProp *tagProp, gchar *rcdName,
 				       RcdProp **rcdProp);
-
-#ifdef __cplusplus
-}
-#endif	/* __cplusplus */
 
 #endif /* NEARDAL_TAG_H */

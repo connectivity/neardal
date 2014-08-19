@@ -21,10 +21,6 @@
 #ifndef NEARDAL_TOOLS_H
 #define NEARDAL_TOOLS_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif	/* __cplusplus */
-
 
 /*****************************************************************************
  * Debugging macro to manage assertion.
@@ -80,9 +76,5 @@ static inline gpointer neardal_g_callback(GCallback gc)
 }
 
 #define NEARDAL_G_CALLBACK(cb) neardal_g_callback(G_CALLBACK(cb))
-
-#ifdef __cplusplus
-}
-#endif	/* __cplusplus */
 
 #endif /* NEARDAL_TOOLS_H */

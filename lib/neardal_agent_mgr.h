@@ -23,10 +23,6 @@
 
 #include "neardal.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif	/* __cplusplus */
-
 #define AGENT_PREFIX	"/neardal"
 
 
@@ -108,9 +104,5 @@ errorCode_t neardal_ndefagent_prv_manage(neardal_ndef_agent_t agentData);
  ****************************************************************************/
 errorCode_t neardal_handoveragent_prv_manage(
 					neardal_handover_agent_t agentData);
-
-#ifdef __cplusplus
-}
-#endif	/* __cplusplus */
 
 #endif /* NEARDAL_AGENT_H */

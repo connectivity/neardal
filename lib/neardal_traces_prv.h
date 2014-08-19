@@ -21,10 +21,6 @@
 #ifndef NEARDAL_TRACES_PRV_H
 #define NEARDAL_TRACES_PRV_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif	/* __cplusplus */
-
 /* a debug output macro */
 #ifdef NEARDAL_TRACES
 	#define NEARDAL_TRACE(...)	neardal_trace(NULL, stdout, __VA_ARGS__)
@@ -49,9 +45,5 @@ extern "C" {
 void neardal_trace(const char *func, FILE *stream, char *format, ...)
 	__attribute__((format(printf, 3, 4)));
 void neardal_trace_dump_mem(char *dataP, int size);
-
-#ifdef __cplusplus
-}
-#endif	/* __cplusplus */
 
 #endif	/* NEARDAL_TRACES_PRV_H */

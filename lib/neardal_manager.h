@@ -23,10 +23,6 @@
 
 #include "neardal_adapter.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif	/* __cplusplus */
-
 #define NEARD_DBUS_SERVICE			"org.neard"
 #define NEARD_MGR_PATH				"/"
 #define NEARD_MGR_SECTION_ADAPTERS		"Adapters"
@@ -67,9 +63,5 @@ errorCode_t neardal_mgr_create(void);
  * neardal_mgr_destroy: unref DBus proxy, disconnect Neard Manager signals
  ****************************************************************************/
 void neardal_mgr_destroy(void);
-
-#ifdef __cplusplus
-}
-#endif	/* __cplusplus */
 
 #endif /* NEARDAL_MANAGER_H */

@@ -24,10 +24,6 @@
 #include "neard_device_proxy.h"
 #include "neardal_record.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif	/* __cplusplus */
-
 #define NEARD_DEV_SIG_PROPCHANGED	"property-changed"
 
 /* NEARDAL Dev Properties */
@@ -66,9 +62,5 @@ void neardal_dev_prv_remove(DevProp *devProp);
 errorCode_t neardal_dev_prv_push(DevProp *devProp, RcdProp *rcd);
 
 
-
-#ifdef __cplusplus
-}
-#endif	/* __cplusplus */
 
 #endif /* NEARDAL_DEV_H */

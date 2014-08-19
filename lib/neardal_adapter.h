@@ -26,10 +26,6 @@
 #include "neardal_tag.h"
 #include "dbus-properties.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif	/* __cplusplus */
-
 #define NEARD_ADP_SIG_PROPCHANGED			"properties-changed"
 #define NEARD_ADP_SIG_TAG_FOUND				"tag-found"
 #define NEARD_ADP_SIG_TAG_LOST				"tag-lost"
@@ -78,9 +74,5 @@ errorCode_t neardal_adp_add(gchar *adapterName);
  * connection, unregister adapter signal
  ****************************************************************************/
 errorCode_t neardal_adp_remove(AdpProp *adpProp);
-
-#ifdef __cplusplus
-}
-#endif	/* __cplusplus */
 
 #endif /* NEARDAL_ADAPTER_H */

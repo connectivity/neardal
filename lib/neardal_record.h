@@ -23,10 +23,6 @@
 
 #include "dbus-properties.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif	/* __cplusplus */
-
 /* NEARDAL Record Properties */
 typedef struct {
 	Properties	*proxy;	/* proxy to Neard NFC Record interface */
@@ -62,9 +58,5 @@ void neardal_rcd_remove(RcdProp *rcdProp);
  * neardal_rcd_prv_format: Insert key/value in a GHashTable
  *****************************************************************************/
 errorCode_t neardal_rcd_prv_format(GVariantBuilder *builder, RcdProp *rcd);
-
-#ifdef __cplusplus
-}
-#endif	/* __cplusplus */
 
 #endif /* NEARDAL_RECORD_H */
