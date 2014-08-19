@@ -245,29 +245,13 @@ errorCode_t neardal_set_cb_record_found(record_cb cb_rcd_found,
 	return NEARDAL_SUCCESS;
 }
 
-/*****************************************************************************
- * neardal_free_array: free adapters array, tags array or records array
- ****************************************************************************/
 errorCode_t neardal_free_array(char ***array)
 {
-	errorCode_t	err = NEARDAL_SUCCESS;
-	char		**adps;
-
-	if (array == NULL)
+	if (array == NULL || *array == NULL)
 		return NEARDAL_ERROR_INVALID_PARAMETER;
-
-	if (*array == NULL)
-		return NEARDAL_ERROR_GENERAL_ERROR;
-
-	adps = *array;
-	while ((*adps) != NULL) {
-		g_free(*adps);
-		adps++;
-	}
-	g_free(*array);
+	g_strfreev(*array);
 	*array = NULL;
-
-	return err;
+	return NEARDAL_SUCCESS;
 }
 
 /*****************************************************************************
