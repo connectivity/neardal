@@ -28,8 +28,6 @@
 
 #include <glib.h>
 
-#include <neardal.h>
-
 #include "ncl.h"
 #include "ncl_cmd.h"
 
