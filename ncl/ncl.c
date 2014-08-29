@@ -278,13 +278,13 @@ int main(int argc, char *argv[])
 	NCLError err;
 	GOptionContext *context;
 	GError *error = NULL;
-	char *execCmdLineStr = NULL;
-	char *scriptFileStr = NULL;
+	char *opt_command = NULL;
+	char *opt_script = NULL;
 	gboolean opt_keep_running = FALSE;
 	GOptionEntry options[] = {
-		{ "exec", 'e', 0, G_OPTION_ARG_STRING, &execCmdLineStr,
+		{ "exec", 'e', 0, G_OPTION_ARG_STRING, &opt_command,
 		  "Execute command", "command" },
-		{ "script", 's', 0, G_OPTION_ARG_STRING	, &scriptFileStr,
+		{ "script", 's', 0, G_OPTION_ARG_STRING	, &opt_script,
 		  "Execute script", "filename" },
 		{ "keep", 'k', 0, G_OPTION_ARG_NONE, &opt_keep_running,
 		  "Keep running after command/script execution" },
@@ -302,20 +302,20 @@ int main(int argc, char *argv[])
 	}
 	g_option_context_free(context);
 
-	err = ncl_prv_init(execCmdLineStr);
+	err = ncl_prv_init(opt_command);
 	if (err != NCLERR_NOERROR) {
 		ncl_finalize();
 		return NCLERR_INIT;
 	}
 
-	if (!scriptFileStr && !execCmdLineStr)
+	if (!opt_script && !opt_command)
 		opt_keep_running = TRUE;
 
-	if (scriptFileStr)
-		ncl_prv_parse_script_file(scriptFileStr);
+	if (opt_script)
+		ncl_prv_parse_script_file(opt_script);
 
-	if (execCmdLineStr) {
-		gNclCtx.errOnExit = ncl_exec(execCmdLineStr);
+	if (opt_command) {
+		gNclCtx.errOnExit = ncl_exec(opt_command);
 		while (g_main_context_pending(NULL))
 			g_main_context_iteration(NULL, FALSE);
 	}
@@ -326,7 +326,7 @@ int main(int argc, char *argv[])
 					(GIOFunc) ncl_prv_kbinput_cb, &gNclCtx);
 		g_io_channel_unref(gNclCtx.channel);
 
-		if (!scriptFileStr && !execCmdLineStr)
+		if (!opt_script && !opt_command)
 			ncl_exec(LISTCMD_NAME);
 
 		rl_callback_handler_install(NCL_PROMPT, ncl_parse_line);
