@@ -164,34 +164,31 @@ static ncl_cmd_func ncl_prv_find_func(char *cmd)
 	return NULL;
 }
 
-NCLError ncl_exec(char *cmdName)
+NCLError ncl_exec(char *cmd)
 {
 	NCLError		ret		= NCLERR_PARSING_PARAMETERS;
-	GError			*gerror		= NULL;
-	ncl_cmd_func		funcList	= NULL;
+	GError			*gerr		= NULL;
+	ncl_cmd_func		func	= NULL;
 	int			argc;
 	char **argv = NULL;
 
-	if (!g_shell_parse_argv(g_strstrip(cmdName), &argc, &argv, &gerror))
+	if (!g_shell_parse_argv(g_strstrip(cmd), &argc, &argv, &gerr))
 		goto exit;
 
-	funcList = ncl_prv_find_func(argv[0]);
-	if (funcList != NULL) {
-		ret = (*funcList)(argc, argv);
-		if (ret < NCLERR_NOERROR)
-			NCL_CMD_PRINTERR(
-				"Error command '%s' return err %d (%s)\n",
-					 argv[0], ret, ncl_error_get_text(ret));
-	} else {
-		NCL_CMD_PRINTERR("Unknow NCL function '%s', trying shell...\n",
-				 cmdName);
-		g_spawn_command_line_async(cmdName, &gerror);
+	func = ncl_prv_find_func(argv[0]);
+	if (!func) {
+		NCL_CMD_PRINTERR("'%s': Not NCL command, trying shell\n", cmd);
+		g_spawn_command_line_async(cmd, &gerr);
+		goto exit;
 	}
+
+	if ((ret = func(argc, argv)) != NCLERR_NOERROR)
+		NCL_CMD_PRINTERR("'%s': %s\n", cmd, ncl_error_get_text(ret));
 exit:
-	if (gerror) {
-		if (gerror->code != G_SHELL_ERROR_EMPTY_STRING)
-			NCL_CMD_PRINTERR("%s\n", gerror->message);
-		g_error_free(gerror);
+	if (gerr) {
+		if (gerr->code != G_SHELL_ERROR_EMPTY_STRING)
+			NCL_CMD_PRINTERR("%s\n", gerr->message);
+		g_error_free(gerr);
 	}
 	g_strfreev(argv);
 	return ret;
