@@ -164,8 +164,7 @@ static NCLError ncl_prv_split_cmdLine(gchar  *cmdLine, int *iArgc,
 	inQuotes = false;
 
 	argStart = argEnd = cmdLine;
-	while ((*argc) < NB_MAX_PARAMETERS && *argEnd != '\0' &&
-		endParsing == FALSE) {
+	while (endParsing == FALSE && *argc < NB_MAX_PARAMETERS && *argEnd) {
 		while (*argEnd != ' ' && *argEnd != '"' && *argEnd != '\0')
 			argEnd++;
 		if (*argEnd == '"') {
