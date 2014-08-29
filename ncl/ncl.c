@@ -166,17 +166,16 @@ static ncl_cmd_func ncl_prv_find_func(char *cmd)
 
 NCLError ncl_exec(char *cmd)
 {
-	NCLError		ret		= NCLERR_PARSING_PARAMETERS;
-	GError			*gerr		= NULL;
-	ncl_cmd_func		func	= NULL;
-	int			argc;
+	NCLError ret = NCLERR_PARSING_PARAMETERS;
+	GError *gerr = NULL;
+	ncl_cmd_func func = NULL;
 	char **argv = NULL;
+	int argc;
 
 	if (!g_shell_parse_argv(g_strstrip(cmd), &argc, &argv, &gerr))
 		goto exit;
 
-	func = ncl_prv_find_func(argv[0]);
-	if (!func) {
+	if (!(func = ncl_prv_find_func(argv[0]))) {
 		NCL_CMD_PRINTERR("'%s': Not NCL command, trying shell\n", cmd);
 		g_spawn_command_line_async(cmd, &gerr);
 		goto exit;
