@@ -40,8 +40,6 @@
 #include "ncl_cmd.h"
 
 #define NCL_PROMPT		"NCL> "
-#define NB_MAX_PARAMETERS	20	/* Max number of parameters in a
-					command */
 #define NB_COLUMN		16
 
 NCLContext	gNclCtx;
@@ -149,55 +147,6 @@ char *ncl_error_get_text(NCLError ec)
 	}
 }
 
-static NCLError ncl_prv_split_cmdLine(gchar  *cmdLine, int *iArgc,
-				      char *iArgv[])
-{
-	NCLError	err	= NCLERR_NOERROR;
-	char		**argv	= NULL;
-	int		*argc;
-	char		*argEnd;
-	char		*argStart;
-	bool		inQuotes;
-	gssize		argSize;
-	int		endParsing = FALSE;
-
-	/* Test input parameters */
-	if (!cmdLine || !iArgc || !iArgv)
-		return NCLERR_PARSING_PARAMETERS;
-
-	/* Splitting parameters list like argc/argv style */
-	argv = iArgv;
-	argc = iArgc;
-	*argc = 0;
-	inQuotes = false;
-
-	argStart = argEnd = cmdLine;
-	while (endParsing == FALSE && *argc < NB_MAX_PARAMETERS && *argEnd) {
-		while (*argEnd != ' ' && *argEnd != '"' && *argEnd != '\0')
-			argEnd++;
-		if (*argEnd == '"') {
-			if (inQuotes == false)
-				argStart = argEnd + 1;
-			inQuotes = !inQuotes;
-		}
-
-		if (inQuotes == false) {
-			if (*argEnd == '\0')
-				endParsing = TRUE;
-			*argEnd = '\0';
-			argSize = argEnd - argStart;
-			if (argSize > 0)
-				((char **)(argv))[(*argc)++] = argStart;
-			argEnd++;
-			argStart = argEnd;
-		} else
-			argEnd++;
-	}
-
-	return err;
-}
-
-
 static ncl_cmd_func ncl_prv_find_func(char *cmd)
 {
 	int			index;
@@ -217,25 +166,14 @@ static ncl_cmd_func ncl_prv_find_func(char *cmd)
 
 NCLError ncl_exec(char *cmdName)
 {
-	NCLError		ret		= NCLERR_NOERROR;
+	NCLError		ret		= NCLERR_PARSING_PARAMETERS;
 	GError			*gerror		= NULL;
 	ncl_cmd_func		funcList	= NULL;
-	char			*cmd		= NULL;
-	char			*argv[NB_MAX_PARAMETERS];
 	int			argc;
+	char **argv = NULL;
 
-	/* Duplicate Command line before split */
-	cmd = g_strdup(cmdName);
-	if (cmd == NULL)
-		return NCLERR_MEM_ALLOC;
-
-	/* Invoking 'list' command to display interpretor commands list */
-	memset(argv, 0, sizeof(argv));
-	ret = ncl_prv_split_cmdLine(cmd, &argc, argv);
-	if (ret != NCLERR_NOERROR) {
-		NCL_CMD_PRINTERR("Error while parsing '%s'\n", cmdName);
-		goto error;
-	}
+	if (!g_shell_parse_argv(g_strstrip(cmdName), &argc, &argv, &gerror))
+		goto exit;
 
 	funcList = ncl_prv_find_func(argv[0]);
 	if (funcList != NULL) {
@@ -248,19 +186,13 @@ NCLError ncl_exec(char *cmdName)
 		NCL_CMD_PRINTERR("Unknow NCL function '%s', trying shell...\n",
 				 cmdName);
 		g_spawn_command_line_async(cmdName, &gerror);
-		if (gerror != NULL) {
-			NCL_CMD_PRINTERR("Shell return error %d:%s\n",
-					 gerror->code, gerror->message);
-			g_error_free(gerror);
-		}
 	}
-	g_free(cmd);
-
-	return ret;
-
-error:
-	if (cmd != NULL)
-		g_free(cmd);
+exit:
+	if (gerror) {
+		NCL_CMD_PRINTERR("%s\n", gerror->message);
+		g_error_free(gerror);
+	}
+	g_strfreev(argv);
 	return ret;
 }
 
