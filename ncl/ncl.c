@@ -276,35 +276,29 @@ static void ncl_prv_parse_script_file(char *filename)
 
 int main(int argc, char *argv[])
 {
-	NCLError	err;
-	GOptionContext	*context;
-	GError		*error		= NULL;
-	static char	*execCmdLineStr;
-	static char	*scriptFileStr;
-	gboolean	opt_keep_running = FALSE;
-GOptionEntry	options[] = {
+	NCLError err;
+	GOptionContext *context;
+	GError *error = NULL;
+	char *execCmdLineStr = NULL;
+	char *scriptFileStr = NULL;
+	gboolean opt_keep_running = FALSE;
+	GOptionEntry options[] = {
 		{ "exec"	, 'e', 0, G_OPTION_ARG_STRING, &execCmdLineStr,
 		"Execute specific command line function", "Command Line" },
 		{ "script", 's', 0, G_OPTION_ARG_STRING	, &scriptFileStr
 				  , "Script file to execute", "filename" },
 		{ "keep", 'k', 0, G_OPTION_ARG_NONE, &opt_keep_running,
 		  "Keep running after command execution" },
-		{ NULL, 0, 0, 0, NULL, NULL, NULL} /* End of List */
+		{ NULL }
 	};
 
-	execCmdLineStr	= NULL;
-	scriptFileStr	= NULL;
-	NCL_CMD_PRINTIN();
 	NCL_CMD_PRINT("Compiled at %s : %s\n\n", __DATE__, __TIME__);
 
-	context = g_option_context_new("");
-	g_option_context_add_main_entries(context, options, "");
+	context = g_option_context_new(NULL);
+	g_option_context_add_main_entries(context, options, NULL);
 	if (g_option_context_parse(context, &argc, &argv, &error) == FALSE) {
-		if (error != NULL) {
-			NCL_CMD_PRINTERR("%s\n", error->message);
-			g_error_free(error);
-		} else
-			NCL_CMD_PRINTERR("An unknown error occurred\n");
+		NCL_CMD_PRINTERR("%s\n", error->message);
+		g_error_free(error);
 		return NCLERR_INIT;
 	}
 	g_option_context_free(context);
