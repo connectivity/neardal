@@ -308,51 +308,31 @@ int main(int argc, char *argv[])
 		return NCLERR_INIT;
 	}
 
-	/* Do we have a command line in parameters list ? */
-	if (scriptFileStr == NULL) {
-		/* No, test application executed without a command line in
-		parameter. Do we have a command in parameters list ? */
-		if (execCmdLineStr == NULL) {
-		keep_running:
-			/* No, test application executed without a command
-			line in parameter */
-			gNclCtx.channel = g_io_channel_unix_new(STDIN_FILENO);
-			gNclCtx.tag = g_io_add_watch(gNclCtx.channel, G_IO_IN,
+	if (!scriptFileStr && !execCmdLineStr)
+		opt_keep_running = TRUE;
+
+	if (scriptFileStr)
+		ncl_prv_parse_script_file(scriptFileStr);
+
+	if (execCmdLineStr) {
+		gNclCtx.errOnExit = ncl_exec(execCmdLineStr);
+		while (g_main_context_pending(NULL))
+			g_main_context_iteration(NULL, FALSE);
+	}
+
+	if (opt_keep_running) {
+		gNclCtx.channel = g_io_channel_unix_new(STDIN_FILENO);
+		gNclCtx.tag = g_io_add_watch(gNclCtx.channel, G_IO_IN,
 					(GIOFunc) ncl_prv_kbinput_cb, &gNclCtx);
-			g_io_channel_unref(gNclCtx.channel);
-			/* Invoking 'help' command to display commands line
-			 * list */
+		g_io_channel_unref(gNclCtx.channel);
+
+		if (!scriptFileStr && !execCmdLineStr)
 			ncl_exec(LISTCMD_NAME);
 
-			rl_callback_handler_install(NCL_PROMPT, ncl_parse_line);
-			/* Launch main-loop */
-			g_main_loop_run(gNclCtx.main_loop);
-		} else {
-			int eventsCount = 0;
+		rl_callback_handler_install(NCL_PROMPT, ncl_parse_line);
 
-			/* Yes, test application executed with a command line
-			 * in parameter */
-			NCL_CMD_PRINTF("Executing command ('%s')...\n",
-				       execCmdLineStr);
-			gNclCtx.errOnExit = ncl_exec(execCmdLineStr);
-
-			NCL_CMD_PRINT(
-				"Command executed('%s'), processing events...",
-				      execCmdLineStr);
-			do {
-				NCL_CMD_PRINT("*");
-				eventsCount++;
-			} while (g_main_context_iteration(NULL, false) == true);
-			NCL_CMD_PRINT("\n");
-			NCL_CMD_PRINTF("All events have been processed (%d).\n",
-				       eventsCount);
-			g_free(execCmdLineStr);
-			execCmdLineStr = NULL;
-			if (opt_keep_running)
-				goto keep_running;
-		}
-	} else
-		ncl_prv_parse_script_file(scriptFileStr);
+		g_main_loop_run(gNclCtx.main_loop);
+	}
 
 	err = gNclCtx.errOnExit;
 
