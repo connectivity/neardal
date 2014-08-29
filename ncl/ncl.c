@@ -282,12 +282,12 @@ int main(int argc, char *argv[])
 	char *scriptFileStr = NULL;
 	gboolean opt_keep_running = FALSE;
 	GOptionEntry options[] = {
-		{ "exec"	, 'e', 0, G_OPTION_ARG_STRING, &execCmdLineStr,
-		"Execute specific command line function", "Command Line" },
-		{ "script", 's', 0, G_OPTION_ARG_STRING	, &scriptFileStr
-				  , "Script file to execute", "filename" },
+		{ "exec", 'e', 0, G_OPTION_ARG_STRING, &execCmdLineStr,
+		  "Execute command", "command" },
+		{ "script", 's', 0, G_OPTION_ARG_STRING	, &scriptFileStr,
+		  "Execute script", "filename" },
 		{ "keep", 'k', 0, G_OPTION_ARG_NONE, &opt_keep_running,
-		  "Keep running after command execution" },
+		  "Keep running after command/script execution" },
 		{ NULL }
 	};
 
