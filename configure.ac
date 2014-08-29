@@ -16,6 +16,7 @@ AC_ARG_ENABLE([optimization],
 
 AC_PROG_CC
 AC_PROG_LIBTOOL
+AC_PROG_GREP
 
 AC_CHECK_FUNCS([getline fileno])
 
@@ -66,6 +67,11 @@ PKG_CHECK_MODULES(gio, gio-unix-2.0 >= 2.30,
 	AC_SUBST([gio_CFLAGS])
 	AC_SUBST([gio_LIBS]),
 	AC_MSG_ERROR(gio-unix-2.0 >= 2.30 is required))
+
+AC_SEARCH_LIBS([rl_initialize], [edit readline],
+	[AS_IF([echo $LIBS | grep -q "-ledit"],
+		[CPPFLAGS="-DHAVE_LIBEDIT $CPPFLAGS"])],
+	[AC_MSG_ERROR(editline or readline is required)])
 
 AC_PATH_TOOL([DOXYGEN], [doxygen])
 AM_CONDITIONAL([HAVE_DOXYGEN], [test ! -z "$DOXYGEN"])

@@ -25,8 +25,16 @@
 #include <string.h>
 #include <stdlib.h>
 #include <signal.h>
+#include <unistd.h>
 
 #include <glib.h>
+
+#ifdef HAVE_LIBEDIT
+#include <editline/readline.h>
+#else
+#include <readline/readline.h>
+#include <readline/history.h>
+#endif
 
 #include "ncl.h"
 #include "ncl_cmd.h"
@@ -256,52 +264,22 @@ error:
 	return ret;
 }
 
+static void ncl_parse_line(char *line)
+{
+	add_history(line);
+	ncl_exec(line);
+	free(line);
+}
 
 static gboolean ncl_prv_kbinput_cb(GIOChannel *source, GIOCondition condition,
 				   gpointer data)
 {
-	NCLContext	*nclCtx	= (NCLContext *) data;
-	GError		*error	= NULL;
-
-	switch (condition) {
-	case G_IO_IN: {
-		gsize		terminator_pos;
-		GIOStatus	status;
-		NCLCmdContext	*nclCmdCtx;
-
-		nclCmdCtx = ncl_cmd_get_ctx();
-		if (!nclCmdCtx)
-			return FALSE;
-
-		status = g_io_channel_read_line_string(source,
-							nclCmdCtx->clBuf,
-							&terminator_pos,
-							&error);
-		(void) status; /* Remove warning */
-		if (nclCmdCtx->clBuf->str) {
-			nclCmdCtx->clBuf->str[terminator_pos] = '\0';
-
-			if (nclCmdCtx->clBuf->str[0] != '\0') {
-				nclCtx->errOnExit = NCLERR_PARSING_PARAMETERS;
-				nclCtx->errOnExit = ncl_exec(
-							nclCmdCtx->clBuf->str);
-			}
-			g_string_erase(nclCmdCtx->clBuf, 0, -1);
-			g_string_append_c(nclCmdCtx->clBuf, '\0');
-		} else
-			NCL_CMD_PRINTERR("buf is NULL!!!\n");
-	}
-	break;
-	case G_IO_PRI:
-	case G_IO_ERR:
-	case G_IO_HUP:
-	case G_IO_NVAL:
-	default:
-		NCL_CMD_PRINTERR("unhandled condition (%d)\n", condition);
-	break;
-	}
-	ncl_prompt();
-
+	rl_callback_read_char();
+#ifdef HAVE_LIBEDIT
+	/* Editline bug workaround: handler install with the original prompt
+	   corrects EL_UNBUFFERED state without side-effects. */
+	rl_callback_handler_install(PROMPT_PREFIX, ncl_parse_line);
+#endif
 	return TRUE;
 }
 
@@ -323,11 +301,8 @@ void ncl_finalize(void)
 	/* Freeing command line interpretor context */
 	ncl_cmd_finalize();
 
-	if (gNclCtx.channel) {
-		g_io_channel_unref(gNclCtx.channel);
-		g_io_channel_shutdown(gNclCtx.channel, TRUE, NULL);
-		g_source_remove(gNclCtx.tag);
-	}
+	rl_callback_handler_remove();
+
 	if (gNclCtx.main_loop)
 		g_main_loop_unref(gNclCtx.main_loop);
 }
@@ -389,7 +364,6 @@ static void ncl_prv_parse_script_file(char *scriptFileStr)
 int main(int argc, char *argv[])
 {
 	NCLError	err;
-	int		fd;
 	GOptionContext	*context;
 	GError		*error		= NULL;
 	static char	*execCmdLineStr;
@@ -436,21 +410,16 @@ GOptionEntry	options[] = {
 		keep_running:
 			/* No, test application executed without a command
 			line in parameter */
-
-			/* Wrap stdin (keyboard) on callback */
-			fd = fileno(stdin);
-			gNclCtx.channel = g_io_channel_unix_new(fd);
-			g_io_channel_set_encoding(gNclCtx.channel, NULL, NULL);
-			g_io_channel_set_buffered(gNclCtx.channel, TRUE);
+			gNclCtx.channel = g_io_channel_unix_new(STDIN_FILENO);
 			gNclCtx.tag = g_io_add_watch(gNclCtx.channel, G_IO_IN,
-						(GIOFunc) ncl_prv_kbinput_cb,
-						     &gNclCtx);
-
+					(GIOFunc) ncl_prv_kbinput_cb, &gNclCtx);
+			g_io_channel_unref(gNclCtx.channel);
 			/* Invoking 'help' command to display commands line
 			 * list */
 			ncl_exec(LISTCMD_NAME);
-			ncl_prompt();
 
+			rl_callback_handler_install(PROMPT_PREFIX,
+							ncl_parse_line);
 			/* Launch main-loop */
 			g_main_loop_run(gNclCtx.main_loop);
 		} else {
