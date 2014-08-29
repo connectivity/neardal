@@ -189,7 +189,8 @@ NCLError ncl_exec(char *cmdName)
 	}
 exit:
 	if (gerror) {
-		NCL_CMD_PRINTERR("%s\n", gerror->message);
+		if (gerror->code != G_SHELL_ERROR_EMPTY_STRING)
+			NCL_CMD_PRINTERR("%s\n", gerror->message);
 		g_error_free(gerror);
 	}
 	g_strfreev(argv);
