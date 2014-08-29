@@ -332,31 +332,10 @@ void ncl_finalize(void)
 		g_main_loop_unref(gNclCtx.main_loop);
 }
 
-/*
-static void signal_handler(int signum)
-{
-	NCL_CMD_PRINTERR("Receive signal %d\n", signum);
-}
-*/
 static NCLError ncl_prv_init(char *execCmdLineStr)
 {
-/*	struct sigaction	sa;
-	int			err = NCLERR_NOERROR; */
-
-	/* Initialize Test App context... */
+	/* Initialize Test App context */
 	memset(&gNclCtx, 0, sizeof(gNclCtx));
-
-/*
-	sa.sa_handler = signal_handler;
-    sigemptyset(&sa.sa_mask);
-    sa.sa_flags = SA_RESTART;
-    if (sigaction(SIGINT, &sa, NULL) == -1)
-	{
-		NCL_CMD_PRINTERR("Unable to handle system signals\n");
-		return NCLERR_INIT;
-	}
-*/
-
 	gNclCtx.main_loop = g_main_loop_new(NULL, FALSE);
 
 	/* Initialize command line interpretor context */
