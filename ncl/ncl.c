@@ -263,12 +263,7 @@ static void ncl_prv_parse_script_file(char *scriptFileStr)
 	do {
 		/* Reading command line script file */
 		nbRead = getline(&cmdLineStr, &cmdLineSize, scriptFile);
-		if (nbRead > 0 && strlen(cmdLineStr) > 1) {
-			cmdLineSize = strlen(cmdLineStr);
-			if (cmdLineStr[0] != '#') {
-				if (cmdLineStr[cmdLineSize - 1] == '\n')
-					cmdLineStr[cmdLineSize - 1] = '\0';
-
+		if (nbRead > 0) {
 				/* Executing command line */
 				NCL_CMD_PRINT("$$$$$$$$$$$$$$$$$$$$$$$$$'\n");
 				NCL_CMD_PRINT("Executing '%s'\n", cmdLineStr);
