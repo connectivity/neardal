@@ -185,7 +185,9 @@ NCLError ncl_exec(char *cmd)
 		NCL_CMD_PRINTERR("'%s': %s\n", cmd, ncl_error_get_text(ret));
 exit:
 	if (gerr) {
-		if (gerr->code != G_SHELL_ERROR_EMPTY_STRING)
+		if (gerr->code == G_SHELL_ERROR_EMPTY_STRING)
+			ret = NCLERR_NOERROR;
+		if (ret != NCLERR_NOERROR)
 			NCL_CMD_PRINTERR("%s\n", gerr->message);
 		g_error_free(gerr);
 	}
