@@ -270,11 +270,8 @@ static void ncl_prv_parse_script_file(char *scriptFileStr)
 				NCL_CMD_PRINT("$$$$$$$$$$$$$$$$$$$$$$$$$'\n");
 				gNclCtx.errOnExit = ncl_exec(cmdLineStr);
 
-				/* Main loop */
-				do {
-					g_main_context_iteration(NULL, false);
-				} while (g_main_context_pending(NULL));
-			}
+				while (g_main_context_pending(NULL))
+					g_main_context_iteration(NULL, FALSE);
 		}
 		/* Freeing command line */
 		if (cmdLineStr != NULL) {
