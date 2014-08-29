@@ -19,7 +19,6 @@
  */
 
 #define _GNU_SOURCE
-#define _POSIX_SOURCE
 
 #include <stdio.h>
 #include <string.h>
