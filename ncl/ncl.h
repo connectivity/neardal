@@ -22,8 +22,6 @@
 #ifndef __NCL_H__
 #define __NCL_H__
 
-#include <glib.h>
-
 /* Buffer size for the command line interpretor */
 #define	CL_BUF_SIZE			1024
 
