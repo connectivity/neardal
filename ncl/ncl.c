@@ -260,25 +260,20 @@ static void ncl_prv_parse_script_file(char *scriptFileStr)
 		return;
 	}
 
-	do {
-		/* Reading command line script file */
-		nbRead = getline(&cmdLineStr, &cmdLineSize, scriptFile);
-		if (nbRead > 0) {
-				/* Executing command line */
-				NCL_CMD_PRINT("$$$$$$$$$$$$$$$$$$$$$$$$$'\n");
-				NCL_CMD_PRINT("Executing '%s'\n", cmdLineStr);
-				NCL_CMD_PRINT("$$$$$$$$$$$$$$$$$$$$$$$$$'\n");
-				gNclCtx.errOnExit = ncl_exec(cmdLineStr);
+	gNclCtx.errOnExit = NCLERR_NOERROR;
 
-				while (g_main_context_pending(NULL))
-					g_main_context_iteration(NULL, FALSE);
-		}
-		/* Freeing command line */
-		if (cmdLineStr != NULL) {
-			free(cmdLineStr);
-			cmdLineStr = NULL;
-		}
-	} while (nbRead > 0 && gNclCtx.errOnExit == NCLERR_NOERROR);
+	while ((nbRead = getline(&cmdLineStr, &cmdLineSize, scriptFile)) != -1
+			&& gNclCtx.errOnExit == NCLERR_NOERROR) {
+
+		NCL_CMD_PRINT("$$$$$$$$$$$$$$$$$$$$$$$$$'\n");
+		NCL_CMD_PRINT("Executing '%s'\n", cmdLineStr);
+		NCL_CMD_PRINT("$$$$$$$$$$$$$$$$$$$$$$$$$'\n");
+		gNclCtx.errOnExit = ncl_exec(cmdLineStr);
+
+		while (g_main_context_pending(NULL))
+			g_main_context_iteration(NULL, FALSE);
+	}
+
 	fclose(scriptFile);
 }
 
