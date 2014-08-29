@@ -39,7 +39,7 @@
 #include "ncl.h"
 #include "ncl_cmd.h"
 
-#define PROMPT_PREFIX		"NCL> "
+#define NCL_PROMPT		"NCL> "
 #define NB_MAX_PARAMETERS	20	/* Max number of parameters in a
 					command */
 #define NB_COLUMN		16
@@ -278,14 +278,14 @@ static gboolean ncl_prv_kbinput_cb(GIOChannel *source, GIOCondition condition,
 #ifdef HAVE_LIBEDIT
 	/* Editline bug workaround: handler install with the original prompt
 	   corrects EL_UNBUFFERED state without side-effects. */
-	rl_callback_handler_install(PROMPT_PREFIX, ncl_parse_line);
+	rl_callback_handler_install(NCL_PROMPT, ncl_parse_line);
 #endif
 	return TRUE;
 }
 
 void ncl_prompt(void)
 {
-	NCL_CMD_PRINT(PROMPT_PREFIX);
+	NCL_CMD_PRINT(NCL_PROMPT);
 }
 
 NCLContext *ncl_get_ctx(void)
@@ -418,8 +418,7 @@ GOptionEntry	options[] = {
 			 * list */
 			ncl_exec(LISTCMD_NAME);
 
-			rl_callback_handler_install(PROMPT_PREFIX,
-							ncl_parse_line);
+			rl_callback_handler_install(NCL_PROMPT, ncl_parse_line);
 			/* Launch main-loop */
 			g_main_loop_run(gNclCtx.main_loop);
 		} else {
