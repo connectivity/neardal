@@ -1,6 +1,7 @@
 /*
  *     NEARDAL Tester command line interpreter
  *
+ *     Copyright 2014      Marvell International Ltd.
  *     Copyright 2012-2014 Intel Corporation. All rights reserved.
  *
  *     This program is free software; you can redistribute it and/or modify
@@ -264,6 +265,15 @@ static void ncl_cmd_prv_dump_record(neardal_record *record)
 	}
 	if (record->mime)
 		NCL_CMD_PRINT(".. MIME:\t\t%s\n"	, record->mime);
+	if (record->ssid)
+		NCL_CMD_PRINT(".. SSID:\t\t%s\n"	, record->ssid);
+	if (record->passphrase)
+		NCL_CMD_PRINT(".. PASSPHRASE:\t\t%s\n", record->passphrase);
+	if (record->encryption)
+		NCL_CMD_PRINT(".. Encryption:\t\t%s\n", record->encryption);
+	if (record->authentication)
+		NCL_CMD_PRINT(".. Authentication:\t\t%s\n",
+			      record->authentication);
 }
 
 /*****************************************************************************
@@ -774,6 +784,22 @@ static GOptionEntry options[] = {
 		{ "carrier", 'u', 0, G_OPTION_ARG_STRING, &rcd.carrier
 				  , "Carrier", "bluetooth" },
 
+		{ "ssid", 'd', 0, G_OPTION_ARG_STRING, &rcd.ssid
+				  , "SSID", "ssid" },
+
+		{ "passphrase", 'p', 0, G_OPTION_ARG_STRING, &rcd.passphrase
+				  , "Passphrase", "psk" },
+
+		{ "encryption", 'c', 0, G_OPTION_ARG_STRING , &rcd.encryption
+                                  , "List separated by ','"
+		                  , "NONE,WEP,TKIP,AES"},
+
+		{ "authentication", 'z', 0, G_OPTION_ARG_STRING
+		                  , &rcd.authentication
+		                  , "List separated by ','"
+		                  , "OPEN,WPA-Personal,Shared,WPA-Enterprise,"
+		                    "WPA2-Enterprise,WPA2-Personal" },
+
 		{ NULL, 0, 0, 0, NULL, NULL, NULL} /* End of List */
 	};
 
@@ -826,6 +852,14 @@ exit:
 		g_free((gchar *) rcd.uri);
 	if (rcd.carrier != NULL)
 		g_free((gchar *) rcd.carrier);
+	if (rcd.ssid != NULL)
+		g_free((gchar *) rcd.ssid);
+	if (rcd.passphrase != NULL)
+		g_free((gchar *) rcd.passphrase);
+	if (rcd.authentication != NULL)
+		g_free((gchar *) rcd.authentication);
+	if (rcd.encryption != NULL)
+		g_free((gchar *) rcd.encryption);
 
 	return nclErr;
 }
@@ -844,7 +878,7 @@ static NCLError ncl_cmd_write(int argc, char *argv[])
 	static neardal_record	rcd;
 	static int		smartPoster;
 
-static GOptionEntry options[] = {
+	static GOptionEntry options[] = {
 		{ "act", 'c', 0, G_OPTION_ARG_STRING, &rcd.action
 				  , "Action", "save"},
 
@@ -871,6 +905,25 @@ static GOptionEntry options[] = {
 
 		{ "uri", 'u', 0, G_OPTION_ARG_STRING, &rcd.uri
 				  , "URI", "http://www.intel.com" },
+
+		{ "carrier", 'u', 0, G_OPTION_ARG_STRING, &rcd.carrier
+				  , "Carrier", "bluetooth" },
+
+		{ "ssid", 'd', 0, G_OPTION_ARG_STRING, &rcd.ssid
+				  , "SSID", "ssid" },
+
+		{ "passphrase", 'p', 0, G_OPTION_ARG_STRING, &rcd.passphrase
+				  , "Passphrase", "psk" },
+
+		{ "encryption", 'c', 0, G_OPTION_ARG_STRING , &rcd.encryption
+                                  , "List separated by ','"
+		                  , "NONE,WEP,TKIP,AES"},
+
+		{ "authentication", 'z', 0, G_OPTION_ARG_STRING
+		                  , &rcd.authentication
+		                  , "List separated by ','"
+		                  , "OPEN,WPA-Personal,Shared,WPA-Enterprise,"
+		                    "WPA2-Enterprise,WPA2-Personal" },
 
 		{ NULL, 0, 0, 0, NULL, NULL, NULL} /* End of List */
 	};
@@ -922,6 +975,15 @@ exit:
 		g_free((gchar *) rcd.type);
 	if (rcd.uri != NULL)
 		g_free((gchar *) rcd.uri);
+	if (rcd.ssid != NULL)
+		g_free((gchar *) rcd.ssid);
+	if (rcd.passphrase != NULL)
+		g_free((gchar *) rcd.passphrase);
+	if (rcd.authentication != NULL)
+		g_free((gchar *) rcd.authentication);
+	if (rcd.encryption != NULL)
+		g_free((gchar *) rcd.encryption);
+
 
 	return nclErr;
 }

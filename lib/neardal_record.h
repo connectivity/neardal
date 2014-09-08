@@ -1,6 +1,7 @@
 /*
  *     NEARDAL (Neard Abstraction Library)
  *
+ *     Copyright 2014      Marvell International Ltd.
  *     Copyright 2012-2014 Intel Corporation. All rights reserved.
  *
  *     This program is free software; you can redistribute it and/or modify
