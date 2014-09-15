@@ -1,7 +1,7 @@
 /*
  *     NEARDAL (Neard Abstraction Library)
  *
- *     Copyright 2012 Intel Corporation. All rights reserved.
+ *     Copyright 2012-2014 Intel Corporation. All rights reserved.
  *
  *     This program is free software; you can redistribute it and/or modify
  *     it under the terms of the GNU Lesser General Public License version 2
@@ -28,6 +28,14 @@
 
 #include "neardal.h"
 #include "neardal_prv.h"
+
+void neardal_g_strfreev(void **array, void *end)
+{
+	void **p = array;
+	for (; (void *) p < end; p++)
+		g_free(*p);
+	g_free(array);
+}
 
 void neardal_g_variant_add_parsed(GVariant **v, const char *format, ...)
 {
