@@ -236,14 +236,14 @@ void ncl_finalize(void)
 		g_main_loop_unref(gNclCtx.main_loop);
 }
 
-static NCLError ncl_prv_init(char *execCmdLineStr)
+static NCLError ncl_prv_init(void)
 {
 	/* Initialize Test App context */
 	memset(&gNclCtx, 0, sizeof(gNclCtx));
 	gNclCtx.main_loop = g_main_loop_new(NULL, FALSE);
 
 	/* Initialize command line interpretor context */
-	return ncl_cmd_init(execCmdLineStr);
+	return ncl_cmd_init(NULL);
 }
 
 static void ncl_prv_parse_script_file(char *filename)
@@ -278,11 +278,11 @@ int main(int argc, char *argv[])
 	NCLError err;
 	GOptionContext *context;
 	GError *error = NULL;
-	char *opt_command = NULL;
+	char **opt_command = NULL;
 	char *opt_script = NULL;
-	gboolean opt_keep_running = FALSE;
+	gboolean opt_keep_running = FALSE, show_help = FALSE;
 	GOptionEntry options[] = {
-		{ "exec", 'e', 0, G_OPTION_ARG_STRING, &opt_command,
+		{ "exec", 'e', 0, G_OPTION_ARG_STRING_ARRAY, &opt_command,
 		  "Execute command", "command" },
 		{ "script", 's', 0, G_OPTION_ARG_STRING	, &opt_script,
 		  "Execute script", "filename" },
@@ -302,22 +302,24 @@ int main(int argc, char *argv[])
 	}
 	g_option_context_free(context);
 
-	err = ncl_prv_init(opt_command);
-	if (err != NCLERR_NOERROR) {
-		ncl_finalize();
-		return NCLERR_INIT;
-	}
+	if ((err = ncl_prv_init()) != NCLERR_NOERROR)
+		goto exit;
 
-	if (!opt_script && !opt_command)
+	if (!opt_script && !opt_command) {
 		opt_keep_running = TRUE;
+		show_help = TRUE;
+	}
 
 	if (opt_script)
 		ncl_prv_parse_script_file(opt_script);
 
-	if (opt_command) {
-		gNclCtx.errOnExit = ncl_exec(opt_command);
+	while (opt_command) {
+		gNclCtx.errOnExit = ncl_exec(*opt_command);
 		while (g_main_context_pending(NULL))
 			g_main_context_iteration(NULL, FALSE);
+		g_free(*opt_command++);
+		if (!*opt_command)
+			opt_command = NULL;
 	}
 
 	if (opt_keep_running) {
@@ -326,7 +328,7 @@ int main(int argc, char *argv[])
 					(GIOFunc) ncl_prv_kbinput_cb, &gNclCtx);
 		g_io_channel_unref(gNclCtx.channel);
 
-		if (!opt_script && !opt_command)
+		if (show_help)
 			ncl_exec(LISTCMD_NAME);
 
 		rl_callback_handler_install(NCL_PROMPT, ncl_parse_line);
@@ -335,7 +337,7 @@ int main(int argc, char *argv[])
 	}
 
 	err = gNclCtx.errOnExit;
-
+exit:
 	ncl_finalize();
 
 	if (err != NCLERR_NOERROR)
