@@ -972,19 +972,6 @@ errorCode_t neardal_get_records(char *tag, char ***array, int *len)
 	return *len ? NEARDAL_SUCCESS : NEARDAL_ERROR_NO_RECORD;
 }
 
-/*****************************************************************************
- * neardal_free_record: Release memory allocated for properties of a record
- ****************************************************************************/
-void neardal_free_record(neardal_record *record)
-{
-	if (record == NULL) {
-		NEARDAL_TRACE_ERR("Record provided is NULL!\n");
-		return;
-	}
-
-	neardal_record_free(record);
-}
-
 errorCode_t neardal_get_record_properties(const char *name,
 						neardal_record **record)
 {

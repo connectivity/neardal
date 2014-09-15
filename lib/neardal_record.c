@@ -34,6 +34,9 @@ void neardal_record_free(neardal_record *r)
 	memset(r, 0, sizeof(*r));
 }
 
+void neardal_free_record(neardal_record *record) \
+	__attribute__ ((alias("neardal_record_free")));
+
 GVariant *neardal_record_to_g_variant(neardal_record *in)
 {
 	GVariantBuilder b;
