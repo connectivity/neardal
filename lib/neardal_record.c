@@ -54,12 +54,14 @@ GVariant *neardal_record_to_g_variant(neardal_record *in)
 				in->representation);
 	NEARDAL_G_VARIANT_IN(&b, "{'Size', <%u>}", in->uriObjSize);
 	NEARDAL_G_VARIANT_IN(&b, "{'Type', <%s>}", in->type);
-	NEARDAL_G_VARIANT_IN(&b, "{'URI', <%s>}", in->uri);
+
 	NEARDAL_G_VARIANT_IN(&b, "{'SSID', <%s>}", in->ssid);
 	NEARDAL_G_VARIANT_IN(&b, "{'Passphrase', <%s>}", in->passphrase);
 	NEARDAL_G_VARIANT_IN(&b, "{'Authentication', <%s>}",
 			     in->authentication);
 	NEARDAL_G_VARIANT_IN(&b, "{'Encryption', <%s>}", in->encryption);
+
+	NEARDAL_G_VARIANT_IN(&b, "{'URI', <%s>}", in->uri);
 
 	out = g_variant_builder_end(&b);
 
@@ -79,11 +81,13 @@ neardal_record *neardal_g_variant_to_record(GVariant *in)
 	NEARDAL_G_VARIANT_OUT(in, "Representation", "s", &out->representation);
 	NEARDAL_G_VARIANT_OUT(in, "Size", "u", &out->uriObjSize);
 	NEARDAL_G_VARIANT_OUT(in, "Type", "s", &out->type);
-	NEARDAL_G_VARIANT_OUT(in, "URI", "s", &out->uri);
+
 	NEARDAL_G_VARIANT_OUT(in, "SSID", "s", &out->ssid);
 	NEARDAL_G_VARIANT_OUT(in, "Passphrase", "s", &out->passphrase);
 	NEARDAL_G_VARIANT_OUT(in, "Authentication", "s", &out->authentication);
 	NEARDAL_G_VARIANT_OUT(in, "Encryption", "s", &out->encryption);
+
+	NEARDAL_G_VARIANT_OUT(in, "URI", "s", &out->uri);
 
 	return out;
 }
