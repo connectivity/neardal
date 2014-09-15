@@ -20,6 +20,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include <glib.h>
 
@@ -28,9 +29,9 @@
 
 void neardal_record_free(neardal_record *r)
 {
-	/* let's use uri as sentinel for g_strfreev() */
-	g_clear_pointer(&r->uri, g_free);
-	g_strfreev((char **) r);
+	g_return_if_fail(r);
+	neardal_g_strfreev((void **) r, &r->uriObjSize);
+	memset(r, 0, sizeof(*r));
 }
 
 GVariant *neardal_record_to_g_variant(neardal_record *in)
