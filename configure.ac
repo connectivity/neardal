@@ -1,4 +1,4 @@
-AC_INIT([neardal], [0.8.0], [Neardal for Neard v0.8])
+AC_INIT([neardal], [0.14.0])
 AC_CONFIG_AUX_DIR([.])
 AC_CONFIG_SRCDIR([lib/neardal.c])
 AC_CONFIG_HEADERS([config.h])
