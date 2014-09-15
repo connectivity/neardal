@@ -617,6 +617,21 @@ errorCode_t neardal_agent_set_handover_cb(oob_push_agent_cb cb_oob_push_agent
  **/
 errorCode_t neardal_free_array(char ***array);
 
+/**
+ * Dump GVariant in a human readable format.
+ */
+void neardal_g_variant_dump(GVariant *data);
+
+/**
+ * Convert neardal_record to GVariant.
+ */
+GVariant *neardal_record_to_g_variant(neardal_record *in);
+
+/**
+ * Convert GVariant to neardal_record.
+ */
+neardal_record *neardal_g_variant_to_record(GVariant *in);
+
 #ifdef __cplusplus
 }
 #endif	/* __cplusplus */
