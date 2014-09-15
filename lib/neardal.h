@@ -2,7 +2,7 @@
  *     NEARDAL (Neard Abstraction Library)
  *
  *     Copyright 2014 Marvell International Ltd.
- *     Copyright 2012 Intel Corporation. All rights reserved.
+ *     Copyright 2012-2014 Intel Corporation. All rights reserved.
  *
  *     This program is free software; you can redistribute it and/or modify
  *     it under the terms of the GNU Lesser General Public License version 2
@@ -122,12 +122,17 @@ typedef struct {
 					HandoverCarrier,
 					HandoverRequest,
 					HandoverSelect. */
+	/* WiFi handover parameters. */
+	char *ssid;		/**< WiFi SSID. */
+	char *passphrase;	/**< WiFi Passphrase. */
+	char *encryption;	/**< WiFi Encryption. */
+	char *authentication;	/**< WiFi Authentication. */
+
 	char *uri;		/**< URI including scheme and resource. */
+
+	/* Keep uriObjSize first after contiguous array of pointers. */
+
 	unsigned int uriObjSize;/**< URI object size. */
-	char *ssid;		/**< The Handover SSID for WiFi */
-	char *passphrase;	/**< The Handover Passphrase for WiFi */
-	char *encryption;	/**< The Handover Encryption for WiFi */
-	char *authentication;	/**< The Handover Authentication for WiFi */
 } neardal_record;
 
 /* @}*/
