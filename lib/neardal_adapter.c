@@ -378,7 +378,7 @@ static GVariant *neardal_adp_properties_get(char *name)
 	if (!path)
 		return NULL;
 
-	tmp = g_variant_get_child_value(path, i);
+	tmp = g_variant_get_child_value(path, 1);
 	g_variant_unref(path);
 
 	g_variant_iter_init(&iter, tmp);
