@@ -148,11 +148,6 @@ static errorCode_t neardal_tag_prv_init(TagProp *tagProp)
 	if (err != NEARDAL_SUCCESS)
 		return err;
 
-	NEARDAL_TRACEF("Register Neard-Tag Signal 'PropertyChanged'\n");
-	g_signal_connect(tagProp->proxy, NEARD_TAG_SIG_PROPCHANGED,
-			G_CALLBACK(neardal_tag_prv_cb_property_changed),
-			  tagProp);
-
 	return err;
 }
 
