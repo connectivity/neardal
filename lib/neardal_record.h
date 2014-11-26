@@ -28,12 +28,8 @@ typedef struct {
 	gboolean	notified; /* Already notified to client? */
 } RcdProp;
 
-errorCode_t neardal_rcd_add(char *rcdName, void *parent);
-void neardal_rcd_remove(RcdProp *rcdProp);
-
 void neardal_record_add(GVariant *record);
 void neardal_record_remove(GVariant *record);
-
 void neardal_record_free(neardal_record *record);
 
 #endif /* NEARDAL_RECORD_H */

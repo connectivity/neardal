@@ -145,12 +145,7 @@ void neardal_dev_prv_remove(DevProp *devProp)
 	NEARDAL_ASSERT(devProp != NULL);
 
 	NEARDAL_TRACEF("Removing dev:%s\n", devProp->name);
-	/* Remove all devs */
-	while (g_list_length(devProp->rcdList)) {
-		node = g_list_first(devProp->rcdList);
-		rcdProp = (RcdProp *) node->data;
-		neardal_rcd_remove(rcdProp);
-	}
+
 	adpProp = devProp->parent;
 	adpProp->devList = g_list_remove(adpProp->devList,
 					 (gconstpointer) devProp);

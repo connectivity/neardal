@@ -108,14 +108,3 @@ void neardal_record_remove(GVariant *record)
 
 	neardal_g_variant_dump(record);
 }
-
-errorCode_t neardal_rcd_add(char *rcdName, void *parent)
-{
-	BUG();
-	return NEARDAL_SUCCESS;
-}
-
-void neardal_rcd_remove(RcdProp *rcd)
-{
-	BUG();
-}
