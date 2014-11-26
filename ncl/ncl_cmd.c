@@ -1610,30 +1610,6 @@ NCLError ncl_cmd_list(int argc, char *argv[])
 	return 0;
 }
 
-
-/*****************************************************************************
- *
- ****************************************************************************/
-void ncl_cmd_print(const char *func, FILE *stream, char *format, ...)
-{
-	gchar	*bufTrace;
-	va_list ap;
-
-	va_start(ap, format);
-
-	bufTrace = g_strdup_vprintf(format, ap);
-	if (bufTrace != NULL) {
-		if (func)
-			fprintf(stream, "%s(): %s", func, bufTrace);
-		else
-			fprintf(stream, "%s", bufTrace);
-		fflush(stream);
-	}
-	va_end(ap);
-	g_free(bufTrace);
-}
-
-
 /*****************************************************************************
  *
  ****************************************************************************/

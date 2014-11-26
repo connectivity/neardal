@@ -55,10 +55,7 @@ NCLCmdInterpretor	*ncl_cmd_get_list(int *nbCmd);
 int			ncl_cmd_get_nbCmd(void);
 NCLCmdContext		*ncl_cmd_get_ctx(void);
 
-/* Print out used by command line functions (and prompt) */
-void			ncl_cmd_print(const char *func, FILE *fprintout,
-					char *format, ...)
-				__attribute__((format(printf, 3, 4)));
+#define ncl_cmd_print(...) neardal_trace(__VA_ARGS__)
 
 #define		NCL_CMD_PRINT(...) \
 			ncl_cmd_print(NULL, stdout, __VA_ARGS__)

@@ -632,6 +632,8 @@ GVariant *neardal_record_to_g_variant(neardal_record *in);
  */
 neardal_record *neardal_g_variant_to_record(GVariant *in);
 
+void neardal_trace(const char *func, FILE *fp, char *fmt, ...);
+
 #ifdef __cplusplus
 }
 #endif	/* __cplusplus */
