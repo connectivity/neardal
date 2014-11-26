@@ -27,31 +27,14 @@
 
 #define NB_COLUMN		16
 
-/*
- * neardal_trace
- *
- * trace function.
- *
- */
-
-
-void neardal_trace(const char *func, FILE *stream, char *format, ...)
+void neardal_trace(const char *func, FILE *fp, char *fmt, ...)
 {
 	va_list ap;
-	gchar	*bufTrace;
-
-	va_start(ap, format);
-
-	bufTrace = g_strdup_vprintf(format, ap);
-	if (bufTrace != NULL) {
-		if (func)
-			fprintf(stream, "%s() : %s", func, bufTrace);
-		else
-			fprintf(stream, "%s", bufTrace);
-		fflush(stream);
-	}
+	va_start(ap, fmt);
+	if (func)
+		fprintf(fp, "%s(): ", func);
+	vfprintf(fp, fmt, ap);
 	va_end(ap);
-	g_free(bufTrace);
 }
 
 static void neardal_prv_dump_data_as_binary_format(char *bufToReadP,
