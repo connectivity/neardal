@@ -19,9 +19,7 @@
  */
 
 #include <stdio.h>
-#include <string.h>
 #include <glib.h>
-#include <glib-object.h>
 
 #include "neardal.h"
 #include "neardal_prv.h"
