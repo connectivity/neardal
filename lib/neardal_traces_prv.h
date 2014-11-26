@@ -42,8 +42,6 @@
 #define NEARDAL_TRACE_ERR(...)	neardal_trace(__func__, stderr, \
 						"Error: " __VA_ARGS__)
 
-void neardal_trace(const char *func, FILE *stream, char *format, ...)
-	__attribute__((format(printf, 3, 4)));
 void neardal_trace_dump_mem(char *dataP, int size);
 
 #endif	/* NEARDAL_TRACES_PRV_H */

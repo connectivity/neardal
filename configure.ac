@@ -18,7 +18,7 @@ AC_PROG_CC
 AC_PROG_LIBTOOL
 AC_PROG_GREP
 
-AC_CHECK_FUNCS([getline])
+AC_CHECK_FUNCS([getline asprintf])
 
 AC_ARG_ENABLE([debug],
 	[AC_HELP_STRING([--enable-debug],

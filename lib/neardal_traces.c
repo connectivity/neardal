@@ -18,8 +18,11 @@
  *
  */
 
+#define _GNU_SOURCE
+
 #include <stdio.h>
 #include <stdarg.h>
+#include <stdlib.h>
 #include <string.h>
 #include <glib.h>
 
@@ -27,14 +30,19 @@
 
 #define NB_COLUMN		16
 
+int (*neardal_output_cb)(FILE *fp, const char *fmt, va_list ap) = vfprintf;
+
 void neardal_trace(const char *func, FILE *fp, char *fmt, ...)
 {
 	va_list ap;
-	va_start(ap, fmt);
+	char *f = fmt;
 	if (func)
-		fprintf(fp, "%s(): ", func);
-	vfprintf(fp, fmt, ap);
+		asprintf(&f, "%s(): %s", func, fmt);
+	va_start(ap, fmt);
+	neardal_output_cb(fp, f, ap);
 	va_end(ap);
+	if (f != fmt)
+		free(f);
 }
 
 static void neardal_prv_dump_data_as_binary_format(char *bufToReadP,
