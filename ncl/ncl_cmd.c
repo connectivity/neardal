@@ -240,40 +240,9 @@ static void ncl_cmd_prv_dump_dev(neardal_dev *dev)
 
 }
 
-/*****************************************************************************
- * Dump properties of a record
- ****************************************************************************/
 static void ncl_cmd_prv_dump_record(neardal_record *record)
 {
-	NCL_CMD_PRINT("Record\n");
-	if (record->name)
-		NCL_CMD_PRINT(".. Name:\t\t%s\n"	, record->name);
-	if (record->encoding)
-		NCL_CMD_PRINT(".. Encoding:\t\t%s\n"	, record->encoding);
-	if (record->language)
-		NCL_CMD_PRINT(".. Language:\t\t%s\n"	, record->language);
-	if (record->action)
-		NCL_CMD_PRINT(".. Action:\t\t%s\n"	, record->action);
-	if (record->type)
-		NCL_CMD_PRINT(".. Type:\t\t%s\n"	, record->type);
-	if (record->representation)
-		NCL_CMD_PRINT(".. Representation:\t%s\n",
-			      record->representation);
-	if (record->uri) {
-		NCL_CMD_PRINT(".. URI:\t\t\t%s\n"	, record->uri);
-		NCL_CMD_PRINT(".. URI size:\t\t%d\n"	, record->uriObjSize);
-	}
-	if (record->mime)
-		NCL_CMD_PRINT(".. MIME:\t\t%s\n"	, record->mime);
-	if (record->ssid)
-		NCL_CMD_PRINT(".. SSID:\t\t%s\n"	, record->ssid);
-	if (record->passphrase)
-		NCL_CMD_PRINT(".. PASSPHRASE:\t\t%s\n", record->passphrase);
-	if (record->encryption)
-		NCL_CMD_PRINT(".. Encryption:\t\t%s\n", record->encryption);
-	if (record->authentication)
-		NCL_CMD_PRINT(".. Authentication:\t\t%s\n",
-			      record->authentication);
+	neardal_g_variant_dump(neardal_record_to_g_variant(record));
 }
 
 /*****************************************************************************
