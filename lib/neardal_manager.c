@@ -295,18 +295,24 @@ static void neardal_mgr_prv_cb_adapter_removed(OrgNeardManager *proxy,
 static void neardal_mgr_adapters_parse(GVariant *v, char ***adps, gsize *nadps)
 {
 	char *s = NULL;
-	GVariantIter iter;
+	char *t = NULL;
+	GVariantIter iter, *iter2;
 
 	*adps = g_new0(char *, g_variant_n_children(v) + 1);
 	*nadps = 0;
 
 	g_variant_iter_init(&iter, v);
 
-	while (g_variant_iter_loop(&iter, "{o*}", &s, NULL)) {
-		if (g_str_has_prefix(s, "/org/neard/nfc")) {
-			NEARDAL_TRACEF("Found adapter: %s\n", s);
-			(*adps)[(*nadps)++] = s;
-			s = NULL;
+	while (g_variant_iter_loop(&iter, "{oa{sa{sv}}}", &s, &iter2, NULL)) {
+		while (g_variant_iter_loop(iter2, "{s*}", &t, NULL)) {
+			if(!strcmp(t, "org.neard.Adapter"))
+			{
+				NEARDAL_TRACEF("Found adapter: %s\n", s);
+				(*adps)[(*nadps)++] = s;
+				s = NULL;
+				g_free(t);
+				break;
+			}
 		}
 	}
 
