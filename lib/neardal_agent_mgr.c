@@ -144,12 +144,13 @@ static gboolean on_RequestOOB(neardalHandoverAgent	*handoverAgent
 	unsigned char  			*oobData	= NULL;
 	unsigned int			oobDataLen	= 0;
 	void				(*freeFunc)(void *) = NULL;
-	gchar	   			*blobKey;
+	const gchar* 		blobKeys[] = {"EIR", "nokia.com:bt", "WSC", NULL};
 	gchar	   			*blob		= NULL;
 	gsize	   			blobLen		= 0;
 	gconstpointer			value;
 	GVariant			*result;
 	errorCode_t			err;
+	guint 				counter;
 
 	(void) handoverAgent;       /* Avoid warning */
 	(void) invocation;      /* Avoid warning */
@@ -165,24 +166,9 @@ static gboolean on_RequestOOB(neardalHandoverAgent	*handoverAgent
 		if (agent_data->cb_oob_req_agent != NULL) {
 			GVariant	*tmpOut	 = NULL;
 
-			blobKey = "EIR";
-			tmpOut = g_variant_lookup_value(values, blobKey,
-							G_VARIANT_TYPE_ARRAY);
-			if (tmpOut != NULL) {
-				value = g_variant_get_data(tmpOut);
-				blobLen = g_variant_get_size(tmpOut);
-
-				if (blobLen > 0) {
-					blob = g_try_malloc0(blobLen);
-					if (blob != NULL)
-						memcpy(blob, value
-						      , blobLen);
-				}
-			} else  {
-				blobKey = "nokia.com:bt";
-				tmpOut = g_variant_lookup_value(values,
-								 blobKey,
-							G_VARIANT_TYPE_ARRAY);
+			for(counter = 0; blobKeys[counter] != NULL; counter++) {
+				tmpOut = g_variant_lookup_value(values, blobKeys[counter],
+								G_VARIANT_TYPE_ARRAY);
 				if (tmpOut != NULL) {
 					value = g_variant_get_data(tmpOut);
 					blobLen = g_variant_get_size(tmpOut);
@@ -191,10 +177,12 @@ static gboolean on_RequestOOB(neardalHandoverAgent	*handoverAgent
 						blob = g_try_malloc0(blobLen);
 						if (blob != NULL)
 							memcpy(blob, value
-							, blobLen);
+							      , blobLen);
 					}
+					break;
 				}
 			}
+
 			(agent_data->cb_oob_req_agent)(
 							(unsigned char *) blob
 						       , blobLen
@@ -202,14 +190,14 @@ static gboolean on_RequestOOB(neardalHandoverAgent	*handoverAgent
 						       , &oobDataLen
 						       , &freeFunc
 						, agent_data->user_data);
-			if (oobData != NULL) {
+			if ((oobData != NULL) && (blobKeys[counter] != NULL)) {
 				GVariantBuilder	*dictBuilder		= NULL;
 
  				dictBuilder = g_variant_builder_new(
 							G_VARIANT_TYPE_ARRAY);
 				err = neardal_tools_prv_add_dict_entry(
 								dictBuilder,
-						blobKey, oobData, oobDataLen
+								blobKeys[counter], oobData, oobDataLen
 					     				, -1);
 				result = g_variant_builder_end(dictBuilder);
 
@@ -247,9 +235,10 @@ static gboolean on_PushOOB(neardalHandoverAgent	*handoverAgent
 {
 	neardal_handover_agent_t	*agent_data	= user_data;
 	gconstpointer			value;
-	gchar	   			*blobKey;
+	const gchar* 		blobKeys[] = {"EIR", "nokia.com:bt", "WSC", NULL};
 	gchar	   			*blob		= NULL;
 	gsize	   			blobLen		= 0;
+	guint 				counter;
 
 	(void) handoverAgent;       /* Avoid warning */
 	(void) invocation;      /* Avoid warning */
@@ -264,24 +253,9 @@ static gboolean on_PushOOB(neardalHandoverAgent	*handoverAgent
 		if (agent_data->cb_oob_push_agent != NULL) {
 			GVariant	*tmpOut	 = NULL;
 
-			blobKey = "EIR";
-			tmpOut = g_variant_lookup_value(values, blobKey,
-							G_VARIANT_TYPE_ARRAY);
-			if (tmpOut != NULL) {
-				value = g_variant_get_data(tmpOut);
-				blobLen = g_variant_get_size(tmpOut);
-
-				if (blobLen > 0) {
-					blob = g_try_malloc0(blobLen);
-					if (blob != NULL)
-						memcpy(blob, value
-						      , blobLen);
-				}
-			} else  {
-				blobKey = "nokia.com:bt";
-				tmpOut = g_variant_lookup_value(values,
-								 blobKey,
-							G_VARIANT_TYPE_ARRAY);
+			for(counter = 0; blobKeys[counter] != NULL; counter++) {
+				tmpOut = g_variant_lookup_value(values, blobKeys[counter],
+								G_VARIANT_TYPE_ARRAY);
 				if (tmpOut != NULL) {
 					value = g_variant_get_data(tmpOut);
 					blobLen = g_variant_get_size(tmpOut);
@@ -290,14 +264,17 @@ static gboolean on_PushOOB(neardalHandoverAgent	*handoverAgent
 						blob = g_try_malloc0(blobLen);
 						if (blob != NULL)
 							memcpy(blob, value
-							, blobLen);
+							      , blobLen);
 					}
+					break;
 				}
 			}
  			(agent_data->cb_oob_push_agent)(
 							(unsigned char *) blob
 						       , blobLen
 						, agent_data->user_data);
+ 			if (invocation != NULL)
+ 				neardal_handover_agent_complete_push_oob(handoverAgent, invocation);
 		}
 	}
 
@@ -442,6 +419,7 @@ errorCode_t neardal_handoveragent_prv_manage(
 
                 memcpy(data, &agentData, sizeof(neardal_handover_agent_t));
                 data->objPath = g_strdup(agentData.objPath);
+                data->carrierType = g_strdup(agentData.carrierType);
 
                 NEARDAL_TRACEF("Create agent '%s'\n", data->objPath);
                 objSkel = neardal_object_skeleton_new (data->objPath);

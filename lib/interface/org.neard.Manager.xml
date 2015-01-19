@@ -11,9 +11,11 @@
 		</method>
 		<method name="RegisterHandoverAgent">
 			<arg name="path" type="o" direction="in"/>
+			<arg name="type" type="s" direction="in"/>
 		</method>
 		<method name="UnregisterHandoverAgent">
 			<arg name="path" type="o" direction="in"/>
+			<arg name="type" type="s" direction="in"/>
 		</method>
 		<method name="RegisterNDEFAgent">
 			<arg name="path" type="o" direction="in"/>
