@@ -34,10 +34,12 @@ int (*neardal_output_cb)(FILE *fp, const char *fmt, va_list ap) = vfprintf;
 
 void neardal_trace(const char *func, FILE *fp, char *fmt, ...)
 {
+int dummy;
+
 	va_list ap;
 	char *f = fmt;
 	if (func)
-		asprintf(&f, "%s(): %s", func, fmt);
+		dummy = asprintf(&f, "%s(): %s", func, fmt);
 	va_start(ap, fmt);
 	neardal_output_cb(fp, f, ap);
 	va_end(ap);

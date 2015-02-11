@@ -275,7 +275,9 @@ static void ncl_prv_parse_script_file(char *filename)
 
 static int ncl_trace(FILE *fp, const char *fmt, va_list ap)
 {
-	write(1, "\r           \r", 13);
+	int dummy;
+
+	dummy = write(1, "\r           \r", 13);
 	vfprintf(fp, fmt, ap);
 	rl_forced_update_display();
 	return 0;
