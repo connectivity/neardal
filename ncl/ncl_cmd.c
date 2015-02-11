@@ -1258,7 +1258,7 @@ exit:
  * ncl_cmd_(un)register_handover_agent : BEGIN
  * Handle a record macthing a registered tag type
  ****************************************************************************/
-void ncl_cmd_handover_req_agent_cb(unsigned char *blobEIR
+void ncl_cmd_handover_req_bluetooth_agent_cb(unsigned char *blobEIR
 				   , unsigned int blobSize
 				   , unsigned char ** oobData
 				   , unsigned int * oobDataSize
@@ -1285,7 +1285,7 @@ void ncl_cmd_handover_req_agent_cb(unsigned char *blobEIR
 	NCL_CMD_DUMP(*oobData, *oobDataSize);
 }
 
-void ncl_cmd_handover_push_agent_cb (unsigned char *blobEIR
+void ncl_cmd_handover_push_bluetooth_agent_cb (unsigned char *blobEIR
 				     , unsigned int blobSize
 				     , void *user_data)
 {
@@ -1295,6 +1295,46 @@ void ncl_cmd_handover_push_agent_cb (unsigned char *blobEIR
 
 	NCL_CMD_PRINTF("\n");
 }
+
+void ncl_cmd_handover_req_wifi_agent_cb(unsigned char *blobWSC
+				   , unsigned int blobSize
+				   , unsigned char ** oobData
+				   , unsigned int * oobDataSize
+				   , freeFunc *freeF
+				   , void *user_data)
+{
+	const unsigned char test_data[] = {0x10,0x4A,0x00,0x01,0x10,
+			 	 	 	0x10,0x45,0x00,0x08,
+			 	 	 	0x74,0x65,0x73,0x74,0x73,0x73,0x69,0x64,
+			 	 	 	0x10,0x27,0x00,0x06,
+			 	 	 	0x62,0x6C,0x61,0x62,0x6C,0x61};
+
+	(void) user_data;
+
+	NCL_CMD_PRINTF("Received blobWSC = \n");
+	NCL_CMD_DUMP(blobWSC, blobSize);
+
+	NCL_CMD_PRINTF("user_data= %s\n", (char *) user_data);
+
+	*oobData = g_try_malloc0(sizeof(test_data));
+	memcpy(*oobData , test_data, sizeof(test_data));
+	*oobDataSize = sizeof(test_data);
+	*freeF = g_free;
+	NCL_CMD_PRINTF("return oobData = \n");
+	NCL_CMD_DUMP(*oobData, *oobDataSize);
+}
+
+void ncl_cmd_handover_push_wifi_agent_cb (unsigned char *blobWSC
+				     , unsigned int blobSize
+				     , void *user_data)
+{
+	NCL_CMD_PRINTF("Received blobWSC = \n");
+	NCL_CMD_DUMP(blobWSC, blobSize);
+	(void) user_data;
+
+	NCL_CMD_PRINTF("\n");
+}
+
 
 void ncl_cmd_handover_release_agent_cb(void *user_data)
 {
@@ -1306,52 +1346,152 @@ void ncl_cmd_handover_release_agent_cb(void *user_data)
 static NCLError ncl_cmd_register_handover_agent(int argc, char *argv[])
 {
 	errorCode_t	ec		= NEARDAL_SUCCESS;
-	char		*test_user_data;
+	NCLError	nclErr;
+	static char		*carrier = NULL;
+	char		*test_user_data = NULL;
 
-	(void) argc;
-	(void) argv;
+	static GOptionEntry options[] = {
+		{ "carrier", 's', 0, G_OPTION_ARG_STRING , &carrier
+				, "carrier to register",
+				"'bluetooth, wifi'" },
+
+		{ NULL, 0, 0, 0, NULL, NULL, NULL} /* End of List */
+	};
+
+	if (argc > 1) {
+		/* Parse options */
+		carrier = NULL;
+		nclErr = ncl_cmd_prv_parseOptions(&argc, &argv, options);
+	} else
+		nclErr = NCLERR_PARSING_PARAMETERS;
+
+	if (nclErr != NCLERR_NOERROR)
+		goto exit;
 
 	/* Install Neardal Callback*/
 	if (sNclCmdCtx.cb_initialized == false)
 		ncl_cmd_install_callback();
 
-	test_user_data = g_strdup("test HANDOVER user data");
+	if (!strcmp(carrier, "bluetooth")) {
+		test_user_data = g_strdup("test HANDOVER user data");
 
-	ec = neardal_agent_set_handover_cb(ncl_cmd_handover_push_agent_cb
-					   , ncl_cmd_handover_req_agent_cb
-					   , ncl_cmd_handover_release_agent_cb
-					   , test_user_data);
+		ec = neardal_agent_set_handover_cb(
+							 carrier
+						   , ncl_cmd_handover_push_bluetooth_agent_cb
+						   , ncl_cmd_handover_req_bluetooth_agent_cb
+						   , ncl_cmd_handover_release_agent_cb
+						   , test_user_data);
+	} else if (!strcmp(carrier, "wifi")) {
+		test_user_data = g_strdup("test HANDOVER user data");
+
+		ec = neardal_agent_set_handover_cb(
+							 carrier
+						   , ncl_cmd_handover_push_wifi_agent_cb
+						   , ncl_cmd_handover_req_wifi_agent_cb
+						   , ncl_cmd_handover_release_agent_cb
+						   , test_user_data);
+	}
+	else
+		nclErr = NCLERR_PARSING_PARAMETERS;
+
 	if (ec != NEARDAL_SUCCESS) {
 		NCL_CMD_PRINTF("Set handover callback failed! error:%d='%s'.\n",
 			       ec, neardal_error_get_text(ec));
-		return NCLERR_LIB_ERROR;
+		nclErr = NCLERR_LIB_ERROR;
 	}
 	NCL_CMD_PRINT("\nExit with error code %d:%s\n", ec,
 		      neardal_error_get_text(ec));
 
-	return NCLERR_NOERROR;
+exit:
+	if (carrier != NULL)
+		g_free(carrier);
+
+	if (test_user_data != NULL)
+		g_free(test_user_data);
+
+	if (nclErr != NCLERR_NOERROR) {
+		NCL_CMD_PRINT("Sample (WiFi agent):");
+		NCL_CMD_PRINT("e.g. < %s --carrier wifi >\n"
+				 , argv[0]);
+	}
+
+	if (ec != NEARDAL_SUCCESS)
+		nclErr = NCLERR_LIB_ERROR;
+
+	return nclErr;
 }
 static NCLError ncl_cmd_unregister_handover_agent(int argc, char *argv[])
 {
 	errorCode_t	ec		= NEARDAL_SUCCESS;
+	NCLError	nclErr;
+	static char		*carrier = NULL;
+	char		*test_user_data = NULL;
 
-	(void) argc;
-	(void) argv;
+	static GOptionEntry options[] = {
+		{ "carrier", 's', 0, G_OPTION_ARG_STRING , &carrier
+				, "carrier to unregister",
+				"'bluetooth, wifi'" },
+
+		{ NULL, 0, 0, 0, NULL, NULL, NULL} /* End of List */
+	};
+
+	if (argc > 1) {
+		/* Parse options */
+		carrier = NULL;
+		nclErr = ncl_cmd_prv_parseOptions(&argc, &argv, options);
+	} else
+		nclErr = NCLERR_PARSING_PARAMETERS;
+
+	if (nclErr != NCLERR_NOERROR)
+		goto exit;
 
 	/* Install Neardal Callback*/
 	if (sNclCmdCtx.cb_initialized == false)
 		ncl_cmd_install_callback();
 
-	ec = neardal_agent_set_handover_cb(NULL, NULL, NULL, NULL);
+	if (!strcmp(carrier, "bluetooth")) {
+		ec = neardal_agent_set_handover_cb(
+							 carrier
+						   , NULL
+						   , NULL
+						   , NULL
+						   , NULL);
+	} else if (!strcmp(carrier, "wifi")) {
+		ec = neardal_agent_set_handover_cb(
+							 carrier
+						   , NULL
+						   , NULL
+						   , NULL
+						   , NULL);
+	}
+	else
+		nclErr = NCLERR_PARSING_PARAMETERS;
+
 	if (ec != NEARDAL_SUCCESS) {
 		NCL_CMD_PRINTF("Set handover callback failed! error:%d='%s'.\n",
 			       ec, neardal_error_get_text(ec));
-		return NCLERR_LIB_ERROR;
+		nclErr = NCLERR_LIB_ERROR;
 	}
 	NCL_CMD_PRINT("\nExit with error code %d:%s\n", ec,
 		      neardal_error_get_text(ec));
 
-	return NCLERR_NOERROR;
+exit:
+	if (carrier != NULL)
+		g_free(carrier);
+
+	if (test_user_data != NULL)
+		g_free(test_user_data);
+
+	if (nclErr != NCLERR_NOERROR) {
+		NCL_CMD_PRINT("Sample (WiFi agent):");
+		NCL_CMD_PRINT("e.g. < %s --carrier wifi >\n"
+				 , argv[0]);
+	}
+
+	if (ec != NEARDAL_SUCCESS)
+		nclErr = NCLERR_LIB_ERROR;
+
+	return nclErr;
 }
 /*****************************************************************************
  * ncl_cmd_(un)register_handover_agent : END

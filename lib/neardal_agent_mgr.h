@@ -54,6 +54,7 @@ typedef struct {
 
 typedef struct {
 	gchar			*objPath;		/* agent object path */
+	gchar			*carrierType;	/* carrier type: "wifi" or "bluetooth" */
 	gint			pid;			/* process pid */
 
 	oob_req_agent_cb	cb_oob_req_agent;	/* client callback to

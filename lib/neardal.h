@@ -591,18 +591,22 @@ errorCode_t neardal_agent_set_NDEF_cb(char *tagType
 
 
 /*! \fn errorCode_t neardal_agent_set_handover_cb(
- * 					  oob_push_agent_cb cb_oob_push_agent
+ * 					  const gchar* carrier
+ * 					, oob_push_agent_cb cb_oob_push_agent
  * 					, oob_req_agent_cb  cb_oob_req_agent
 					, void *user_data)
  * @brief register or unregister two callbacks to handle handover connection.
  * If one of this callback is null, the agent is unregistered.
+ * @param carrier carrier type ("bluetooth" and "wifi" are valid choices)
  * @param cb_oob_push_agent used to pass remote Out Of Band data
  * @param cb_oob_req_agent used to get Out Of Band data
  * @param cb_oob_release_agent used to cleanup agent user data
  * @param user_data Client user data
  * @return errorCode_t error code
  **/
-errorCode_t neardal_agent_set_handover_cb(oob_push_agent_cb cb_oob_push_agent
+errorCode_t neardal_agent_set_handover_cb(
+						const gchar* carrier
+					  , oob_push_agent_cb cb_oob_push_agent
 					  , oob_req_agent_cb  cb_oob_req_agent
 				, oob_agent_free_cb cb_oob_release_agent
 					  , void *user_data);

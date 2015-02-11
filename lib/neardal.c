@@ -1081,7 +1081,9 @@ exit:
  * used to pass remote Out Of Band data.
  * If one of this callback is null, the agent is unregistered
  ****************************************************************************/
-errorCode_t neardal_agent_set_handover_cb(oob_push_agent_cb cb_oob_push_agent
+errorCode_t neardal_agent_set_handover_cb(
+						const gchar* carrier
+					  , oob_push_agent_cb cb_oob_push_agent
 					  , oob_req_agent_cb  cb_oob_req_agent
 				, oob_agent_free_cb cb_oob_release_agent
 					  , void *user_data)
@@ -1101,6 +1103,7 @@ errorCode_t neardal_agent_set_handover_cb(oob_push_agent_cb cb_oob_push_agent
 	agent.objPath			= g_strdup_printf("%s/handover/%d"
 							 , AGENT_PREFIX
 							 , agent.pid);
+	agent.carrierType	= g_strdup(carrier);
 	if (agent.objPath == NULL)
 		goto exit;
 
@@ -1109,17 +1112,20 @@ errorCode_t neardal_agent_set_handover_cb(oob_push_agent_cb cb_oob_push_agent
 		goto exit;
 
 	if (cb_oob_push_agent != NULL && cb_oob_req_agent != NULL)
-		/* RegisterNDEFAgent */
+		/* RegisterHandoverAgent */
 		org_neard_manager_call_register_handover_agent_sync(
 							       neardalMgr.proxy,
 							       agent.objPath,
+							       agent.carrierType,
 							       NULL,
 							   &neardalMgr.gerror);
 	else
-		/* UnregisterNDEFAgent */
+		/* UnregisterHandoverAgent */
 		org_neard_manager_call_unregister_handover_agent_sync(
 							neardalMgr.proxy,
-							agent.objPath, NULL,
+							agent.objPath,
+							agent.carrierType,
+							NULL,
 							 &neardalMgr.gerror);
 
 
