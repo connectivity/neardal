@@ -6,7 +6,7 @@ pkgconfig_DATA = neardal.pc
 confdir = $(sysconfdir)/dbus-1/system.d/
 conf_DATA = org.neardal.conf
 
-SUBDIRS = lib ncl
+SUBDIRS = lib ncl demo
 
 if HAVE_DOXYGEN
 .PHONY: doc clean-doc

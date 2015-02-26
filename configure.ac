@@ -77,5 +77,5 @@ AC_PATH_TOOL([DOXYGEN], [doxygen])
 AM_CONDITIONAL([HAVE_DOXYGEN], [test ! -z "$DOXYGEN"])
 AM_COND_IF([HAVE_DOXYGEN], [AC_CONFIG_FILES([doxygen.cfg])])
 
-AC_CONFIG_FILES([Makefile lib/Makefile ncl/Makefile neardal.pc])
+AC_CONFIG_FILES([Makefile lib/Makefile ncl/Makefile demo/Makefile neardal.pc])
 AC_OUTPUT
