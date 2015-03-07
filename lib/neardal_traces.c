@@ -18,8 +18,11 @@
  *
  */
 
+#define _GNU_SOURCE
+
 #include <stdio.h>
 #include <stdarg.h>
+#include <stdlib.h>
 #include <string.h>
 #include <glib.h>
 
@@ -27,31 +30,21 @@
 
 #define NB_COLUMN		16
 
-/*
- * neardal_trace
- *
- * trace function.
- *
- */
+int (*neardal_output_cb)(FILE *fp, const char *fmt, va_list ap) = vfprintf;
 
-
-void neardal_trace(const char *func, FILE *stream, char *format, ...)
+void neardal_trace(const char *func, FILE *fp, char *fmt, ...)
 {
+int dummy;
+
 	va_list ap;
-	gchar	*bufTrace;
-
-	va_start(ap, format);
-
-	bufTrace = g_strdup_vprintf(format, ap);
-	if (bufTrace != NULL) {
-		if (func)
-			fprintf(stream, "%s() : %s", func, bufTrace);
-		else
-			fprintf(stream, "%s", bufTrace);
-		fflush(stream);
-	}
+	char *f = fmt;
+	if (func)
+		dummy = asprintf(&f, "%s(): %s", func, fmt);
+	va_start(ap, fmt);
+	neardal_output_cb(fp, f, ap);
 	va_end(ap);
-	g_free(bufTrace);
+	if (f != fmt)
+		free(f);
 }
 
 static void neardal_prv_dump_data_as_binary_format(char *bufToReadP,

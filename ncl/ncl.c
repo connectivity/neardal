@@ -273,6 +273,16 @@ static void ncl_prv_parse_script_file(char *filename)
 	fclose(file);
 }
 
+static int ncl_trace(FILE *fp, const char *fmt, va_list ap)
+{
+	int dummy;
+
+	dummy = write(1, "\r           \r", 13);
+	vfprintf(fp, fmt, ap);
+	rl_forced_update_display();
+	return 0;
+}
+
 int main(int argc, char *argv[])
 {
 	NCLError err;
@@ -290,6 +300,9 @@ int main(int argc, char *argv[])
 		  "Keep running after command/script execution" },
 		{ NULL }
 	};
+
+	neardal_output_cb = ncl_trace;
+	rl_callback_handler_install(NCL_PROMPT, ncl_parse_line);
 
 	NCL_CMD_PRINT("Compiled at %s : %s\n\n", __DATE__, __TIME__);
 
@@ -330,8 +343,6 @@ int main(int argc, char *argv[])
 
 		if (show_help)
 			ncl_exec(LISTCMD_NAME);
-
-		rl_callback_handler_install(NCL_PROMPT, ncl_parse_line);
 
 		g_main_loop_run(gNclCtx.main_loop);
 	}

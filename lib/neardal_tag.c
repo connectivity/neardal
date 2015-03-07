@@ -279,12 +279,7 @@ void neardal_tag_prv_remove(TagProp *tagProp)
 	NEARDAL_ASSERT(tagProp != NULL);
 
 	NEARDAL_TRACEF("Removing tag:%s\n", tagProp->name);
-	/* Remove all tags */
-	while (g_list_length(tagProp->rcdList)) {
-		node = g_list_first(tagProp->rcdList);
-		rcdProp = (RcdProp *) node->data;
-		neardal_rcd_remove(rcdProp);
-	}
+
 	adpProp = tagProp->parent;
 	adpProp->tagList = g_list_remove(adpProp->tagList,
 					 (gconstpointer) tagProp);

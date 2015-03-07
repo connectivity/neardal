@@ -98,8 +98,9 @@ void neardal_record_add(GVariant *record)
 
 	neardal_g_variant_dump(record);
 
-	neardalMgr.cb.rcd_found(neardal_g_variant_get(record, "Name", "&s"),
-				neardalMgr.cb.rcd_found_ud);
+	if (neardalMgr.cb.rcd_found != NULL)
+		neardalMgr.cb.rcd_found(neardal_g_variant_get(record, "Name", "&s"),
+					neardalMgr.cb.rcd_found_ud);
 }
 
 void neardal_record_remove(GVariant *record)
@@ -107,15 +108,4 @@ void neardal_record_remove(GVariant *record)
 	NEARDAL_TRACEIN();
 
 	neardal_g_variant_dump(record);
-}
-
-errorCode_t neardal_rcd_add(char *rcdName, void *parent)
-{
-	BUG();
-	return NEARDAL_SUCCESS;
-}
-
-void neardal_rcd_remove(RcdProp *rcd)
-{
-	BUG();
 }
