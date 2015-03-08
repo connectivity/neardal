@@ -39,6 +39,20 @@ static void cb_adapter_prop_changed(char *adpName, char *propName,
 	printf("\n");
 }
 
+/*****************************************************************************
+ * Get readable string of bytes
+ ****************************************************************************/
+static gchar* bytes_to_str(GBytes* bytes)
+{
+	gchar* str = g_malloc0( 2*g_bytes_get_size(bytes) + 1 );
+	const guint8* data = g_bytes_get_data(bytes, NULL);
+	for(int i = 0 ; i < g_bytes_get_size(bytes); i++)
+	{
+		sprintf(&str[2*i], "%02X", data[i]);
+	}
+	return str;
+}
+
 static void dump_tag(neardal_tag *tag)
 {
 	char **records;
@@ -76,6 +90,48 @@ static void dump_tag(neardal_tag *tag)
 	}
 	printf("\n");
 	printf("---- ReadOnly:\t\t%s\n", tag->readOnly ? "TRUE" : "FALSE");
+	if(tag->iso14443aAtqa != NULL)
+	{
+		gchar *str = bytes_to_str(tag->iso14443aAtqa);
+		printf("---- ISO14443A ATQA:\t\t'%s'\n", str);
+		g_free(str);
+	}
+	if(tag->iso14443aSak != NULL)
+	{
+		gchar *str = bytes_to_str(tag->iso14443aSak);
+		printf("---- ISO14443A SAK:\t\t'%s'\n", str);
+		g_free(str);
+	}
+	if(tag->iso14443aUid != NULL)
+	{
+		gchar *str = bytes_to_str(tag->iso14443aUid);
+		printf("---- ISO14443A UID:\t\t'%s'\n", str);
+		g_free(str);
+	}
+	if(tag->felicaManufacturer != NULL)
+	{
+		gchar *str = bytes_to_str(tag->felicaManufacturer);
+		printf("---- Felica Manufacturer:\t\t'%s'\n", str);
+		g_free(str);
+	}
+	if(tag->felicaCid != NULL)
+	{
+		gchar *str = bytes_to_str(tag->felicaCid);
+		printf("---- Felica CID:\t\t'%s'\n", str);
+		g_free(str);
+	}
+	if(tag->felicaIc != NULL)
+	{
+		gchar *str = bytes_to_str(tag->felicaIc);
+		printf("---- Felica IC Code:\t\t'%s'\n", str);
+		g_free(str);
+	}
+	if(tag->felicaMaxRespTimes != NULL)
+	{
+		gchar *str = bytes_to_str(tag->felicaMaxRespTimes);
+		printf("---- Felica Maximum Response times:\t\t'%s'\n", str);
+		g_free(str);
+	}
 }
 
 static void dump_record(neardal_record *record)

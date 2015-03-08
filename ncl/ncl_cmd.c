@@ -49,6 +49,20 @@ NCLError ncl_cmd_list(int argc, char *argv[]);
 
 /* Local Utilities functions */
 /*****************************************************************************
+ * Get readable string of bytes
+ ****************************************************************************/
+static gchar* ncl_cmd_prv_bytes_to_str(GBytes* bytes)
+{
+	gchar* str = g_malloc0( 2*g_bytes_get_size(bytes) + 1 );
+	const guint8* data = g_bytes_get_data(bytes, NULL);
+	for(int i = 0 ; i < g_bytes_get_size(bytes); i++)
+	{
+		sprintf(&str[2*i], "%02X", data[i]);
+	}
+	return str;
+}
+
+/*****************************************************************************
  * Tool function : help command to dump parameters command
  ****************************************************************************/
 static void ncl_cmd_prv_dumpOptions(GOptionEntry *options)
@@ -212,6 +226,49 @@ static void ncl_cmd_prv_dump_tag(neardal_tag *tag)
 	NCL_CMD_PRINT("\n");
 	NCL_CMD_PRINT(".. ReadOnly:\t\t%s\n"	,
 		      tag->readOnly ? "TRUE" : "FALSE");
+
+	if(tag->iso14443aAtqa != NULL)
+	{
+		gchar *str = ncl_cmd_prv_bytes_to_str(tag->iso14443aAtqa);
+		NCL_CMD_PRINT(".. ISO14443A ATQA:\t\t'%s'\n", str);
+		g_free(str);
+	}
+	if(tag->iso14443aSak != NULL)
+	{
+		gchar *str = ncl_cmd_prv_bytes_to_str(tag->iso14443aSak);
+		NCL_CMD_PRINT(".. ISO14443A SAK:\t\t'%s'\n", str);
+		g_free(str);
+	}
+	if(tag->iso14443aUid != NULL)
+	{
+		gchar *str = ncl_cmd_prv_bytes_to_str(tag->iso14443aUid);
+		NCL_CMD_PRINT(".. ISO14443A UID:\t\t'%s'\n", str);
+		g_free(str);
+	}
+	if(tag->felicaManufacturer != NULL)
+	{
+		gchar *str = ncl_cmd_prv_bytes_to_str(tag->felicaManufacturer);
+		NCL_CMD_PRINT(".. Felica Manufacturer:\t\t'%s'\n", str);
+		g_free(str);
+	}
+	if(tag->felicaCid != NULL)
+	{
+		gchar *str = ncl_cmd_prv_bytes_to_str(tag->felicaCid);
+		NCL_CMD_PRINT(".. Felica CID:\t\t'%s'\n", str);
+		g_free(str);
+	}
+	if(tag->felicaIc != NULL)
+	{
+		gchar *str = ncl_cmd_prv_bytes_to_str(tag->felicaIc);
+		NCL_CMD_PRINT(".. Felica IC Code:\t\t'%s'\n", str);
+		g_free(str);
+	}
+	if(tag->felicaMaxRespTimes != NULL)
+	{
+		gchar *str = ncl_cmd_prv_bytes_to_str(tag->felicaMaxRespTimes);
+		NCL_CMD_PRINT(".. Felica Maximum Response times:\t\t'%s'\n", str);
+		g_free(str);
+	}
 }
 
 /*****************************************************************************
