@@ -18,11 +18,33 @@ typedef enum
 	keystroke
 } loop_state_t;
 
+static GMainLoop *main_loop;
 static pthread_t tid;
 static loop_state_t main_loop_state = wait;
+static int g_argc;
+static char **g_argv;
 static char TagName[30];
 static char DevName[30];
 static char AdpName[30];
+static neardal_record	rcd;
+static int smartPoster;
+static GOptionEntry options[] = {
+	{ "act", 'c', 0, G_OPTION_ARG_STRING, &rcd.action, "Action", "save"},
+	{ "encoding", 'e', 0, G_OPTION_ARG_STRING, &rcd.encoding, "Encoding", "UTF-8"},
+	{ "lang", 'l', 0, G_OPTION_ARG_STRING	, &rcd.language, "Language", "en"},
+	{ "mime", 'm', 0, G_OPTION_ARG_STRING	, &rcd.mime, "Mime-type", "audio/mp3"},
+	{ "rep"	, 'r', 0, G_OPTION_ARG_STRING , &rcd.representation, "Representation", "sample text" },
+	{ "smt"	, 's', 0, G_OPTION_ARG_INT , &smartPoster, "SmartPoster", "0 or <>0"},
+	{ "type", 't', 0, G_OPTION_ARG_STRING, &rcd.type, "Record type (Text, URI...", "Text" },
+	{ "uri", 'u', 0, G_OPTION_ARG_STRING, &rcd.uri , "URI", "http://www.nxp.com"},
+	{ "carrier", 'k', 0, G_OPTION_ARG_STRING, &rcd.carrier, "Carrier", "bluetooth"},
+	{ "ssid", 'd', 0, G_OPTION_ARG_STRING, &rcd.ssid, "SSID", "ssid"},
+	{ "passphrase", 'p', 0, G_OPTION_ARG_STRING, &rcd.passphrase, "Passphrase", "psk"},
+	{ "encryption", 'y', 0, G_OPTION_ARG_STRING , &rcd.encryption, "List separated by ','", "NONE,WEP,TKIP,AES"},
+	{ "authentication", 'z', 0, G_OPTION_ARG_STRING	, &rcd.authentication, "List separated by ','",
+		"OPEN,WPA-Personal,Shared,WPA-Enterprise," "WPA2-Enterprise,WPA2-Personal"},
+	{ NULL, 0, 0, 0, NULL, NULL, NULL} /* End of List */
+};
 
 #define NB_COLUMN		16
 
@@ -180,8 +202,9 @@ void cb_tag_found (const char *tagName, void *user_data)
 	}
 	else
 	{
-		printf("Unable to read tag properties (error:%d='%s'). exit...\n", ec, neardal_error_get_text(ec));
+		printf("Unable to read tag properties. (error:%d)\n", ec);
 	}
+
 	main_loop_state = tag_found;
 }
 
@@ -241,7 +264,7 @@ void cb_dev_found (const char *devName, void *user_data)
 	} 
 	else
 	{
-		printf("Unable to read device properties (error:%d='%s'). exit...\n", ec, neardal_error_get_text(ec));
+		printf("Unable to read device properties (error:%d)\n", ec);
 	}
 	main_loop_state = device_found;
 }
@@ -252,11 +275,7 @@ static void cb_dev_lost(const char *devName, void *user_data)
 	main_loop_state = device_lost;
 }
 
-static void cb_ndef_agent (unsigned char **rcdArray, 
-		 	   unsigned int rcdLen,
-			   unsigned char *ndefArray,
-			   unsigned int ndefLen,
-			   void *user_data)
+static void cb_ndef_agent (unsigned char **rcdArray, unsigned int rcdLen,unsigned char *ndefArray, unsigned int ndefLen,void *user_data)
 {
 	printf("\n%d bytes of NDEF raw data Received :\n", ndefLen);
 	trace_dump_mem(ndefArray, ndefLen);
@@ -274,6 +293,79 @@ static gboolean wait_lost (gpointer data)
 	return TRUE;
 }
 
+static gboolean wait_found(gpointer data)
+{
+	if ((main_loop_state == tag_found) || (main_loop_state == device_found) || (main_loop_state == keystroke))
+	{
+		g_main_loop_quit( (GMainLoop*)data );
+		return FALSE;
+	}
+
+	return TRUE;
+}
+
+static void help(void)
+{
+	printf("OPTIONS: \n");
+	printf("\tpoll\tPolling mode \t e.g. <demo poll >\n");
+	printf("\twrite\tWrite tag \t e.g. <demo write -t Text -l en -e UTF-8 -r \"Test\">\n");
+	printf("\tpush\tPush to device \t e.g. <demo push -t URI -u http://www.nxp.com>\n");
+	printf("\n");
+}
+
+static errorCode_t cmd_prv_parseOptions(int *argc, char **argv[], GOptionEntry *options)
+{
+	GOptionContext	*context;
+	GError		*error		= NULL;
+	errorCode_t	ec		= NEARDAL_SUCCESS;
+
+	context = g_option_context_new(NULL);
+
+	g_option_context_add_main_entries(context, options, NULL);
+
+	if (!g_option_context_parse(context, argc, argv, &error))
+	{
+		if(error != NULL)
+		{
+			printf("%s\n", error->message);
+			g_error_free(error);
+		}
+		else
+		{
+			ec = NEARDAL_ERROR_INVALID_PARAMETER;
+		}
+	}
+
+	g_option_context_free(context);
+	return ec;
+}
+
+static void free_record(neardal_record record)
+{
+	if (record.action != NULL) g_free((gchar *) record.action);
+	if (record.encoding != NULL) g_free((gchar *) record.encoding);
+	if (record.language != NULL) g_free((gchar *) record.language);
+	if (record.mime != NULL) g_free((gchar *) record.mime);
+	if (record.representation != NULL) g_free((gchar *) record.representation);
+	if (record.type != NULL) g_free((gchar *) record.type);
+	if (record.uri != NULL) g_free((gchar *) record.uri);
+	if (record.ssid != NULL) g_free((gchar *) record.ssid);
+	if (record.passphrase != NULL) g_free((gchar *) record.passphrase);
+	if (record.authentication != NULL) g_free((gchar *) record.authentication);
+	if (record.encryption != NULL) g_free((gchar *) record.encryption);
+}
+
+static errorCode_t create_loop (GMainLoop **loop)
+{
+	*loop = g_main_loop_new(NULL, FALSE);
+	if (loop == NULL)
+	{
+		printf("Error creating context\n");
+		return NEARDAL_ERROR_NO_MEMORY;
+	}
+	return NEARDAL_SUCCESS;
+}
+
 static errorCode_t start_discovery (int mode)
 {
 	errorCode_t	ec;
@@ -284,8 +376,18 @@ static errorCode_t start_discovery (int mode)
 	}
 	else if (ec != NEARDAL_SUCCESS)
 	{
-		printf("---- Error starting discovery loop (error:%d='%s'). exit...", ec, neardal_error_get_text(ec));
+		printf("---- Error starting discovery loop %d\n", ec);
 		return ec;
+	}
+	return NEARDAL_SUCCESS;
+}
+
+static errorCode_t start_thread (void *routine)
+{
+	if (0 != pthread_create(&tid, NULL, routine, NULL))
+	{
+ 		printf("can't create thread\n");
+		return NEARDAL_ERROR_NO_MEMORY;	
 	}
 	return NEARDAL_SUCCESS;
 }
@@ -343,53 +445,23 @@ static int power_adapter(void)
 	return 0;
 }
 
-int main(int argc, char *argv[])
+static void cmd_poll(void)
 {
-	errorCode_t	ec;
-	static GMainLoop *main_loop;
-
 	printf("#####################################\n");
 	printf("##     NFC demo through Neardal    ##\n");
-	printf("#####################################\n\n");
+	printf("#####################################\n");
 
-	if (power_adapter() != 0) return 1;
-
-	/* Register callbacks */
-	neardal_set_cb_tag_found(cb_tag_found, NULL);
-	neardal_set_cb_tag_lost(cb_tag_lost, NULL);
-	neardal_set_cb_dev_found(cb_dev_found, NULL);
-	neardal_set_cb_dev_lost(cb_dev_lost, NULL);
-	neardal_agent_set_NDEF_cb("urn:nfc:wkt:U", cb_ndef_agent, NULL, NULL);
-	neardal_set_cb_record_found(cb_record_found, NULL);
-
-	main_loop = g_main_loop_new(NULL, FALSE);
-	if (main_loop == NULL)
-	{
-		printf("Error creating context\n");
-		return 1;
-	}
+	if (create_loop(&main_loop) != NEARDAL_SUCCESS) return;
 
 	do
 	{
 		main_loop_state = wait;
 
 		/* Start discovery Loop */
-		ec = neardal_start_poll_loop(AdpName, NEARD_ADP_MODE_DUAL);
-		if (ec == NEARDAL_ERROR_POLLING_ALREADY_ACTIVE)
-		{
-		}
-		else if (ec != NEARDAL_SUCCESS)
-		{
-			printf("---- Error starting discovery loop (error:%d='%s'). exit...\n", ec, neardal_error_get_text(ec));
-			return 1;
-		}
-
+		if (start_discovery(NEARD_ADP_MODE_DUAL) != NEARDAL_SUCCESS) return;	
+		
 		/* Start a thread to get keystroke */
-		if (0 != pthread_create(&tid, NULL, &wait_for_keystroke, NULL))
-		{
-	 		printf("can't create thread\n");
-			return 1;	
-		}
+		if (start_thread(&wait_for_keystroke) != NEARDAL_SUCCESS) return;
 
 		printf("---- Waiting for a Tag/Device");
 
@@ -403,7 +475,236 @@ int main(int argc, char *argv[])
 	g_main_loop_unref(main_loop);
 
 	printf("Leaving ...\n");
+}
+
+static void cmd_write(int argc, char *argv[])
+{
+	errorCode_t ec = NEARDAL_SUCCESS;
+
+	memset(&rcd, 0, sizeof(neardal_record));
+
+	if (argc > 2) {
+		/* Parse options */
+		ec = cmd_prv_parseOptions(&argc, &argv, options);
+	} else
+		ec = NEARDAL_ERROR_INVALID_PARAMETER;
+
+	if (ec != NEARDAL_SUCCESS)
+	{
+		printf("\nexample of use: demo write -t Text -l en -e UTF-8 -r \"Test\"");
+		printf("\n<demo write -h> for more help\n");
+	}
+	else
+	{
+		if (create_loop(&main_loop) != NEARDAL_SUCCESS) return;
+
+		/* Start a thread to get keystroke */
+		if (start_thread(&wait_for_keystroke) != NEARDAL_SUCCESS) return;
+
+		while (1)
+		{
+			/* Start discovery Loop */
+			if (start_discovery(NEARD_ADP_MODE_INITIATOR) != NEARDAL_SUCCESS) return;	
+
+			printf("---- Waiting for a Tag to write");
+
+			/* Wait for tag/device found or for keystroke */
+			main_loop_state = wait;
+			g_timeout_add (100, wait_found, main_loop);
+			g_main_loop_run(main_loop);
+
+			if (main_loop_state == tag_found)
+			{
+				/* Tag found, write data */
+				rcd.name=TagName;
+				if (neardal_tag_write(&rcd) != NEARDAL_SUCCESS)
+					printf("\t---- Failed to write !!!\n");
+				else
+					printf("\t---- Write sucessful !\n");
+				break;
+			}		
+			else if (main_loop_state == device_found)
+			{
+				/* Device found, wait for Device lost before restarting */
+				g_timeout_add (100 , wait_lost , main_loop);
+				g_main_loop_run(main_loop);
+
+				if (main_loop_state == keystroke) 
+				{
+					printf("Leaving ...\n");
+					break;
+				}				
+			}
+			else
+			{
+				/* Stop Discovery Loop*/
+				neardal_stop_poll(AdpName);
+				printf("Leaving ...\n");
+				break;
+			}
+		}
+
+		g_main_loop_unref(main_loop);
+	}
+
+	free_record(rcd);
+}
+
+static void cmd_push(int argc, char *argv[])
+{
+	errorCode_t		ec = NEARDAL_SUCCESS;
+
+	memset(&rcd, 0, sizeof(neardal_record));
+
+	if (argc > 2) {
+		/* Parse options */
+		ec = cmd_prv_parseOptions(&argc, &argv, options);
+	} else
+		ec = NEARDAL_ERROR_INVALID_PARAMETER;
+
+	if (ec != NEARDAL_SUCCESS)
+	{
+		printf("\nexample of use: demo push -t URI -u http://www.nxp.com");
+		printf("\n<demo push -h> for more help\n");
+	}
+	else
+	{
+		if (create_loop(&main_loop) != NEARDAL_SUCCESS) return;
+
+		main_loop_state = wait;
+
+		/* Start discovery Loop */
+		if (start_discovery(NEARD_ADP_MODE_DUAL) != NEARDAL_SUCCESS) return;	
+
+		/* Start a thread to get keystroke */
+		if (start_thread(&wait_for_keystroke) != NEARDAL_SUCCESS) return;
+
+		while (1)
+		{
+			/* Start discovery Loop */
+			if (start_discovery(NEARD_ADP_MODE_DUAL) != NEARDAL_SUCCESS) return;	
+
+			printf("---- Waiting for a Device to push");
+
+			/* Wait for tag/device found or for keystroke */
+			main_loop_state = wait;
+			g_timeout_add (100, wait_found, main_loop);
+			g_main_loop_run(main_loop);
+
+			if (main_loop_state == device_found)
+			{
+				/* Device found, push data */
+				rcd.name=DevName;
+				if (neardal_dev_push(&rcd) != NEARDAL_SUCCESS)
+					printf("\t---- Failed to push !!!\n");
+				else
+					printf("\t---- Push sucessful !\n");
+				break;
+			}		
+			else if (main_loop_state == tag_found)
+			{
+				/* Tag found, wait for tag lost before restarting */
+				g_timeout_add (100 , wait_lost , main_loop);
+				g_main_loop_run(main_loop);
+
+				if (main_loop_state == keystroke) 
+				{
+					printf("Leaving ...\n");
+					break;
+				}				
+			}
+			else
+			{
+				/* Stop Discovery Loop*/
+				neardal_stop_poll(AdpName);
+				printf("Leaving ...\n");
+				break;
+			}
+		}
+
+		g_main_loop_unref(main_loop);
+	}
+
+	free_record(rcd);
+}
+
+int main(int argc, char *argv[])
+{
+	errorCode_t	ec;
+	char		**adpArray = NULL;
+	int		adpLen;
+	neardal_adapter	*adapter;
+	static int	power = 1;
+
+	g_argc=argc;
+	g_argv=argv;
+
+	printf("\n");
+
+	/* Look for available adapter */
+	ec = neardal_get_adapters(&adpArray, &adpLen);
+	if (ec == NEARDAL_SUCCESS)
+	{
+		memcpy(AdpName, adpArray[0], sizeof(AdpName));
+		neardal_free_array(&adpArray);
+	} else
+	{
+		printf("---- No adapter found\n");
+		return 1;
+	}
+
+	/* Power on first adapter found */
+	ec = neardal_get_adapter_properties(AdpName,&adapter);	
+	if (ec == NEARDAL_SUCCESS)
+	{
+		power=adapter->powered;
+		neardal_free_adapter(adapter);			
+		if (!power)
+		{
+			power = 1;
+			ec = neardal_set_adapter_property(AdpName, NEARD_ADP_PROP_POWERED, GINT_TO_POINTER(power));
+			if (ec != NEARDAL_SUCCESS) {
+				printf("---- Error setting adapter properties\n");
+				return 1;
+			}
+		}
+	} else
+	{
+		printf("---- Error getting adapter properties\n");
+		return 1;
+	}
+
+	/* Register callbacks */
+	neardal_set_cb_tag_found(cb_tag_found, NULL);
+	neardal_set_cb_tag_lost(cb_tag_lost, NULL);
+	neardal_set_cb_dev_found(cb_dev_found, NULL);
+	neardal_set_cb_dev_lost(cb_dev_lost, NULL);
+
+	if (argc<2)
+	{
+		printf("Missing argument\n");
+		help();
+	}
+	else if (strcmp(argv[1],"poll") == 0)
+	{
+		neardal_agent_set_NDEF_cb("urn:nfc:wkt:U", cb_ndef_agent, NULL, NULL);
+		neardal_set_cb_record_found(cb_record_found, NULL);
+		cmd_poll();
+	}
+	else if(strcmp(argv[1],"write") == 0)
+	{
+		cmd_write(g_argc,g_argv);
+	}
+	else if(strcmp(argv[1],"push") == 0)
+	{
+		cmd_push(g_argc,g_argv);
+	}
+	else
+	{
+		help();
+	}
 	
+	printf("\n");
 	return 0;
 }
 
