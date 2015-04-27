@@ -5,4 +5,4 @@ noinst_PROGRAMS=demo
 demo_SOURCES = \
 	$(srcdir)/demo.c
 
-demo_LDADD = @gio_LIBS@ -L$(top_builddir)/lib -lneardal
+demo_LDADD = @gio_LIBS@ -L$(top_builddir)/lib -lneardal -lpthread
