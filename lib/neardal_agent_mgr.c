@@ -338,7 +338,7 @@ on_name_lost(GDBusConnection *connection
 	(void) name;		/* avoid warning */
 	(void) user_data;	/* avoid warning */
 	NEARDAL_TRACEIN();
-	NEARDAL_TRACE_LOG(":%s\n", name);
+	//NEARDAL_TRACE_LOG(":%s\n", name);
 }
 
 /*****************************************************************************
