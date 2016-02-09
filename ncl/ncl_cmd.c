@@ -299,7 +299,34 @@ static void ncl_cmd_prv_dump_dev(neardal_dev *dev)
 
 static void ncl_cmd_prv_dump_record(neardal_record *record)
 {
-	neardal_g_variant_dump(neardal_record_to_g_variant(record));
+	printf(" ---- Action         :%s\n"
+		, record->action);
+	printf(" ---- Carrier        :%s\n"
+		, record->carrier);
+	printf(" ---- Encoding       :%s\n"
+		, record->encoding);
+	printf(" ---- Language       :%s\n"
+		, record->language);
+	printf(" ---- MIME           :%s\n"
+		, record->mime);
+	printf(" ---- Name           :%s\n"
+		, record->name);
+	printf(" ---- Representation :%s\n"
+		, record->representation);
+	printf(" ---- Size           :%u\n"
+		, record->uriObjSize);
+	printf(" ---- Type           :%s\n"
+		, record->type);
+	printf(" ---- SSID           :%s\n"
+		, record->ssid);
+	printf(" ---- Passphrase     :%s\n"
+		, record->passphrase);
+	printf(" ---- Authentication :%s\n"
+		, record->authentication);
+	printf(" ---- Encryption     :%s\n"
+		, record->encryption);
+	printf(" ---- URI            :%s\n"
+		, record->uri);
 }
 
 /*****************************************************************************
