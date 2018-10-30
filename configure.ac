@@ -68,16 +68,10 @@ PKG_CHECK_MODULES(gio, gio-unix-2.0 >= 2.30,
 	AC_SUBST([gio_LIBS]),
 	AC_MSG_ERROR(gio-unix-2.0 >= 2.30 is required))
 
-PKG_CHECK_MODULES(libedit, libedit,
-	[CPPFLAGS="-DHAVE_LIBEDIT $libedit_CFLAGS $CPPFLAGS"
-	 LIBS="$libedit_LIBS $LIBS"],
-	[PKG_CHECK_MODULES(readline, readline,
-		[CPPFLAGS="$readline_CFLAGS $CPPFLAGS"
-		 LIBS="$readline_LIBS $LIBS"],
-		AC_SEARCH_LIBS([rl_initialize], [edit readline],
-			[AS_IF([echo $LIBS | grep -q "-ledit"],
-				[CPPFLAGS="-DHAVE_LIBEDIT $CPPFLAGS"])],
-			[AC_MSG_ERROR(editline or readline is required)]))])
+PKG_CHECK_MODULES([rl], [libedit],
+	[CPPFLAGS="-DHAVE_LIBEDIT $CPPFLAGS"],
+	[PKG_CHECK_MODULES([rl], [readline])]
+)
 
 AC_PATH_TOOL([DOXYGEN], [doxygen])
 AM_CONDITIONAL([HAVE_DOXYGEN], [test ! -z "$DOXYGEN"])
