@@ -32,9 +32,12 @@
 void neardal_g_strfreev(void **array, void *end)
 {
 	void **p = array;
-	for (; (void *) p < end; p++)
+	for (; (void *) p < end; p++) {
 		g_free(*p);
+		*p = NULL;
+	}
 	g_free(array);
+	array = NULL;
 }
 
 void neardal_g_variant_add_parsed(GVariant **v, const char *format, ...)

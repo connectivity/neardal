@@ -31,7 +31,6 @@ void neardal_record_free(neardal_record *r)
 {
 	g_return_if_fail(r);
 	neardal_g_strfreev((void **) r, &r->uriObjSize);
-	memset(r, 0, sizeof(*r));
 }
 
 void neardal_free_record(neardal_record *record) \
