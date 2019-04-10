@@ -104,6 +104,43 @@ static errorCode_t neardal_tag_prv_read_properties(TagProp *tagProp)
 	if (tmpOut != NULL)
 		tagProp->readOnly = g_variant_get_boolean(tmpOut);
 
+	/* ISO14443A-specific fields (optional) */
+	tmpOut = g_variant_lookup_value(tmp, "Iso14443aAtqa",
+			G_VARIANT_TYPE_BYTESTRING);
+	if ( (tmpOut != NULL) && (g_variant_n_children(tmpOut) > 0) )
+		tagProp->iso14443aAtqa = g_variant_get_data_as_bytes(tmpOut);
+
+	tmpOut = g_variant_lookup_value(tmp, "Iso14443aSak",
+			G_VARIANT_TYPE_BYTESTRING);
+	if ( (tmpOut != NULL) && (g_variant_n_children(tmpOut) > 0) )
+		tagProp->iso14443aSak = g_variant_get_data_as_bytes(tmpOut);
+
+	tmpOut = g_variant_lookup_value(tmp, "Iso14443aUid",
+			G_VARIANT_TYPE_BYTESTRING);
+	if ( (tmpOut != NULL) && (g_variant_n_children(tmpOut) > 0) )
+		tagProp->iso14443aUid = g_variant_get_data_as_bytes(tmpOut);
+
+	/* Felica-specific fields (optional) */
+	tmpOut = g_variant_lookup_value(tmp, "FelicaManufacturer",
+			G_VARIANT_TYPE_BYTESTRING);
+	if ( (tmpOut != NULL) && (g_variant_n_children(tmpOut) > 0) )
+		tagProp->felicaManufacturer = g_variant_get_data_as_bytes(tmpOut);
+
+	tmpOut = g_variant_lookup_value(tmp, "FelicaCid",
+			G_VARIANT_TYPE_BYTESTRING);
+	if ( (tmpOut != NULL) && (g_variant_n_children(tmpOut) > 0) )
+		tagProp->felicaCid = g_variant_get_data_as_bytes(tmpOut);
+
+	tmpOut = g_variant_lookup_value(tmp, "FelicaIc",
+			G_VARIANT_TYPE_BYTESTRING);
+	if ( (tmpOut != NULL) && (g_variant_n_children(tmpOut) > 0) )
+		tagProp->felicaIc = g_variant_get_data_as_bytes(tmpOut);
+
+	tmpOut = g_variant_lookup_value(tmp, "FelicaMaxRespTimes",
+			G_VARIANT_TYPE_BYTESTRING);
+	if ( (tmpOut != NULL) && (g_variant_n_children(tmpOut) > 0) )
+		tagProp->felicaMaxRespTimes = g_variant_get_data_as_bytes(tmpOut);
+
 exit:
 	return err;
 }
@@ -167,6 +204,13 @@ static void neardal_tag_prv_free(TagProp **tagProp)
 	g_free((*tagProp)->name);
 	g_free((*tagProp)->type);
 	g_strfreev((*tagProp)->tagType);
+    g_clear_pointer(&((*tagProp)->iso14443aAtqa), g_bytes_unref);
+    g_clear_pointer(&((*tagProp)->iso14443aSak), g_bytes_unref);
+    g_clear_pointer(&((*tagProp)->iso14443aUid), g_bytes_unref);
+    g_clear_pointer(&((*tagProp)->felicaManufacturer), g_bytes_unref);
+    g_clear_pointer(&((*tagProp)->felicaCid), g_bytes_unref);
+    g_clear_pointer(&((*tagProp)->felicaIc), g_bytes_unref);
+    g_clear_pointer(&((*tagProp)->felicaMaxRespTimes), g_bytes_unref);
 	g_free((*tagProp));
 	(*tagProp) = NULL;
 }

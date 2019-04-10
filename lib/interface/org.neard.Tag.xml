@@ -8,5 +8,26 @@
 		<method name="GetRawNDEF">
 			<arg name="NDEF" type="ay" direction="out"/>
 		</method>
+		<property name="Iso14443aUid" type="ay" access="read">
+			<annotation name="org.gtk.GDBus.C.ForceGVariant" value="true"/>
+		</property>
+		<property name="Iso14443aAtqa" type="ay" access="read">
+			<annotation name="org.gtk.GDBus.C.ForceGVariant" value="true"/>
+		</property>
+		<property name="Iso14443aSak" type="ay" access="read">
+			<annotation name="org.gtk.GDBus.C.ForceGVariant" value="true"/>
+		</property>
+		<property name="FelicaManufacturer" type="ay" access="read">
+			<annotation name="org.gtk.GDBus.C.ForceGVariant" value="true"/>
+		</property>
+		<property name="FelicaCid" type="ay" access="read">
+			<annotation name="org.gtk.GDBus.C.ForceGVariant" value="true"/>
+		</property>
+		<property name="FelicaIc" type="ay" access="read">
+			<annotation name="org.gtk.GDBus.C.ForceGVariant" value="true"/>
+		</property>
+		<property name="FelicaMaxRespTimes" type="ay" access="read">
+			<annotation name="org.gtk.GDBus.C.ForceGVariant" value="true"/>
+		</property>
 	</interface>
 </node>

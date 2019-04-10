@@ -31,6 +31,9 @@
 #define NEARDAL_H
 #include "neardal_errors.h"
 
+#include <glib.h>
+
+
 #ifdef __cplusplus
 extern "C" {
 #endif	/* __cplusplus */
@@ -88,6 +91,20 @@ typedef struct {
 	const char	*type;
 /*! @brief Read-Only flag (is tag writable?) */
 	short		readOnly;
+/*! @brief ISO14443A ATQA (if present) */
+	GBytes		*iso14443aAtqa;
+/*! @brief ISO14443A SAK (if present) */
+	GBytes		*iso14443aSak;
+/*! @brief ISO14443A UID (if present) */
+	GBytes		*iso14443aUid;
+/*! @brief Felica Manufacturer info (if present) */
+	GBytes		*felicaManufacturer;
+/*! @brief Felica CID (if present) */
+	GBytes		*felicaCid;
+/*! @brief Felica IC Code (if present) */
+	GBytes		*felicaIc;
+/*! @brief Felica Max reponse times (if present) */
+	GBytes		*felicaMaxRespTimes;
 } neardal_tag;
 
 /*!
