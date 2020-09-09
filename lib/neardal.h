@@ -638,7 +638,7 @@ neardal_record *neardal_g_variant_to_record(GVariant *in);
 
 void neardal_trace(const char *func, FILE *fp, char *fmt, ...)
 	__attribute__((format(printf, 3, 4)));
-int (*neardal_output_cb)(FILE *fp, const char *fmt, va_list ap);
+extern int (*neardal_output_cb)(FILE *fp, const char *fmt, va_list ap);
 
 #ifdef __cplusplus
 }
